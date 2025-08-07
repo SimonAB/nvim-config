@@ -39,8 +39,6 @@
 - `<leader>q` - Close buffer (quick access)
 - `<leader>e` - Toggle file explorer
 - `<leader>f` - Find files
-- `<leader>t` - Test keymap
-- `<leader>?` - Which-key status
 - `<leader>x` - Toggle checkbox (Obsidian)
 
 ### Benefits

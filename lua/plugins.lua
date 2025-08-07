@@ -19,7 +19,6 @@ local plugins = {
   { url = 'https://github.com/lewis6991/gitsigns.nvim', name = 'gitsigns.nvim' }, -- Git integration
   { url = 'https://github.com/nvim-lualine/lualine.nvim', name = 'lualine.nvim' }, -- Status line
   { url = 'https://github.com/akinsho/bufferline.nvim', name = 'bufferline.nvim' }, -- Buffer tabs
-  { url = 'https://github.com/echasnovski/mini.icons', name = 'mini.icons' },      -- Modern icon support
 
   -- Navigation - File and project navigation tools
   { url = 'https://github.com/nvim-telescope/telescope.nvim', name = 'telescope.nvim' }, -- Fuzzy finder
@@ -509,7 +508,61 @@ vim.defer_fn(function()
     })
   end)
 
-  -- NvimTree file explorer
+  -- Nvim-web-devicons setup (should be done early)
+  safe_setup('nvim-web-devicons', function(devicons)
+    devicons.setup({
+      -- globally enable different highlight colors per icon (default to true)
+      color_icons = true,
+      -- globally enable default icons (default to false)
+      default = true,
+      -- globally enable "strict" selection of icons - icon will be looked up in
+      -- different tables, first by filename, and if not found by extension
+      strict = true,
+      -- same as `override` but specifically for overrides by filename
+      override_by_filename = {
+        [".gitignore"] = {
+          icon = "",
+          color = "#f1502f",
+          name = "Gitignore"
+        },
+        ["yarn.lock"] = {
+          icon = "",
+          color = "#2C8EBB",
+          name = "YarnLock"
+        },
+        ["requirements.txt"] = {
+          icon = "",
+          color = "#3776ab",
+          name = "Requirements"
+        },
+        ["docker-compose.yml"] = {
+          icon = "",
+          color = "#2496ED",
+          name = "DockerCompose"
+        },
+      },
+      -- same as `override` but specifically for overrides by extension
+      override_by_extension = {
+        ["jl"] = {
+          icon = "",
+          color = "#9558B2",
+          name = "Julia"
+        },
+        ["qmd"] = {
+          icon = "",
+          color = "#75AADB",
+          name = "Quarto"
+        },
+        ["ipynb"] = {
+          icon = "",
+          color = "#F37626",
+          name = "Jupyter"
+        },
+      },
+    })
+  end)
+
+  -- NvimTree file explorer (after devicons setup)
   safe_setup('nvim-tree', function(nvim_tree)
     nvim_tree.setup({
       view = {
@@ -538,10 +591,6 @@ vim.defer_fn(function()
     })
   end)
 
-  -- Mini.icons setup for modern icon support
-  safe_setup('mini.icons', function(mini_icons)
-    mini_icons.setup()
-  end)
 
   -- Nvim-surround setup for text manipulation
   safe_setup('nvim-surround', function(nvim_surround)
@@ -604,6 +653,7 @@ vim.defer_fn(function()
   -- Which Key (keymap popup) - using modern v3 wk.add() API
   safe_setup('which-key', function(wk)
     wk.setup({
+      preset = "classic",
       delay = 500,
       plugins = {
         marks = true,
@@ -635,6 +685,45 @@ vim.defer_fn(function()
         spacing = 3,
         align = "center",
       },
+      icons = {
+        breadcrumb = "»",
+        separator = "→",
+        group = "+",
+        ellipsis = "...",
+        mappings = false,  -- Disable icon mappings for a cleaner look
+        rules = {},
+        colors = false,    -- Disable icon colors for text-only
+        keys = {
+          Up = " ",
+          Down = " ",
+          Left = " ",
+          Right = " ",
+          C = "󰘴 ",
+          M = "󰘵 ",
+          D = "󰘳 ",
+          S = "󰘶 ",
+          CR = "󰌑 ",
+          Esc = "󱊷 ",
+          ScrollWheelDown = "󱕐 ",
+          ScrollWheelUp = "󱕑 ",
+          NL = "󰌑 ",
+          BS = "󰁮",
+          Space = "󱁐 ",
+          Tab = "󰌒 ",
+          F1 = "󱊫",
+          F2 = "󱊬",
+          F3 = "󱊭",
+          F4 = "󱊮",
+          F5 = "󱊯",
+          F6 = "󱊰",
+          F7 = "󱊱",
+          F8 = "󱊲",
+          F9 = "󱊳",
+          F10 = "󱊴",
+          F11 = "󱊵",
+          F12 = "󱊶",
+        },
+      },
     })
 
     -- Centralised function to open Julia REPL with specified direction
@@ -653,12 +742,12 @@ vim.defer_fn(function()
       julia_repl:toggle()
     end
 
-    -- Add keymaps using modern v3 API
+    -- Add keymaps using modern v3 API (text-only, no icons)
     wk.add({
         -- Buffer operations
         { "<leader>B", group = "Buffer" },
         -- Configuration
-        { "<leader>C", group = "Configuration" },
+        { "<leader>C", group = "Config" },
         { "<leader>Cs", function()
           -- Comprehensive configuration reload
           local config_path = vim.fn.stdpath('config')
@@ -837,7 +926,7 @@ vim.defer_fn(function()
         { "<leader>Xl", ":TroubleToggle loclist<CR>", desc = "Location List" },
         { "<leader>Xq", ":TroubleToggle quickfix<CR>", desc = "Quickfix" },
 
-        -- Julia-specific operations (Stage 3)
+        -- Julia-specific operations
         { "<leader>J", group = "Julia" },
         { "<leader>Jr", group = "Julia REPL" },
         { "<leader>Jrh", function() open_julia_repl('horizontal') end, desc = "Horizontal REPL" },
@@ -918,22 +1007,6 @@ vim.defer_fn(function()
           })
           pkg_docs:toggle()
         end, desc = "Generate Docs" },
-
-        -- Test keymap
-        { "<leader>t", function()
-          print('Test keymap executed - which-key working properly')
-        end, desc = "test keymap" },
-
-        -- Help and testing
-        { "<leader>?", function()
-          local ok, wk = pcall(require, 'which-key')
-          if ok then
-            print('Which-key is loaded and ready')
-            print('Press <space> and wait to see keymap popup')
-          else
-            print('Which-key not loaded')
-          end
-        end, desc = "Which-key Status" },
       })
   end)
 
@@ -1102,7 +1175,7 @@ map("n", "<leader>Bq", ":bdelete<CR>", { desc = "Close buffer" })
 
 -- Search Operations with Telescope (from lua/keymaps.lua lines 468-477)
 map("n", "<leader>Sf", ":Telescope find_files<CR>", { desc = "Find files" })
-map("n", "<leader>St", ":Telescope live_grep<CR>", { desc = "Text (Live Grep)" })
+map("n", "<leader>Sg", ":Telescope live_grep<CR>", { desc = "Live Grep" })
 map("n", "<leader>Sb", ":Telescope git_branches<CR>", { desc = "Git branches" })
 map("n", "<leader>Sc", ":Telescope colorscheme<CR>", { desc = "Colourscheme" })
 map("n", "<leader>Sh", ":Telescope help_tags<CR>", { desc = "Help tags" })
@@ -1152,24 +1225,6 @@ map("n", "<leader>Gg", function()
   })
   lazygit:toggle()
 end, { desc = "Lazygit" })
-
--- Which-key status check (from lua/keymaps.lua lines 596-604)
-map('n', '<leader>?', function()
-  local ok, wk = pcall(require, 'which-key')
-  if ok then
-    print('Which-key is loaded and ready')
-    print('Press <space> and wait 1 second to see keymap popup')
-  else
-    print('Which-key not loaded')
-  end
-end, { desc = 'Which-key status' })
-
--- Which-key test functionality (moved from <leader>t to avoid collision with Terminal group)
-map('n', '<leader>T', function()
-  print('Test keymap executed - which-key should show this description')
-end, { desc = 'Test which-key functionality' })
-
--- Legacy Quarto keymaps removed - now using Q prefix
 
 -- Otter keymaps for code execution
 map('n', '<leader>Oa', function()

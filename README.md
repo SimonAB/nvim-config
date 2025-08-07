@@ -35,7 +35,6 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 │   ├── keymaps.lua       # Comprehensive key mappings
 │   └── plugins.lua       # Plugin management and LSP setup
 ├── scripts/              # Helper scripts for PDF sync
-├── spell/                # Custom spelling dictionaries
 └── Documentation files   # Comprehensive guides
 ```
 
@@ -45,7 +44,7 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 
 ### Core Navigation & Editing
 - `<Shift-h>` - Previous buffer
-- `<Shift-l>` - Next buffer 
+- `<Shift-l>` - Next buffer
 - `<Ctrl-h/j/k/l>` - Navigate windows (works in terminal mode)
 - `<Shift-Arrow>` - Resize windows
 - `<Esc>` - Clear search highlights
@@ -142,7 +141,7 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<leader>Tk` - Clear terminal
 - `<leader>Td` - Kill terminal
 - `<Alt-1>` - Horizontal terminal
-- `<Alt-2>` - Vertical terminal  
+- `<Alt-2>` - Vertical terminal
 - `<Alt-3>` - Float terminal
 
 ### Trouble Diagnostics (`<leader>X`)
@@ -164,7 +163,6 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 
 ### Individual Commands
 - `<leader>q` - Close buffer (quick access)
-- `<leader>?` - Which-key status
 - `<leader>x` - Toggle checkbox (Obsidian)
 
 ## 🛠️ Installation
@@ -277,18 +275,17 @@ conda install -c conda-forge texlab
 Built-in theme cycling with system dark mode detection:
 - **Catppuccin** (Mocha variant)
 - **OneDark** (Atom-inspired)
-- **Tokyo Night** (vibrant dark theme)  
+- **Tokyo Night** (vibrant dark theme)
 - **Nord** (arctic colour palette)
 - **GitHub Dark/Light** (auto-switches with system)
 
-**Cycle themes**: `<leader>Yc`  
+**Cycle themes**: `<leader>Yc`
 **Auto dark mode**: Automatically switches light/dark variants based on macOS system appearance
 
 ## 📚 Documentation
 
 - Press `<Space>` and wait to see available commands
 - Use `<leader>Sk` to search all keymaps
-- Check `<leader>?` for which-key status
 
 ### Additional Guides
 - [Installation Guide](INSTALLATION_GUIDE.md)
