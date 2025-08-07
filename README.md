@@ -240,7 +240,7 @@ Use VimTeX’s native Skim integration for a simple, robust setup.
 1. Configure Skim:
    - Preferences → Sync → PDF-TeX Sync
    - Preset: Custom
-   - Command: `~/.config/nvim/scripts/skim_inverse_search.sh`
+   - Command: `<Full/path/to>/nvim/scripts/skim_inverse_search.sh` (must be a full path, no tilde or symlinks)
    - Arguments: `%line "%file"`
 
 2. Ensure synctex is enabled (already configured here via VimTeX):
@@ -305,7 +305,7 @@ Built-in theme cycling with system dark mode detection:
 - Ensure Skim is configured correctly
 - Check `/tmp/inverse_search.log` for debugging
 - For complex project structures, set `INVERSE_SEARCH_PROJECT_ROOT` environment variable
-- Test path resolution manually: `~/.config/nvim/scripts/skim_inverse_search.sh 1 "your-file.tex"`
+- Test path resolution manually: `<Full/path/to>/nvim/scripts/skim_inverse_search.sh 1 \"your-file.tex\"`
 
 **Files not found with relative paths in LaTeX projects?**
 - The script now includes intelligent path resolution

@@ -127,16 +127,16 @@ vim.g.vimtex_compiler_latexmk = {
 -- Markdown preview configuration
 vim.g.mkdp_auto_start = 0
 
--- Create user command for manual VimTeX initialization
+-- Create user command for manual VimTeX initialisation
 vim.api.nvim_create_user_command('InitVimTeX', function()
     vim.cmd("runtime! autoload/vimtex.vim")
     if vim.fn.exists('*vimtex#init') == 1 then
         vim.fn['vimtex#init']()
-        print("VimTeX initialized manually")
+        print("VimTeX initialised manually")
     else
-        print("VimTeX initialization failed - autoload not found")
+        print("VimTeX initialisation failed - autoload not found")
     end
-end, { desc = "Manually initialize VimTeX" })
+end, { desc = "Manually initialise VimTeX" })
 
 -- ============================================================================
 -- AUTOCOMMANDS

@@ -21,7 +21,7 @@
 - Confirm Skim has permissions to control your Mac if using AppleScript elsewhere. Not required for this minimal setup.
 
 ### Path Configuration Problems
-- **Verify Script Path**: In Skim preferences, ensure the full path to your script is correct.
-- **Test Script Manually**: Run `~/.config/nvim/scripts/skim_inverse_search.sh 10 /path/to/test.tex` to test the script directly.
-- **Check nvr Installation**: Verify nvr is installed at `/opt/homebrew/bin/nvr` with `which nvr`.
-- **Homebrew Path Issues**: If nvr is installed elsewhere, update the script path accordingly.
+- Verify Script Path: In Skim preferences, use the full canonical absolute path to the script; do not use tilde (~) and do not use symlinks. Use exactly: <Full/path/to>/nvim/scripts/skim_inverse_search.sh
+- Test Script Manually: Run <Full/path/to>/nvim/scripts/skim_inverse_search.sh 10 "/absolute/path/to/test.tex" to validate the script directly.
+- Check nvr Installation: Verify nvr is installed at /opt/homebrew/bin/nvr with which nvr.
+- Homebrew Path Issues: If nvr is installed elsewhere, update the script path accordingly.

@@ -18,8 +18,9 @@ brew install --cask mactex-no-gui
 
 2) Configure Skim → Preferences → Sync
 - Preset: Custom
-- Command: `~/.config/nvim/scripts/skim_inverse_search.sh`
-- Arguments: `%line "%file"`
+- Command: <Full/path/to>/nvim/scripts/skim_inverse_search.sh
+- Arguments: %line "%file"
+- Note: Use the full canonical absolute path; do not use tilde (~) and do not use symlinks.
 
 3) Use
 - Compile: `\ll` or `<localleader>ll`
