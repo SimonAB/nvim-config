@@ -12,6 +12,14 @@ require('plugins')
 require('config')
 require('keymaps')
 
+-- Ensure VimTeX is loaded for TeX files
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "tex",
+  callback = function()
+    vim.g.vimtex_enabled = 1
+  end,
+})
+
 -- Julia LSP auto-start (simplified)
 vim.api.nvim_create_augroup("JuliaLSPAutoStart", { clear = true })
 vim.api.nvim_create_autocmd("FileType", {

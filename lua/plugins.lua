@@ -355,6 +355,8 @@ vim.defer_fn(function()
     -- Texlab not available
   end
 
+  -- Inverse search is handled by VimTeX and Skim; no custom module required
+
   -- Blink.cmp completion setup with simplified config
   local blink_ok2, blink = pcall(require, 'blink.cmp')
   if blink_ok2 then
@@ -726,6 +728,11 @@ vim.defer_fn(function()
       },
     })
 
+    -- which-key group for VimTeX under localleader
+    wk.add({
+      { "<localleader>l", group = "VimTeX" },
+    })
+
     -- Centralised function to open Julia REPL with specified direction
     local function open_julia_repl(direction)
       local Terminal = require('toggleterm.terminal').Terminal
@@ -740,6 +747,89 @@ vim.defer_fn(function()
         end,
       })
       julia_repl:toggle()
+    end
+
+    -- Server management functions
+    local function start_nvim_server()
+      local socket_path = "/tmp/nvim_server"
+
+      -- Check if server is already running
+      if vim.fn.filereadable(socket_path) == 1 then
+        print("Neovim server already running at " .. socket_path)
+        return
+      end
+
+      -- Start server in background
+      local cmd = string.format("nvim --listen %s --headless", socket_path)
+      vim.fn.system(cmd .. " &")
+
+      -- Wait a moment and verify
+      vim.defer_fn(function()
+        if vim.fn.filereadable(socket_path) == 1 then
+          print("✓ Neovim server started successfully at " .. socket_path)
+        else
+          print("✗ Failed to start Neovim server")
+        end
+      end, 1000)
+    end
+
+    local function stop_nvim_server()
+      local socket_path = "/tmp/nvim_server"
+
+      -- Check if server exists
+      if vim.fn.filereadable(socket_path) == 0 then
+        print("No Neovim server running")
+        return
+      end
+
+      -- Try graceful shutdown first
+      local success = pcall(function()
+        vim.fn.system(string.format("nvr --servername %s --remote-send ':qa!<CR>'", socket_path))
+      end)
+
+      -- Force kill if graceful shutdown didn't work
+      vim.defer_fn(function()
+        if vim.fn.filereadable(socket_path) == 1 then
+          vim.fn.system("pkill -f 'nvim.*nvim_server'")
+          vim.fn.system("rm -f " .. socket_path)
+          print("✓ Neovim server stopped (force killed)")
+        else
+          print("✓ Neovim server stopped gracefully")
+        end
+      end, 1000)
+    end
+
+    local function restart_nvim_server()
+      print("Restarting Neovim server...")
+      stop_nvim_server()
+
+      -- Start new server after a delay
+      vim.defer_fn(function()
+        start_nvim_server()
+      end, 2000)
+    end
+
+    local function check_nvim_server()
+      local socket_path = "/tmp/nvim_server"
+
+      if vim.fn.filereadable(socket_path) == 0 then
+        print("✗ Neovim server not running")
+        return
+      end
+
+      -- Test server responsiveness
+      local success = pcall(function()
+        local result = vim.fn.system(string.format("nvr --servername %s --remote-expr '1+1'", socket_path))
+        if result and result:match("2") then
+          print("✓ Neovim server running and responsive at " .. socket_path)
+        else
+          print("⚠ Neovim server socket exists but not responsive")
+        end
+      end)
+
+      if not success then
+        print("⚠ Neovim server socket exists but nvr communication failed")
+      end
     end
 
     -- Add keymaps using modern v3 API (text-only, no icons)
@@ -916,6 +1006,13 @@ vim.defer_fn(function()
         { "<leader>|h", "<cmd>split<CR>", desc = "Horizontal split" },
         -- Terminal operations
         { "<leader>T", group = "Terminal" },
+        { "<leader>Ts", group = "Server Management" },
+        { "<leader>Tss", start_nvim_server, desc = "Start Neovim server" },
+        { "<leader>Tst", stop_nvim_server, desc = "Stop Neovim server" },
+        { "<leader>Tr", group = "Server Restart" },
+        { "<leader>Trs", restart_nvim_server, desc = "Restart Neovim server" },
+        { "<leader>TC", group = "Server Check" },
+        { "<leader>TCk", check_nvim_server, desc = "Check Neovim server" },
         -- Vertical split
         -- Window operations
         { "<leader>W", group = "Window" },
