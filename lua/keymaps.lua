@@ -12,7 +12,7 @@
 -- • Addition of Split Group: New <leader>|* prefix for split window commands
 --   using pipe symbol (|) which visually represents splitting
 -- • Key Collision Resolution: Terminal (<leader>T*), Toggle (<leader>Y*),
---   Split (<leader>|*), and Search (<leader>S*) groups now have distinct prefixes
+--
 
 
 local map = vim.keymap.set
@@ -43,10 +43,10 @@ map("n", "<S-Left>", ":vertical resize -2<CR>", { desc = "Decrease window width"
 map("n", "<S-Right>", ":vertical resize +2<CR>", { desc = "Increase window width" })
 
 -- Leader-based resize commands (always reliable)
-map("n", "<leader>wk", ":resize -2<CR>", { desc = "Decrease window height" })
-map("n", "<leader>wj", ":resize +2<CR>", { desc = "Increase window height" })
-map("n", "<leader>wh", ":vertical resize -2<CR>", { desc = "Decrease window width" })
-map("n", "<leader>wl", ":vertical resize +2<CR>", { desc = "Increase window width" })
+map("n", "<leader>Wk", ":resize -2<CR>", { desc = "Decrease window height" })
+map("n", "<leader>Wj", ":resize +2<CR>", { desc = "Increase window height" })
+map("n", "<leader>Wh", ":vertical resize -2<CR>", { desc = "Decrease window width" })
+map("n", "<leader>Wl", ":vertical resize +2<CR>", { desc = "Increase window width" })
 
 -- Alt+Arrow for those terminals that support it
 map("n", "<A-Up>", ":resize -2<CR>", { desc = "Decrease window height (Alt)" })
