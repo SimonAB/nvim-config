@@ -1,0 +1,20 @@
+# Personal spell dictionaries
+spell/
+
+# macOS system files
+.DS_Store
+._*
+
+# Neovim generated files
+*.log
+startup.log
+
+# Plugin cache and temporary files
+plugin/
+pack/
+.netrwhist
+
+# Personal notes and debug files
+debug_*
+*.tmp
+*.bak
