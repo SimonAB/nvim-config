@@ -1,3 +1,15 @@
+# Requirements
+
+- Neovim 0.12+
+- VimTeX plugin (auto-installed by this config)
+- Skim (macOS) for PDF viewing
+- TeX distribution (MacTeX or BasicTeX)
+
+Optional:
+- texlab (for LSP), latexindent
+
+Notes:
+- No `nvr` is required for SyncTeX; VimTeX’s `VimtexInverseSearch` is used.
 # Requirements & Dependencies
 
 This document lists all prerequisites and installation instructions for the LaTeX/Neovim setup with automatic PDF preview functionality.

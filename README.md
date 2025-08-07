@@ -233,18 +233,23 @@ git clone https://github.com/SimonAB/nvim-config.git ~/.config/nvim
 nvim
 ```
 
-### LaTeX Inverse Search Setup (macOS)
+### LaTeX SyncTeX with Skim (macOS)
 
-1. **Configure Skim PDF viewer:**
-   - Open Skim Preferences → Sync → PDF-TeX Sync
-   - **Preset**: Custom
-   - **Command**: `~/.config/nvim/scripts/skim_inverse_search.sh`
-   - **Arguments**: `%line "%file"`
+Use VimTeX’s native Skim integration for a simple, robust setup.
 
-2. **Make script executable:**
-   ```bash
-   chmod +x ~/.config/nvim/scripts/skim_inverse_search.sh
-   ```
+1. Configure Skim:
+   - Preferences → Sync → PDF-TeX Sync
+   - Preset: Custom
+   - Command: `~/.config/nvim/scripts/skim_inverse_search.sh`
+   - Arguments: `%line "%file"`
+
+2. Ensure synctex is enabled (already configured here via VimTeX):
+   - Compiler uses `-synctex=1`
+
+3. Usage:
+   - Forward search: `<localleader>lv` or `:VimtexView`
+   - Inverse search: Cmd+Shift+Click in Skim
+   - Compile: `<localleader>ll`
 
 ### Language Server Setup
 
@@ -299,6 +304,14 @@ Built-in theme cycling with system dark mode detection:
 **LaTeX inverse search not working?**
 - Ensure Skim is configured correctly
 - Check `/tmp/inverse_search.log` for debugging
+- For complex project structures, set `INVERSE_SEARCH_PROJECT_ROOT` environment variable
+- Test path resolution manually: `~/.config/nvim/scripts/skim_inverse_search.sh 1 "your-file.tex"`
+
+**Files not found with relative paths in LaTeX projects?**
+- The script now includes intelligent path resolution
+- For custom project layouts, export `INVERSE_SEARCH_PROJECT_ROOT=/path/to/project`
+- Check debug log: `tail -f /tmp/inverse_search.log` whilst testing inverse search
+- Verify your project structure matches supported patterns
 
 **Julia LSP not starting?**
 - Install LanguageServer.jl: `using Pkg; Pkg.add("LanguageServer")`
@@ -311,5 +324,3 @@ Built-in theme cycling with system dark mode detection:
 ---
 
 *Optimised for academic writing and research workflows. Based on LunarVim architecture.*
-
-

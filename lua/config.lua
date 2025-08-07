@@ -88,80 +88,26 @@ vim.cmd("filetype plugin indent on")
 -- Theme customisation
 vim.g.sonokai_enable_italic_comment = 1
 
--- VimTeX inverse search server (compatible with Warp terminal)
-if vim.fn.has('nvim') == 1 then
-    -- Server address for VimTeX reverse sync functionality
-    local server_address = "/tmp/nvim_server"
-
-    -- Function to check if socket is active
-    local function is_socket_active(socket_path)
-        if vim.fn.filereadable(socket_path) == 0 then
-            return false
-        end
-        -- Try to connect to check if it's actually active
-        local handle = io.popen("lsof '" .. socket_path .. "' 2>/dev/null")
-        local result = handle:read("*a")
-        handle:close()
-        return result ~= ""
-    end
-
-    -- Function to clean up stale socket
-    local function cleanup_stale_socket(socket_path)
-        if vim.fn.filereadable(socket_path) == 1 and not is_socket_active(socket_path) then
-            vim.fn.delete(socket_path)
-            -- Stale socket removed
-        end
-    end
-
-    -- Function to ensure server is running
-    local function ensure_server_running()
-        cleanup_stale_socket(server_address)
-
-        if not is_socket_active(server_address) then
-            if vim.fn.serverstart then
-                vim.fn.serverstart(server_address)
-                -- Server started silently
-            end
-        end
-
-        -- Set environment variable for consistency
-        vim.env.NVIM_LISTEN_ADDRESS = server_address
-    end
-
-    -- Ensure server is running on startup
-    ensure_server_running()
-
-    -- Create autocmd to ensure server is running before VimTeX compilation
-    vim.api.nvim_create_autocmd("User", {
-        pattern = "VimtexEventCompileStarted",
-        callback = function()
-            ensure_server_running()
-        end,
-        desc = "Ensure Neovim server is running before LaTeX compilation"
-    })
-
-    -- Also ensure server on FileType tex for immediate setup
-    vim.api.nvim_create_autocmd("FileType", {
-        pattern = "tex",
-        callback = function()
-            ensure_server_running()
-            -- Initialize VimTeX
-            vim.schedule(function()
-                vim.cmd("runtime! autoload/vimtex.vim")
-                if vim.fn.exists('*vimtex#init') == 1 then
-                    vim.fn['vimtex#init']()
-                end
-            end)
-        end,
-        desc = "Ensure Neovim server is running for LaTeX files and initialize VimTeX"
-    })
-end
+-- VimTeX configuration (Skim integration)
 
 -- VimTeX configuration with Skim reverse sync support (per official VimTeX docs)
 vim.g.vimtex_enabled = 1                -- Explicitly enable VimTeX
 vim.g.vimtex_view_method = 'skim'
-vim.g.vimtex_view_skim_activate = 0     -- Don't activate Skim automatically
-vim.g.vimtex_view_skim_reading_bar = 1  -- Show reading bar in Skim
+vim.g.vimtex_view_skim_activate = 0     -- Do not steal focus on view
+vim.g.vimtex_view_skim_reading_bar = 1  -- Highlight current location
+vim.g.vimtex_view_skim_sync = 1         -- Forward sync after compilation
+
+-- Start a Neovim RPC server for robust inverse search (used by Skim)
+do
+  local server_address = "/tmp/nvim_server"
+  vim.env.NVIM_LISTEN_ADDRESS = server_address
+  -- Try to start; if socket exists and is stale, delete and retry
+  local ok = pcall(vim.fn.serverstart, server_address)
+  if not ok and vim.fn.filereadable(server_address) == 1 then
+    pcall(vim.fn.delete, server_address)
+    pcall(vim.fn.serverstart, server_address)
+  end
+end
 
 -- Ensure VimTeX uses the correct local leader (must match init.lua setting)
 vim.g.vimtex_mappings_enabled = 1       -- Enable VimTeX mappings
@@ -266,4 +212,3 @@ vim.api.nvim_create_autocmd("FileType", {
         end)
     end,
 })
-

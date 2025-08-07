@@ -418,4 +418,42 @@ map({'n', 't'}, "<leader>T1", make_terminal_cmd('horizontal', 15), { desc = "Ter
 map({'n', 't'}, "<leader>T2", make_terminal_cmd('vertical', math.floor(vim.o.columns * 0.3)), { desc = "Terminal Vertical" })
 map({'n', 't'}, "<leader>T3", make_terminal_cmd('float'), { desc = "Terminal Float" })
 
+-- ============================================================================
+-- VIMTEX KEYMAPS
+-- ============================================================================
+-- VimTeX integration keymaps for LaTeX document processing
+-- These provide forward/inverse search and compilation control
+-- Using LocalLeader prefix to avoid conflicts with main leader bindings
 
+-- Function to set up VimTeX keymaps after VimTeX is loaded
+local function setup_vimtex_keymaps()
+  map("n", "<LocalLeader>lv", ":VimtexView<CR>", { noremap = true, silent = true, desc = "View (forward sync)" })
+  map("n", "<LocalLeader>li", ":VimtexInverseSearch<CR>", { noremap = true, silent = true, desc = "Inverse search" })
+  map("n", "<LocalLeader>ll", ":VimtexCompile<CR>", { noremap = true, silent = true, desc = "Compile (latexmk)" })
+  map("n", "<LocalLeader>lc", ":VimtexClean<CR>", { noremap = true, silent = true, desc = "Clean aux files" })
+  map("n", "<LocalLeader>lS", ":VimtexStop<CR>", { noremap = true, silent = true, desc = "Stop compiler" })
+end
+
+-- Autocmd group for VimTeX keymaps
+local vimtex_augroup = vim.api.nvim_create_augroup('VimTexKeymaps', { clear = true })
+
+-- Set up keymaps when opening TeX files (ensures VimTeX is initialised)
+vim.api.nvim_create_autocmd('FileType', {
+    group = vimtex_augroup,
+    pattern = 'tex',
+    callback = function()
+        -- Small delay to ensure VimTeX is fully initialised
+        vim.defer_fn(function()
+            setup_vimtex_keymaps()
+        end, 100)
+    end,
+})
+
+-- Alternative trigger when VimTeX finishes initialisation
+vim.api.nvim_create_autocmd('User', {
+    group = vimtex_augroup,
+    pattern = 'VimtexEventInitPost',
+    callback = function()
+        setup_vimtex_keymaps()
+    end,
+})

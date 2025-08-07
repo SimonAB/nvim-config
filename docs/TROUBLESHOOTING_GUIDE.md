@@ -2,35 +2,26 @@
 
 ## Common Issues and Solutions
 
-### No Response on Inverse Search
-- **Check Skim Settings**: Ensure that the Sync tab in Skim preferences is correctly configured with the path to your `skim_inverse_search.sh` script.
-- **Verify PATH**: Make sure Neovim is in your PATH. You can verify this by running `which nvim`.
-- **Permissions**: Verify that the inverse search script has executable permissions. Use `chmod +x ~/scripts/skim_inverse_search.sh` if needed.
+### No response on inverse search
+- **Skim Sync settings**: Preferences → Sync → Command `nvim`, Arguments `--headless -c "VimtexInverseSearch %line '%file'"`.
+- **Neovim path**: Verify `which nvim` points to your Neovim 0.12 install.
+- **Synctex**: Ensure your build includes `-synctex=1` (configured via VimTeX latexmk options here).
 
-### NVR Socket Not Found
-- **Verify `nvim --listen` Usage**: Ensure that Neovim is started with the correct listen address. You should have `nvim --listen ...` running before attempting to use `nvr`.
+### nvr (optional) not used
+- This config does not require `nvr`. If you still prefer it, start Neovim with `nvim --listen /tmp/nvim_server` and configure Skim to call `nvr` accordingly. Otherwise, ignore this.
 
-### Fallback Not Triggering
-- **Inspect Fallback osascript Block**: Review the fallback AppleScript block in your configuration or script to ensure it triggers under the right conditions.
+### Skim doesn’t focus or steals focus
+- Control focus via VimTeX options already set: `g:vimtex_view_skim_activate = 0`.
 
-### How to Enable and Read Debug Logs
-- **Enable Debug Logs**: Debug logging is automatically enabled in the `skim_inverse_search.sh` script. All operations are logged to `/tmp/inverse_search.log`.
-- **Read Debug Logs**: Use `cat /tmp/inverse_search.log` or `tail -f /tmp/inverse_search.log` to view the log file in real-time.
-- **Clear Old Logs**: To start fresh, run `rm /tmp/inverse_search.log` before testing.
-- **Log Analysis**: Look for patterns like:
-  - "Trying VimtexInverseSearch" - indicates VimTeX native method attempted (Method 1)
-  - "Trying nvr with existing server" - indicates nvr fallback method (Method 2)
-  - "No nvim instance found" - indicates terminal automation fallback (Method 3)
-  - Error messages that show specific failure reasons
+### Logging and debugging
+- Use `:VimtexInfo` and `:messages` in Neovim.
+- If needed, test Skim’s command directly in a terminal: `nvim --headless -c "VimtexInverseSearch 123 '/absolute/path/to/file.tex'"`.
 
-### Script Permissions Issues
-- **Check Executable Permissions**: Run `ls -la ~/scripts/skim_inverse_search.sh` to verify the script is executable (`-rwxr-xr-x`).
-- **Fix Permissions**: If not executable, run `chmod +x ~/scripts/skim_inverse_search.sh`.
-- **Security Settings**: On macOS, you may need to allow the script in System Preferences > Security & Privacy.
+### Paths and permissions on macOS
+- Confirm Skim has permissions to control your Mac if using AppleScript elsewhere. Not required for this minimal setup.
 
 ### Path Configuration Problems
 - **Verify Script Path**: In Skim preferences, ensure the full path to your script is correct.
-- **Test Script Manually**: Run `~/scripts/skim_inverse_search.sh 10 /path/to/test.tex` to test the script directly.
+- **Test Script Manually**: Run `~/.config/nvim/scripts/skim_inverse_search.sh 10 /path/to/test.tex` to test the script directly.
 - **Check nvr Installation**: Verify nvr is installed at `/opt/homebrew/bin/nvr` with `which nvr`.
 - **Homebrew Path Issues**: If nvr is installed elsewhere, update the script path accordingly.
-
