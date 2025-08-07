@@ -35,7 +35,7 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 │   ├── keymaps.lua       # Comprehensive key mappings
 │   └── plugins.lua       # Plugin management and LSP setup
 ├── scripts/              # Helper scripts for PDF sync
-└── Documentation files   # Comprehensive guides
+└── docs/                 # Comprehensive documentation guides
 ```
 
 ## ⌨️ Complete Key Mappings
@@ -288,8 +288,11 @@ Built-in theme cycling with system dark mode detection:
 - Use `<leader>Sk` to search all keymaps
 
 ### Additional Guides
-- [Installation Guide](INSTALLATION_GUIDE.md)
-- [Troubleshooting](TROUBLESHOOTING_GUIDE.md)
+- [Installation Guide](docs/INSTALLATION_GUIDE.md)
+- [Troubleshooting](docs/TROUBLESHOOTING_GUIDE.md)
+- [Requirements](docs/REQUIREMENTS.md)
+- [Changelog](docs/CHANGELOG.md)
+- [Review Report](docs/REVIEW_REPORT.md)
 
 ## 🐛 Common Issues
 
