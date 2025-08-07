@@ -1,6 +1,9 @@
 # Personal spell dictionaries
 spell/
 
+# Private keys and sensitive data
+private/
+
 # macOS system files
 .DS_Store
 ._*
