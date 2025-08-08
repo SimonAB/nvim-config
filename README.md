@@ -1,8 +1,15 @@
-# ✴︎ Modern Neovim Configuration for Academic Writing
+# ✴︎ StellarVIM: Neovim Configuration for Academic Writing
 
-A comprehensive Neovim configuration optimised for academic research workflows, featuring advanced LaTeX support with bidirectional PDF synchronisation, Julia LSP integration, Quarto document authoring, and intelligent terminal integration. Built for Neovim 0.12+ using modern vim.pack plugin management.
+A comprehensive Neovim configuration optimised for academic research workflows, featuring advanced LaTeX support with bidirectional PDF synchronisation, Julia, Python, and R LSP integration, Quarto document authoring, and intelligent terminal integration. Built for Neovim 0.12+ using modern vim.pack plugin management.
 
 ## 🎯 Key Features for Researchers
+
+### Multi-Language Scientific Computing
+- **Julia**: Enhanced LSP with auto-completion, REPL integration, and project management
+- **Python, R, Bash**: Multi-language code execution in unified documents
+- **Quarto**: Full document authoring with Molten Jupyter kernel integration
+- **Otter**: Multi-language LSP support for code chunks in documents
+- **LaTeX**: VimTeX with bibliography management and real-time compilation
 
 ### LaTeX Bidirectional Synchronisation
 **Seamless PDF-to-source navigation** via VimTeX and Skim (macOS):
@@ -10,13 +17,6 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - **Inverse search**: Click PDF to navigate to source code (Cmd+click in Skim)
 - Real-time compilation with LuaLaTeX and synctex support
 - Perfect for managing large documents, theses, and complex mathematical content
-
-### Multi-Language Scientific Computing
-- **Julia**: Enhanced LSP with auto-completion, REPL integration, and project management
-- **LaTeX**: VimTeX with bibliography management and real-time compilation
-- **Quarto**: Full document authoring with Molten Jupyter kernel integration
-- **Python, R, Bash**: Multi-language code execution in unified documents
-- **Otter**: Multi-language LSP support for code chunks in documents
 
 ### Academic Workflow Tools
 - **Citation management**: Bibliography completion and reference jumping
@@ -72,10 +72,12 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<leader>Gp` - Git pull
 
 ### Julia Development (`<leader>J`)
+
 #### Julia REPL (`<leader>Jr`)
 - `<leader>Jrh` - Horizontal REPL
 - `<leader>Jrv` - Vertical REPL
 - `<leader>Jrf` - Floating REPL
+
 #### Julia Project Management
 - `<leader>Jp` - Project status (Pkg.status())
 - `<leader>Ji` - Instantiate project
@@ -98,16 +100,11 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<leader>Oa` - Activate Otter
 - `<leader>Od` - Deactivate Otter
 
-### Plugin Management (`<leader>P`)
-- `<leader>Pi` - Install plugins
-- `<leader>Pu` - Update plugins
-- `<leader>Pc` - Compile plugins
-- `<leader>Ps` - Sync plugins (install + update + compile)
-
 ### Quarto Operations (`<leader>Q`)
 - `<leader>Qp` - Quarto preview
 - `<leader>Qc` - Close preview
 - `<leader>Qr` - Quarto render
+
 #### Molten (Jupyter) (`<leader>Qm`)
 - `<leader>Qmi` - Show image popup
 - `<leader>Qml` - Evaluate line
@@ -144,13 +141,6 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<Alt-2>` - Vertical terminal
 - `<Alt-3>` - Float terminal
 
-### Trouble Diagnostics (`<leader>X`)
-- `<leader>Xw` - Workspace diagnostics
-- `<leader>Xd` - Document diagnostics
-- `<leader>Xl` - Location list
-- `<leader>Xq` - Quickfix
-- `<leader>Xx` - Toggle Trouble
-
 ### Toggle Options (`<leader>Y`)
 - `<leader>Ys` - Toggle spell check
 - `<leader>Yc` - Cycle colourscheme
@@ -164,6 +154,20 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 ### Individual Commands
 - `<leader>q` - Close buffer (quick access)
 - `<leader>x` - Toggle checkbox (Obsidian)
+
+
+### Trouble Diagnostics (`<leader>X`)
+- `<leader>Xw` - Workspace diagnostics
+- `<leader>Xd` - Document diagnostics
+- `<leader>Xl` - Location list
+- `<leader>Xq` - Quickfix
+- `<leader>Xx` - Toggle Trouble
+
+### Plugin Management (`<leader>P`)
+- `<leader>Pi` - Install plugins
+- `<leader>Pu` - Update plugins
+- `<leader>Pc` - Compile plugins
+- `<leader>Ps` - Sync plugins (install + update + compile)
 
 ## 🛠️ Installation
 
@@ -323,4 +327,4 @@ Built-in theme cycling with system dark mode detection:
 
 ---
 
-*Optimised for academic writing and research workflows. Based on LunarVim architecture.*
+*Optimised for academic writing and research workflows. Based on LunarVim architecture. Made by SimonAB.*
