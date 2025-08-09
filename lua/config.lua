@@ -138,6 +138,23 @@ vim.api.nvim_create_user_command('InitVimTeX', function()
     end
 end, { desc = "Manually initialise VimTeX" })
 
+-- Automatically initialise VimTeX for TeX buffers
+-- This runs only when opening TeX files and skips if VimTeX already initialised
+local vimtex_auto_group = vim.api.nvim_create_augroup('VimTeXAutoInit', { clear = true })
+vim.api.nvim_create_autocmd('FileType', {
+  group = vimtex_auto_group,
+  pattern = 'tex',
+  desc = 'Automatically initialise VimTeX on TeX buffers',
+  callback = function()
+    -- If VimTeX has not attached a buffer-local state yet, trigger initialisation
+    if vim.b.vimtex == nil then
+      vim.defer_fn(function()
+        pcall(vim.cmd, 'InitVimTeX')
+      end, 50)
+    end
+  end,
+})
+
 -- ============================================================================
 -- AUTOCOMMANDS
 -- ============================================================================

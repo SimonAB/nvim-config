@@ -39,6 +39,14 @@ local plugins = {
   { url = 'https://github.com/jmbuhr/otter.nvim', name = 'otter.nvim' },         -- Code execution in Quarto
   { url = 'https://github.com/benlubas/molten-nvim', name = 'molten-nvim' },     -- Jupyter notebook integration
 
+  -- Bibliography and references (Papis)
+  { url = 'https://github.com/jghauser/papis.nvim', name = 'papis.nvim' },       -- Manage bibliography from Neovim
+  -- Required dependencies for papis.nvim
+  { url = 'https://github.com/kkharji/sqlite.lua', name = 'sqlite.lua' },
+  { url = 'https://github.com/MunifTanjim/nui.nvim', name = 'nui.nvim' },
+  { url = 'https://github.com/pysan3/pathlib.nvim', name = 'pathlib.nvim' },
+  { url = 'https://github.com/nvim-neotest/nvim-nio', name = 'nvim-nio' },
+
   -- Language support - Syntax highlighting and LSP
   { url = 'https://github.com/nvim-treesitter/nvim-treesitter', name = 'nvim-treesitter' }, -- Syntax highlighting
   { url = 'https://github.com/neovim/nvim-lspconfig', name = 'nvim-lspconfig' },  -- LSP configurations
@@ -105,6 +113,46 @@ local function safe_setup(plugin_name, setup_func)
     return false
   end
   return ok
+end
+
+-- Early setup for papis.nvim so its FileType autocommands are registered promptly
+do
+  local papis_init_filetypes_map = { markdown = true, norg = true, yaml = true, typst = true, tex = true }
+  safe_setup('papis', function(papis)
+    papis.setup({
+      enable_keymaps = true,
+      init_filetypes = { 'markdown', 'norg', 'yaml', 'typst', 'tex' },
+    })
+  end)
+  -- If current buffer already has a matching filetype, re-trigger FileType to let papis attach
+  pcall(function()
+    local ft = vim.bo.filetype
+    if papis_init_filetypes_map[ft] then
+      vim.api.nvim_exec_autocmds('FileType', { pattern = ft, modeline = false })
+    end
+  end)
+  -- Ensure sqlite DB is initialised early so :checkhealth works before papis starts
+  vim.api.nvim_create_autocmd('VimEnter', {
+    once = true,
+    callback = function()
+      local ok_db, db = pcall(require, 'papis.sqlite-wrapper')
+      if ok_db and db and not db.data then
+        pcall(function() db:init() end)
+      end
+    end,
+    desc = 'Initialise papis.nvim sqlite database for healthcheck',
+  })
+
+  -- Ensure papis actually starts when entering a matching buffer (in case its own autocmd missed)
+  vim.api.nvim_create_autocmd({ 'VimEnter', 'FileType' }, {
+    callback = function(args)
+      local ft = vim.bo[args.buf].filetype
+      if papis_init_filetypes_map[ft] then
+        pcall(function() require('papis').start() end)
+      end
+    end,
+    desc = 'Ensure papis.nvim starts for configured filetypes',
+  })
 end
 
 -- Plugin configuration
@@ -380,6 +428,9 @@ vim.defer_fn(function()
       -- Sources configuration
       sources = {
         default = { 'lsp', 'path', 'snippets', 'buffer' },
+        per_filetype = {
+          yaml = { 'papis' },
+        },
       },
 
       -- Completion configuration
@@ -507,6 +558,16 @@ vim.defer_fn(function()
       float_opts = {
         border = 'curved',
       },
+    })
+  end)
+
+  -- Papis.nvim - bibliography manager
+  safe_setup('papis', function(papis)
+    papis.setup({
+      enable_keymaps = true,
+      -- Ensure automatic activation on these filetypes
+      init_filetypes = { "markdown", "norg", "yaml", "typst" },
+      -- Use defaults for everything else; users can configure later via :Papis reload config
     })
   end)
 
@@ -731,6 +792,18 @@ vim.defer_fn(function()
     -- which-key group for VimTeX under localleader
     wk.add({
       { "<localleader>l", group = "VimTeX" },
+    })
+
+    -- which-key group for Papis under <leader>p (plugin provides the actual mappings)
+    wk.add({ { "<leader>p", group = "Papis" } })
+
+    -- Label default papis.nvim keymaps (do not create mappings; papis.nvim sets them)
+    wk.add({
+      { "<leader>pp", desc = "Papis: Open picker" },
+      { "<leader>pf", desc = "Papis: Open file under cursor" },
+      { "<leader>pe", desc = "Papis: Edit entry under cursor" },
+      { "<leader>pn", desc = "Papis: Open note under cursor" },
+      { "<leader>pi", desc = "Papis: Show entry info popup" },
     })
 
     -- Centralised function to open Julia REPL with specified direction
@@ -1302,23 +1375,43 @@ map("n", "<leader>Ls", ":Telescope lsp_document_symbols<CR>", { desc = "Document
 map("n", "<leader>LS", ":Telescope lsp_dynamic_workspace_symbols<CR>", { desc = "Workspace Symbols" })
 
 -- LazyGit integration with ToggleTerm (from lua/keymaps.lua lines 694-713)
+-- Fixed implementation to handle commit message editing properly
 map("n", "<leader>Gg", function()
   local Terminal = require('toggleterm.terminal').Terminal
   local lazygit = Terminal:new({
     cmd = "lazygit",
+    dir = "git_dir", -- open in the Git root for correct repo context
     hidden = true,
     direction = "float",
     float_opts = {
-      border = "none",
-      width = 100000,
-      height = 100000,
-      zindex = 200,
+      border = "curved",
+      width = function()
+        return math.floor(vim.o.columns * 0.9)
+      end,
+      height = function()
+        return math.floor(vim.o.lines * 0.9)
+      end,
     },
-    on_open = function(_)
+    close_on_exit = true,
+    -- Configure environment to use nvim as editor for commit messages
+    env = {
+      TERM = "xterm-256color",
+      COLORTERM = "truecolor",
+      EDITOR = "nvim --clean",
+      GIT_EDITOR = "nvim --clean",
+      -- Prevent socket conflicts by unsetting NVIM variables
+      NVIM = "",
+      NVIM_LISTEN_ADDRESS = "",
+    },
+    on_open = function(term)
       vim.cmd("startinsert!")
+      -- Disable conflicting keymaps while lazygit is open
+      vim.keymap.set('t', '<esc>', '<esc>', { buffer = term.bufnr })
     end,
-    on_close = function(_) end,
-    count = 99,
+    on_close = function()
+      -- Re-enable keymaps when lazygit closes
+      vim.cmd("stopinsert")
+    end,
   })
   lazygit:toggle()
 end, { desc = "Lazygit" })
