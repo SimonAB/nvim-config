@@ -96,8 +96,7 @@ for _, dir in ipairs(plugin_dirs) do
   end
 end
 
-vim.cmd('runtime! plugin/**/*.vim')
-vim.cmd('runtime! plugin/**/*.lua')
+-- Avoid re-sourcing plugin runtime files manually to prevent duplicate initialisations
 
 -- Safe setup helper
 local function safe_setup(plugin_name, setup_func)
@@ -476,7 +475,7 @@ vim.defer_fn(function()
   local treesitter_ok, treesitter = pcall(require, 'nvim-treesitter.configs')
   if treesitter_ok then
     treesitter.setup({
-      ensure_installed = { 'lua', 'julia', 'python', 'markdown' },
+      ensure_installed = { 'lua', 'julia', 'python', 'markdown', 'yaml' },
       highlight = { enable = true },
       indent = { enable = true },
     })
