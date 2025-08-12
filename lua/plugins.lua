@@ -5,46 +5,46 @@
 -- Comprehensive plugin list with blink.cmp for completion
 local plugins = {
 	-- Core functionality - Essential development tools
-	{ url = "https://github.com/folke/trouble.nvim", name = "trouble.nvim" }, -- Diagnostics viewer
-	{ url = "https://github.com/Saghen/blink.cmp", name = "blink.cmp", build = "cargo build --release" }, -- Modern completion engine
+	{ url = "https://github.com/folke/trouble.nvim",              name = "trouble.nvim" },                                          -- Diagnostics viewer
+	{ url = "https://github.com/Saghen/blink.cmp",                name = "blink.cmp",               build = "cargo build --release" }, -- Modern completion engine
 
 	-- UI and themes - Visual enhancements and colourschemes
-	{ url = "https://github.com/catppuccin/nvim", name = "catppuccin" }, -- Modern pastel theme
-	{ url = "https://github.com/navarasu/onedark.nvim", name = "onedark.nvim" }, -- OneDark theme
-	{ url = "https://github.com/folke/tokyonight.nvim", name = "tokyonight.nvim" }, -- Tokyo Night theme
-	{ url = "https://github.com/arcticicestudio/nord-vim", name = "nord-vim" }, -- Nord theme
-	{ url = "https://github.com/rafi/awesome-vim-colorschemes", name = "awesome-vim-colorschemes" }, -- Collection of themes
-	{ url = "https://github.com/projekt0n/github-nvim-theme", name = "github-nvim-theme" }, -- GitHub theme
-	{ url = "https://github.com/f-person/auto-dark-mode.nvim", name = "auto-dark-mode.nvim" }, -- Auto theme switching
-	{ url = "https://github.com/lewis6991/gitsigns.nvim", name = "gitsigns.nvim" }, -- Git integration
-	{ url = "https://github.com/nvim-lualine/lualine.nvim", name = "lualine.nvim" }, -- Status line
-	{ url = "https://github.com/akinsho/bufferline.nvim", name = "bufferline.nvim" }, -- Buffer tabs
+	{ url = "https://github.com/catppuccin/nvim",                 name = "catppuccin" },            -- Modern pastel theme
+	{ url = "https://github.com/navarasu/onedark.nvim",           name = "onedark.nvim" },          -- OneDark theme
+	{ url = "https://github.com/folke/tokyonight.nvim",           name = "tokyonight.nvim" },       -- Tokyo Night theme
+	{ url = "https://github.com/arcticicestudio/nord-vim",        name = "nord-vim" },              -- Nord theme
+	{ url = "https://github.com/rafi/awesome-vim-colorschemes",   name = "awesome-vim-colorschemes" }, -- Collection of themes
+	{ url = "https://github.com/projekt0n/github-nvim-theme",     name = "github-nvim-theme" },     -- GitHub theme
+	{ url = "https://github.com/f-person/auto-dark-mode.nvim",    name = "auto-dark-mode.nvim" },   -- Auto theme switching
+	{ url = "https://github.com/lewis6991/gitsigns.nvim",         name = "gitsigns.nvim" },         -- Git integration
+	{ url = "https://github.com/nvim-lualine/lualine.nvim",       name = "lualine.nvim" },          -- Status line
+	{ url = "https://github.com/akinsho/bufferline.nvim",         name = "bufferline.nvim" },       -- Buffer tabs
 
 	-- Navigation - File and project navigation tools
-	{ url = "https://github.com/nvim-telescope/telescope.nvim", name = "telescope.nvim" }, -- Fuzzy finder
-	{ url = "https://github.com/nvim-lua/plenary.nvim", name = "plenary.nvim" }, -- Utility library (required by telescope)
+	{ url = "https://github.com/nvim-telescope/telescope.nvim",   name = "telescope.nvim" }, -- Fuzzy finder
+	{ url = "https://github.com/nvim-lua/plenary.nvim",           name = "plenary.nvim" },   -- Utility library (required by telescope)
 	-- { url = 'https://github.com/justinmk/vim-sneak', name = 'vim-sneak' },          -- Enhanced motion
-	{ url = "https://github.com/nvim-tree/nvim-tree.lua", name = "nvim-tree.lua" }, -- File explorer
-	{ url = "https://github.com/nvim-tree/nvim-web-devicons", name = "nvim-web-devicons" }, -- File icons
-	{ url = "https://github.com/folke/which-key.nvim", name = "which-key.nvim" }, -- Keymap popup helper
+	{ url = "https://github.com/nvim-tree/nvim-tree.lua",         name = "nvim-tree.lua" },  -- File explorer
+	{ url = "https://github.com/nvim-tree/nvim-web-devicons",     name = "nvim-web-devicons" }, -- File icons
+	{ url = "https://github.com/folke/which-key.nvim",            name = "which-key.nvim" }, -- Keymap popup helper
 
 	-- Terminal integration - Enhanced terminal workflow
-	{ url = "https://github.com/akinsho/toggleterm.nvim", name = "toggleterm.nvim" }, -- Terminal management
+	{ url = "https://github.com/akinsho/toggleterm.nvim",         name = "toggleterm.nvim" }, -- Terminal management
 
 	-- Document processing - LaTeX, Typst and Markdown support
-	{ url = "https://github.com/lervag/vimtex", name = "vimtex" }, -- LaTeX support
-	{ url = "https://github.com/iamcco/markdown-preview.nvim", name = "markdown-preview.nvim" }, -- Markdown preview
-	{ url = "https://github.com/chomosuke/typst-preview.nvim", name = "typst-preview.nvim" }, -- Typst preview
-	{ url = "https://github.com/quarto-dev/quarto-nvim", name = "quarto-nvim" }, -- Quarto support
-	{ url = "https://github.com/jmbuhr/otter.nvim", name = "otter.nvim" }, -- Code execution in Quarto
-	{ url = "https://github.com/benlubas/molten-nvim", name = "molten-nvim" }, -- Jupyter notebook integration
+	{ url = "https://github.com/lervag/vimtex",                   name = "vimtex" },             -- LaTeX support
+	{ url = "https://github.com/iamcco/markdown-preview.nvim",    name = "markdown-preview.nvim" }, -- Markdown preview
+	{ url = "https://github.com/chomosuke/typst-preview.nvim",    name = "typst-preview.nvim" }, -- Typst preview
+	{ url = "https://github.com/quarto-dev/quarto-nvim",          name = "quarto-nvim" },        -- Quarto support
+	{ url = "https://github.com/jmbuhr/otter.nvim",               name = "otter.nvim" },         -- Code execution in Quarto
+	{ url = "https://github.com/benlubas/molten-nvim",            name = "molten-nvim" },        -- Jupyter notebook integration
 
 	-- Language support - Syntax highlighting and LSP
 	{ url = "https://github.com/nvim-treesitter/nvim-treesitter", name = "nvim-treesitter" }, -- Syntax highlighting
-	{ url = "https://github.com/neovim/nvim-lspconfig", name = "nvim-lspconfig" }, -- LSP configurations
+	{ url = "https://github.com/neovim/nvim-lspconfig",           name = "nvim-lspconfig" }, -- LSP configurations
 
 	-- Text manipulation
-	{ url = "https://github.com/echasnovski/mini.nvim", name = "mini.nvim" }, -- mini.nvim collection
+	{ url = "https://github.com/echasnovski/mini.nvim",           name = "mini.nvim" }, -- mini.nvim collection
 }
 
 -- Plugin installation
@@ -179,9 +179,28 @@ safe_setup("mini.starter", function(starter)
 		return order
 	end
 
+	-- Recent files list: get recent files with custom keys
+	local function recent_files(limit)
+		local files, order = {}, {}
+		local oldfiles = vim.v.oldfiles or {}
+		for _, f in ipairs(oldfiles) do
+			if type(f) == "string" and #f > 0 then
+				local abs = vim.fn.fnamemodify(f, ":p")
+				if abs ~= "" and vim.loop.fs_stat(abs) and files[abs] == nil then
+					files[abs] = true
+					table.insert(order, abs)
+					if #order >= limit then
+						break
+					end
+				end
+			end
+		end
+		return order
+	end
+
 	do
 		local idx = 1
-		for _, dir in ipairs(recent_projects(8)) do
+		for _, dir in ipairs(recent_projects(4)) do
 			local label = string.format("%d. ", idx)
 			local name = label .. " " .. vim.fn.fnamemodify(dir, ":t")
 			local action = string.format("lua require('telescope.builtin').find_files({ cwd = [[%s]] })", dir)
@@ -192,19 +211,15 @@ safe_setup("mini.starter", function(starter)
 	-- Compatible section API resolver (supports both sections and legacy gen_section)
 	local sections = starter.sections or starter.gen_section or {}
 
-	-- Recent files (current dir first)
+	-- Recent files with custom keys (a-d, up to 4 files)
 	do
-		local recent
-		if sections.recent_files then
-			local ok, res = pcall(sections.recent_files, 10, true)
-			if ok then
-				recent = res
-			end
-		end
-		if type(recent) == "table" then
-			for _, it in ipairs(recent) do
-				table.insert(items, it)
-			end
+		local keys = { "a", "b", "c", "d" }
+		for i, file in ipairs(recent_files(4)) do
+			local key = keys[i]
+			local label = string.format("%s. ", key)
+			local name = label .. " " .. vim.fn.fnamemodify(file, ":t")
+			local action = "edit " .. vim.fn.fnameescape(file)
+			table.insert(items, { name = name, action = action, section = "Recent files" })
 		end
 	end
 
@@ -260,13 +275,13 @@ safe_setup("mini.starter", function(starter)
 		end)(),
 	})
 
-	-- Force header colour to #FFCC12 ior #FE021C or Ferrari red #FF2800 or blood red #8B0000 and keep it across colourscheme changes
+	-- Force header colour keep it across colourscheme changes
+	local starter_header_colour = "#4A6D8C" -- Muted blue-black
 	-- local starter_header_colour = "#FFCC12" -- yellow
 	-- local starter_header_colour = "#FFCC12" -- A slightly darker, more metallic gold
 	-- local starter_header_colour = "#FF0000" -- pure red
 	-- local starter_header_colour = "#8B0000" -- blood red
 	-- local starter_header_colour = "#2C3E50" -- Lighter shade with more blue tone
-	local starter_header_colour = "#4A6D8C" -- Muted blue-black
 	pcall(vim.api.nvim_set_hl, 0, "MiniStarterHeader", { fg = starter_header_colour, bold = true })
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		callback = function()
@@ -305,7 +320,7 @@ safe_setup("mini.starter", function(starter)
 						section = "Shortcuts",
 					},
 					{
-						name = "Config",
+						name = "Settings",
 						action = string.format(
 							"lua require('telescope.builtin').find_files({ cwd = [[%s]] })",
 							cfg_path
@@ -319,12 +334,24 @@ safe_setup("mini.starter", function(starter)
 			end
 			do
 				local idx = 1
-				for _, dir in ipairs(recent_projects(8)) do
+				for _, dir in ipairs(recent_projects(4)) do
 					local label = string.format("%d. ", idx)
 					local name = label .. " " .. vim.fn.fnamemodify(dir, ":t")
 					local action = string.format("lua require('telescope.builtin').find_files({ cwd = [[%s]] })", dir)
 					table.insert(new_items, { name = name, action = action, section = "Projects" })
 					idx = idx + 1
+				end
+			end
+
+			-- Recent files with custom keys (a-d, up to 4 files)
+			do
+				local keys = { "a", "b", "c", "d" }
+				for i, file in ipairs(recent_files(4)) do
+					local key = keys[i]
+					local label = string.format("%s. ", key)
+					local name = label .. " " .. vim.fn.fnamemodify(file, ":t")
+					local action = "edit " .. vim.fn.fnameescape(file)
+					table.insert(new_items, { name = name, action = action, section = "Recent files" })
 				end
 			end
 			MiniStarter.config.items = new_items
@@ -350,9 +377,12 @@ safe_setup("mini.starter", function(starter)
 			-- Direct numeric shortcuts for Projects (1..9)
 			local items = (_G.MiniStarter and _G.MiniStarter.config and _G.MiniStarter.config.items) or {}
 			local projects = {}
+			local recent_files = {}
 			for _, item in ipairs(items) do
 				if item and item.section == "Projects" then
 					table.insert(projects, item)
+				elseif item and item.section == "Recent files" then
+					table.insert(recent_files, item)
 				end
 			end
 
@@ -368,6 +398,14 @@ safe_setup("mini.starter", function(starter)
 				vim.keymap.set("n", tostring(i), function()
 					exec_action(projects[i].action)
 				end, { buffer = buf, nowait = true, silent = true, desc = "Open Project " .. i })
+			end
+
+			-- Direct key shortcuts for Recent files (a-d, up to 4 files)
+			local recent_keys = { "a", "b", "c", "d" }
+			for i = 1, math.min(#recent_files, 4) do
+				vim.keymap.set("n", recent_keys[i], function()
+					exec_action(recent_files[i].action)
+				end, { buffer = buf, nowait = true, silent = true, desc = "Open Recent File " .. recent_keys[i] })
 			end
 		end,
 	})
@@ -405,7 +443,7 @@ vim.defer_fn(function()
 		lspconfig.julials.setup({
 			capabilities = capabilities,
 			single_file_support = true,
-			timeout_ms = 30000, -- Stage 2: 30 second timeout for slow operations
+			timeout_ms = 30000,    -- Stage 2: 30 second timeout for slow operations
 			flags = {
 				debounce_text_changes = 150, -- Stage 3: Reduce LSP noise
 				allow_incremental_sync = true, -- Stage 3: Better performance
@@ -441,7 +479,7 @@ vim.defer_fn(function()
 			},
 			init_options = {
 				storagePath = vim.fn.stdpath("cache") .. "/julia_ls", -- Stage 2: Cache path
-				experimentalFeatures = { -- Stage 3: Enable experimental features
+				experimentalFeatures = {                  -- Stage 3: Enable experimental features
 					lspMacroExpansion = true,
 					inlayHints = true,
 				},
@@ -479,7 +517,7 @@ vim.defer_fn(function()
 				)(fname) or vim.fn.getcwd()
 			end,
 		})
-	-- Julia LSP configured
+		-- Julia LSP configured
 	else
 		-- Julia not available
 	end
@@ -623,7 +661,7 @@ vim.defer_fn(function()
 				end, { buffer = bufnr })
 			end,
 		})
-	-- Texlab LSP configured
+		-- Texlab LSP configured
 	else
 		-- Texlab not available
 	end
@@ -680,16 +718,17 @@ vim.defer_fn(function()
 				enabled = true,
 			},
 
-			-- Fuzzy matching - minimal valid configuration
+			-- Fuzzy matching - use Rust implementation for optimal performance
 			fuzzy = {
+				implementation = "prefer_rust", -- Prefer Rust implementation for better performance
 				prebuilt_binaries = {
-					download = true,
-					force_version = nil,
+					download = false, -- We built from source, so don't download
+					ignore_version_mismatch = true, -- Ignore any version warnings
 				},
 			},
 		})
 
-	-- Blink.cmp configured
+		-- Blink.cmp configured
 	else
 		-- blink.cmp not available
 	end
@@ -1181,7 +1220,7 @@ vim.defer_fn(function()
 			-- File explorer
 			-- Find files
 			-- Git operations
-			{ "<leader>G", group = "Git" },
+			{ "<leader>G",   group = "Git" },
 			-- Git operations
 			{
 				"<leader>Gs",
@@ -1199,12 +1238,14 @@ vim.defer_fn(function()
 			},
 
 			-- Toggle options
-			{ "<leader>Y", group = "Toggle" },
+			{ "<leader>Y",   group = "Toggle" },
 			-- Editor utilities
-			{ "<leader>Ys", ":set spell!<CR>", desc = "Toggle Spell Check" },
+			{ "<leader>Ys",  ":set spell!<CR>",                        desc = "Toggle Spell Check" },
+			{ "<leader>Yse", ":set spelllang=en_gb<CR>:set spell<CR>", desc = "Set spell language to English (British)" },
+			{ "<leader>Ysf", ":set spelllang=fr<CR>:set spell<CR>",    desc = "Set spell language to French" },
 
 			-- LSP operations
-			{ "<leader>L", group = "LSP" },
+			{ "<leader>L",   group = "LSP" },
 			{
 				"<leader>Ll",
 				function()
@@ -1251,7 +1292,7 @@ vim.defer_fn(function()
 			-- Plugin management
 			{ "<leader>P", group = "Plugin" },
 			-- Quit
-			{ "<leader>q", ":q<CR>", desc = "Close buffer" },
+			{ "<leader>q", ":q<CR>",        desc = "Close buffer" },
 			-- Quarto operations
 			{ "<leader>Q", group = "Quarto" },
 			-- Quarto preview operations
@@ -1283,7 +1324,7 @@ vim.defer_fn(function()
 				desc = "Quarto Render",
 			},
 			-- Molten keymaps under <leader>Qm prefix
-			{ "<leader>Qm", group = "Molten" },
+			{ "<leader>Qm",  group = "Molten" },
 			{
 				"<leader>Qmi",
 				function()
@@ -1407,36 +1448,36 @@ vim.defer_fn(function()
 				desc = "Open in Browser",
 			},
 			-- Otter operations
-			{ "<leader>O", group = "Otter" },
+			{ "<leader>O",   group = "Otter" },
 			-- Quit
 			-- Search operations
-			{ "<leader>S", group = "Search" },
+			{ "<leader>S",   group = "Search" },
 			-- Split operations
-			{ "<leader>|", group = "Split" },
-			{ "<leader>|v", "<cmd>vsplit<CR>", desc = "Vertical split" },
-			{ "<leader>|h", "<cmd>split<CR>", desc = "Horizontal split" },
+			{ "<leader>|",   group = "Split" },
+			{ "<leader>|v",  "<cmd>vsplit<CR>",                          desc = "Vertical split" },
+			{ "<leader>|h",  "<cmd>split<CR>",                           desc = "Horizontal split" },
 			-- Terminal operations
-			{ "<leader>T", group = "Terminal" },
-			{ "<leader>Ts", group = "Server Management" },
-			{ "<leader>Tss", start_nvim_server, desc = "Start Neovim server" },
-			{ "<leader>Tst", stop_nvim_server, desc = "Stop Neovim server" },
-			{ "<leader>Tr", group = "Server Restart" },
-			{ "<leader>Trs", restart_nvim_server, desc = "Restart Neovim server" },
-			{ "<leader>TC", group = "Server Check" },
-			{ "<leader>TCk", check_nvim_server, desc = "Check Neovim server" },
+			{ "<leader>T",   group = "Terminal" },
+			{ "<leader>Ts",  group = "Server Management" },
+			{ "<leader>Tss", start_nvim_server,                          desc = "Start Neovim server" },
+			{ "<leader>Tst", stop_nvim_server,                           desc = "Stop Neovim server" },
+			{ "<leader>Tr",  group = "Server Restart" },
+			{ "<leader>Trs", restart_nvim_server,                        desc = "Restart Neovim server" },
+			{ "<leader>TC",  group = "Server Check" },
+			{ "<leader>TCk", check_nvim_server,                          desc = "Check Neovim server" },
 			-- Vertical split
 			-- Window operations
-			{ "<leader>W", group = "Window" },
+			{ "<leader>W",   group = "Window" },
 			-- Trouble diagnostics
-			{ "<leader>X", group = "Trouble" },
-			{ "<leader>Xw", ":TroubleToggle workspace_diagnostics<CR>", desc = "Workspace Diagnostics" },
-			{ "<leader>Xd", ":TroubleToggle document_diagnostics<CR>", desc = "Document Diagnostics" },
-			{ "<leader>Xl", ":TroubleToggle loclist<CR>", desc = "Location List" },
-			{ "<leader>Xq", ":TroubleToggle quickfix<CR>", desc = "Quickfix" },
+			{ "<leader>X",   group = "Trouble" },
+			{ "<leader>Xw",  ":TroubleToggle workspace_diagnostics<CR>", desc = "Workspace Diagnostics" },
+			{ "<leader>Xd",  ":TroubleToggle document_diagnostics<CR>",  desc = "Document Diagnostics" },
+			{ "<leader>Xl",  ":TroubleToggle loclist<CR>",               desc = "Location List" },
+			{ "<leader>Xq",  ":TroubleToggle quickfix<CR>",              desc = "Quickfix" },
 
 			-- Julia-specific operations
-			{ "<leader>J", group = "Julia" },
-			{ "<leader>Jr", group = "Julia REPL" },
+			{ "<leader>J",   group = "Julia" },
+			{ "<leader>Jr",  group = "Julia REPL" },
 			{
 				"<leader>Jrh",
 				function()
@@ -1620,11 +1661,11 @@ vim.defer_fn(function()
 
 	-- Molten configuration (remote plugin - configured via vim vars)
 	-- Molten-nvim is a remote plugin that uses Python, configured via vim variables
-	vim.g.molten_image_provider = "none" -- Terminal compatible image display
+	vim.g.molten_image_provider = "none"   -- Terminal compatible image display
 	vim.g.molten_output_win_max_height = 20 -- Limit output window size
-	vim.g.molten_auto_open_output = false -- Don't auto-open output
-	vim.g.molten_wrap_output = true -- Wrap long lines
-	vim.g.molten_virt_text_output = false -- Use virtual text for output
+	vim.g.molten_auto_open_output = false  -- Don't auto-open output
+	vim.g.molten_wrap_output = true        -- Wrap long lines
+	vim.g.molten_virt_text_output = false  -- Use virtual text for output
 	vim.g.molten_use_border_highlights = true -- Use border highlights
 
 	-- Configuration complete
