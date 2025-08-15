@@ -52,7 +52,6 @@ obsidian.setup({
     completion = {
         nvim_cmp = false, -- Disable nvim-cmp since we're using blink.cmp
         min_chars = 2,
-        new_notes_location = "current_dir",
     },
 
     -- Wiki link function (replaces deprecated completion options)
