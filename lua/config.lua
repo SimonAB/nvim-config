@@ -119,8 +119,7 @@ vim.g.vimtex_compiler_latexmk = {
   }
 }
 
--- Markdown preview configuration
-vim.g.mkdp_auto_start = 0
+-- Markdown preview configuration (handled in plugins/markdown-preview-nvim.lua)
 
 -- Create user command for manual VimTeX initialisation
 vim.api.nvim_create_user_command('InitVimTeX', function()

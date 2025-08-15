@@ -746,4 +746,24 @@ if ok then
 			desc = "Mason Help",
 		},
 	})
+
+	-- Markdown preview keymaps
+	wk.add({
+		{ "<leader>K", group = "Markdown" },
+		{
+			"<leader>Kp",
+			"<cmd>MarkdownPreview<CR>",
+			desc = "Start Markdown Preview",
+		},
+		{
+			"<leader>Ks",
+			"<cmd>MarkdownPreviewStop<CR>",
+			desc = "Stop Markdown Preview",
+		},
+		{
+			"<leader>Kt",
+			"<cmd>MarkdownPreviewToggle<CR>",
+			desc = "Toggle Markdown Preview",
+		},
+	})
 end

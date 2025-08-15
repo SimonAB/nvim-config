@@ -38,7 +38,7 @@ local plugins = {
 
 	-- Document processing - LaTeX, Typst and Markdown support
 	{ url = "https://github.com/lervag/vimtex",                   name = "vimtex" },             -- LaTeX support
-	{ url = "https://github.com/iamcco/markdown-preview.nvim",    name = "markdown-preview.nvim" }, -- Markdown preview
+	{ url = "https://github.com/iamcco/markdown-preview.nvim",    name = "markdown-preview.nvim", build = "cd app && ./install.sh" }, -- Markdown preview
 	{ url = "https://github.com/chomosuke/typst-preview.nvim",    name = "typst-preview.nvim" }, -- Typst preview
 	{ url = "https://github.com/epwalsh/obsidian.nvim",           name = "obsidian.nvim" },      -- Obsidian vault support
 
