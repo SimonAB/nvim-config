@@ -1,1 +1,0 @@
-# Test Markdown\n\nThis is a test markdown file.\n\n## Features\n\n- **Bold text**\n- *Italic text*\n- \`code\`\n\n## Math\n\nInline math: $E = mc^2$\n\nBlock math:\n$$\n\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}\n$$
