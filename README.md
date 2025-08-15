@@ -1,6 +1,6 @@
 # ✴︎ StellarVIM: Neovim Configuration for Academic Writing
 
-A comprehensive Neovim configuration optimised for academic research workflows, featuring advanced LaTeX support with bidirectional PDF synchronisation, Julia, Python, and R LSP integration, Quarto document authoring, and intelligent terminal integration. Built for Neovim 0.12+ using modern vim.pack plugin management.
+A comprehensive Neovim configuration optimised for academic research workflows, featuring advanced LaTeX support with bidirectional PDF synchronisation, Julia, Python, and R LSP integration, Quarto document authoring, and intelligent terminal integration. Built for Neovim 0.12+ using modern vim.pack plugin management with a modular, maintainable structure.
 
 ## 🎯 Key Features for Researchers
 
@@ -25,22 +25,102 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - **Terminal integration**: Smart code block execution with automatic navigation
 - **Theme cycling**: Auto dark mode with multiple theme options
 
-## 📁 Structure
+## 📁 Modular Structure
 
 ```
 ~/.config/nvim/
-├── init.lua              # Main configuration entry point
+├── init.lua                    # Main configuration entry point
 ├── lua/
-│   ├── config.lua        # Editor settings and VimTeX configuration
-│   ├── keymaps.lua       # Comprehensive key mappings
-│   └── plugins.lua       # Plugin management and LSP setup
-├── scripts/              # Helper scripts for PDF sync
-└── docs/                 # Comprehensive documentation guides
+│   ├── config.lua              # Core editor settings and VimTeX configuration
+│   ├── keymaps.lua             # Comprehensive key mappings
+│   ├── plugins.lua             # Plugin management and installation
+│   ├── require.lua             # Plugin loading orchestration
+│   └── plugins/                # Individual plugin configurations
+│       ├── auto-dark-mode-nvim.lua
+│       ├── awesome-vim-colorschemes.lua
+│       ├── blink-cmp.lua
+│       ├── bufferline-nvim.lua
+│       ├── catppuccin.lua
+│       ├── github-nvim-theme.lua
+│       ├── gitsigns-nvim.lua
+│       ├── lualine-nvim.lua
+│       ├── markdown-preview-nvim.lua
+│       ├── mini-nvim.lua
+│       ├── molten-nvim.lua
+│       ├── nord-vim.lua
+│       ├── nvim-lspconfig.lua
+│       ├── nvim-tree.lua
+│       ├── nvim-treesitter.lua
+│       ├── nvim-web-devicons.lua
+│       ├── onedark-nvim.lua
+│       ├── otter-nvim.lua
+│       ├── plenary-nvim.lua
+│       ├── quarto-nvim.lua
+│       ├── telescope.lua
+│       ├── toggleterm-nvim.lua
+│       ├── tokyonight-nvim.lua
+│       ├── trouble-nvim.lua
+│       ├── typst-preview-nvim.lua
+│       ├── vimtex.lua
+│       └── which-key-nvim.lua
+├── scripts/                    # Helper scripts for PDF sync
+├── docs/                       # Comprehensive documentation guides
+└── spell/                      # Spell checking dictionaries
 ```
+
+## 🔧 Plugin Architecture
+
+### Core Components
+- **Plugin Management**: Native vim.pack system (Neovim 0.12+)
+- **Loading Strategy**: Modular require system with individual plugin files
+- **Configuration**: Each plugin has its own dedicated configuration file
+- **Error Handling**: Graceful fallbacks and safe setup patterns
+
+### Plugin Categories
+
+#### **Core Functionality**
+- `blink-cmp.lua` - Modern completion engine
+- `mason-nvim.lua` - LSP server manager and package installer
+- `nvim-lspconfig.lua` - Language server protocol support
+- `nvim-treesitter.lua` - Syntax highlighting and parsing
+- `which-key-nvim.lua` - Keymap discovery and management
+
+#### **User Interface**
+- `bufferline-nvim.lua` - Buffer tabs
+- `lualine-nvim.lua` - Status line
+- `nvim-tree.lua` - File explorer
+- `nvim-web-devicons.lua` - File type icons
+- `trouble-nvim.lua` - Diagnostics viewer
+
+#### **Themes & Appearance**
+- `auto-dark-mode-nvim.lua` - Automatic theme switching
+- `catppuccin.lua` - Modern pastel theme
+- `onedark-nvim.lua` - Classic dark theme
+- `tokyonight-nvim.lua` - Clean elegant theme
+- `nord-vim.lua` - Arctic-inspired theme
+- `github-nvim-theme.lua` - GitHub-inspired theme
+- `awesome-vim-colorschemes.lua` - Theme collection
+
+#### **Development Tools**
+- `gitsigns-nvim.lua` - Git integration
+- `telescope.lua` - Fuzzy finder
+- `plenary-nvim.lua` - Utility library
+- `mini-nvim.lua` - Dashboard and text objects
+
+#### **Terminal & Execution**
+- `toggletterm-nvim.lua` - Terminal management
+- `molten-nvim.lua` - Jupyter integration
+
+#### **Document Processing**
+- `vimtex.lua` - LaTeX support
+- `markdown-preview-nvim.lua` - Markdown preview
+- `typst-preview-nvim.lua` - Typst preview
+- `quarto-nvim.lua` - Quarto document authoring
+- `otter-nvim.lua` - Multi-language LSP in documents
 
 ## ⌨️ Complete Key Mappings
 
-**Leader key**: `<Space>` | **Local Leader**: `,`
+**Leader key**: `<Space>` | **Local Leader**: `\`
 
 ### Core Navigation & Editing
 - `<Shift-h>` - Previous buffer
@@ -83,6 +163,7 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<leader>Ji` - Instantiate project
 - `<leader>Ju` - Update project
 - `<leader>Jt` - Run tests
+- `<leader>Jd` - Generate documentation
 
 ### LSP Operations (`<leader>L`)
 - `gd` - Go to definition
@@ -95,6 +176,13 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<leader>Lw` - Workspace diagnostics
 - `<leader>Ls` - Document symbols
 - `<leader>LS` - Workspace symbols
+
+### Mason Package Management (`<leader>M`)
+- `<leader>Mm` - Open Mason interface
+- `<leader>Mi` - Install package
+- `<leader>Mu` - Uninstall package
+- `<leader>Ml` - View Mason log
+- `<leader>Mh` - Mason help
 
 ### Otter Multi-language (`<leader>O`)
 - `<leader>Oa` - Activate Otter
@@ -121,7 +209,7 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 
 ### Search Operations (`<leader>S`)
 - `<leader>Sf` - Find files
-- `<leader>St` - Text (Live Grep)
+- `<leader>Sg` - Live Grep
 - `<leader>Sb` - Git branches
 - `<leader>Sc` - Colourscheme
 - `<leader>Sh` - Help tags
@@ -141,8 +229,16 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<Alt-2>` - Vertical terminal
 - `<Alt-3>` - Float terminal
 
+#### Server Management (`<leader>Ts`)
+- `<leader>Tss` - Start Neovim server
+- `<leader>Tst` - Stop Neovim server
+- `<leader>Trs` - Restart Neovim server
+- `<leader>TCk` - Check Neovim server
+
 ### Toggle Options (`<leader>Y`)
 - `<leader>Ys` - Toggle spell check
+- `<leader>Yse` - Set spell language to English (British)
+- `<leader>Ysf` - Set spell language to French
 - `<leader>Yc` - Cycle colourscheme
 - `<leader>Yw` - Toggle wrap
 - `<leader>Yn` - Toggle line numbers
@@ -151,10 +247,11 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<leader>|v` - Vertical split
 - `<leader>|h` - Horizontal split
 
-### Individual Commands
-- `<leader>q` - Close buffer (quick access)
-- `<leader>x` - Toggle checkbox (Obsidian)
-
+### Window Operations (`<leader>W`)
+- `<leader>Wk` - Decrease window height
+- `<leader>Wj` - Increase window height
+- `<leader>Wh` - Decrease window width
+- `<leader>Wl` - Increase window width
 
 ### Trouble Diagnostics (`<leader>X`)
 - `<leader>Xw` - Workspace diagnostics
@@ -168,6 +265,10 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<leader>Pu` - Update plugins
 - `<leader>Pc` - Compile plugins
 - `<leader>Ps` - Sync plugins (install + update + compile)
+
+### Individual Commands
+- `<leader>q` - Close buffer (quick access)
+- `<leader>x` - Toggle checkbox (Obsidian)
 
 ## 🛠️ Installation
 
@@ -239,7 +340,7 @@ nvim
 
 ### LaTeX SyncTeX with Skim (macOS)
 
-Use VimTeX’s native Skim integration for a simple, robust setup.
+Use VimTeX's native Skim integration for a simple, robust setup.
 
 1. Configure Skim:
    - Preferences → Sync → PDF-TeX Sync
@@ -257,22 +358,41 @@ Use VimTeX’s native Skim integration for a simple, robust setup.
 
 ### Language Server Setup
 
-#### Julia LSP
+**Mason Integration**: This configuration now uses [Mason](https://github.com/mason-org/mason.nvim) for automatic LSP server management. Language servers are automatically installed when needed.
+
+#### Using Mason
+```vim
+:Mason                    # Open Mason interface
+:MasonInstall <server>    # Install specific server
+:MasonUninstall <server>  # Uninstall server
+:MasonLog                 # View installation logs
+```
+
+#### Manual Installation (Fallback)
+If you prefer manual installation or need specific versions:
+
+##### Julia LSP
 ```julia
 # In Julia REPL
 using Pkg
 Pkg.add("LanguageServer")
 ```
 
-#### Python LSP (Alternative)
+##### Python LSP
 ```bash
-# If you prefer python-lsp-server over pyright
+# Install pyright (preferred)
+npm install -g pyright
+
+# Or install python-lsp-server
 pip install python-lsp-server[all]
 ```
 
-#### LaTeX LSP (Alternative Installation Methods)
+##### LaTeX LSP
 ```bash
-# Via Rust cargo if Homebrew version doesn't work
+# Via Homebrew
+brew install texlab
+
+# Via Rust cargo
 cargo install texlab
 
 # Via conda
@@ -282,19 +402,48 @@ conda install -c conda-forge texlab
 ## 🎨 Themes
 
 Built-in theme cycling with system dark mode detection:
-- **Catppuccin** (Mocha variant)
-- **OneDark** (Atom-inspired)
-- **Tokyo Night** (vibrant dark theme)
-- **Nord** (arctic colour palette)
-- **GitHub Dark/Light** (auto-switches with system)
+- **Catppuccin** (Mocha variant) - Modern pastel theme
+- **OneDark** (Atom-inspired) - Classic dark theme
+- **Tokyo Night** (vibrant dark theme) - Clean elegant design
+- **Nord** (arctic colour palette) - Arctic-inspired theme
+- **GitHub Dark/Light** (auto-switches with system) - GitHub-inspired theme
 
 **Cycle themes**: `<leader>Yc`
 **Auto dark mode**: Automatically switches light/dark variants based on macOS system appearance
+
+## 🔧 Configuration Management
+
+### Modular Plugin System
+Each plugin has its own configuration file in `lua/plugins/` for easy maintenance:
+- **Individual Configuration**: Modify specific plugins without affecting others
+- **Clear Documentation**: Each file contains detailed comments and usage examples
+- **Error Isolation**: Plugin failures don't affect the entire system
+- **Easy Debugging**: Isolate issues to specific plugin files
+
+### LSP Server Management with Mason
+The configuration uses [Mason](https://github.com/mason-org/mason.nvim) for seamless LSP server management:
+- **Automatic Installation**: Language servers are installed automatically when needed
+- **Portable**: Works everywhere Neovim runs without external dependencies
+- **Unified Interface**: Manage LSP servers, DAP servers, linters, and formatters
+- **Registry Integration**: Access to comprehensive server registry
+- **Easy Management**: Install, update, and uninstall servers from within Neovim
+
+### Configuration Files
+- `init.lua` - Entry point and leader key setup
+- `lua/config.lua` - Core editor settings and autocommands
+- `lua/keymaps.lua` - All key mappings and terminal integration
+- `lua/plugins.lua` - Plugin installation and management
+- `lua/require.lua` - Plugin loading orchestration
+- `lua/plugins/*.lua` - Individual plugin configurations
+
+### Hot Reloading
+Use `<leader>Cs` to reload all configuration files during development.
 
 ## 📚 Documentation
 
 - Press `<Space>` and wait to see available commands
 - Use `<leader>Sk` to search all keymaps
+- Each plugin file contains detailed configuration comments
 
 ### Additional Guides
 - [Installation Guide](docs/INSTALLATION_GUIDE.md)
@@ -324,7 +473,30 @@ Built-in theme cycling with system dark mode detection:
 **Plugins not loading?**
 - Restart Neovim (auto-installs on first run)
 - Clear cache: `rm -rf ~/.local/share/nvim/pack/`
+- Check individual plugin files for configuration errors
+
+**Configuration changes not taking effect?**
+- Use `<leader>Cs` to reload all configuration
+- Check for syntax errors in individual plugin files
+- Verify plugin dependencies are installed
+
+## 🔄 Maintenance
+
+### Adding New Plugins
+1. Add plugin to `lua/plugins.lua` plugin list
+2. Create new configuration file in `lua/plugins/`
+3. Add require statement to `lua/require.lua`
+4. Restart Neovim or use `<leader>Pi` to install
+
+### Updating Plugins
+- Use `<leader>Pu` to update all plugins
+- Use `<leader>Ps` to sync (install + update + compile)
+
+### Customising Individual Plugins
+- Edit the corresponding file in `lua/plugins/`
+- Each file contains detailed configuration options
+- Use `<leader>Cs` to reload changes
 
 ---
 
-*Optimised for academic writing and research workflows. Based on LunarVim architecture. Made by SimonAB.*
+*Optimised for academic writing and research workflows. Built with modular architecture for maintainability. Made by SimonAB.*

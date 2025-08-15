@@ -1,5 +1,4 @@
 -- Core Neovim Configuration
--- Essential editor settings harmonised from LunarVim
 
 local opt = vim.opt
 
@@ -7,18 +6,14 @@ local opt = vim.opt
 -- CORE EDITOR SETTINGS
 -- ============================================================================
 
--- ============================================================================
--- CORE SETTINGS
--- ============================================================================
-
 -- Line numbers
 opt.number = true
-opt.relativenumber = true      -- Show relative line numbers (from LunarVim)
+opt.relativenumber = true -- Show relative line numbers
 opt.signcolumn = "yes"
 
--- Indentation (from LunarVim)
-opt.tabstop = 4               -- Configure tabs
-opt.shiftwidth = 4            -- Set indentation width
+-- Indentation
+opt.tabstop = 4    -- Configure tabs
+opt.shiftwidth = 4 -- Set indentation width
 opt.expandtab = true
 opt.smartindent = true
 
@@ -28,13 +23,13 @@ opt.smartcase = true
 opt.hlsearch = true
 opt.incsearch = true
 
--- Visual (from LunarVim)
+-- Visual
 opt.cursorline = true
-opt.wrap = true               -- Enable line wrapping
-opt.linebreak = true          -- Wrap at word boundaries
+opt.wrap = true      -- Enable line wrapping
+opt.linebreak = true -- Wrap at word boundaries
 opt.scrolloff = 8
 opt.sidescrolloff = 8
-opt.conceallevel = 2          -- Enable concealment for Obsidian.nvim and VimTex
+opt.conceallevel = 2 -- Enable concealment for Obsidian.nvim and VimTex
 
 -- Behavior
 opt.mouse = "a"
@@ -56,9 +51,9 @@ opt.undofile = true
 opt.modeline = false
 opt.exrc = false
 
--- Language and spell checking (from LunarVim)
-opt.spelllang = "en_gb"       -- Set British English spelling
-opt.spell = false             -- Disable spell checking by default
+-- Language and spell checking
+opt.spelllang = "en_gb" -- Set British English spelling
+opt.spell = false       -- Disable spell checking by default
 
 -- Terminal colours (enables true colour support)
 opt.termguicolors = true
@@ -73,10 +68,10 @@ opt.guifont = "LigaSFMonoNerdFont-Regular:h10"
 -- Configuration file paths for hot-reloading
 local config_dir = vim.fn.stdpath('config')
 local config_files = {
-  init = config_dir..'/init.lua',
-  plugins = config_dir..'/lua/plugins.lua',
-  keymaps = config_dir..'/lua/keymaps.lua',
-  custom = config_dir..'/lua/config.lua',
+  init = config_dir .. '/init.lua',
+  plugins = config_dir .. '/lua/plugins/require.lua',
+  keymaps = config_dir .. '/lua/keymaps.lua',
+  custom = config_dir .. '/lua/config.lua',
 }
 
 -- Expose config files globally for keymaps module
@@ -91,11 +86,11 @@ vim.g.sonokai_enable_italic_comment = 1
 -- VimTeX configuration (Skim integration)
 
 -- VimTeX configuration with Skim reverse sync support (per official VimTeX docs)
-vim.g.vimtex_enabled = 1                -- Explicitly enable VimTeX
+vim.g.vimtex_enabled = 1               -- Explicitly enable VimTeX
 vim.g.vimtex_view_method = 'skim'
-vim.g.vimtex_view_skim_activate = 0     -- Do not steal focus on view
-vim.g.vimtex_view_skim_reading_bar = 1  -- Highlight current location
-vim.g.vimtex_view_skim_sync = 1         -- Forward sync after compilation
+vim.g.vimtex_view_skim_activate = 0    -- Do not steal focus on view
+vim.g.vimtex_view_skim_reading_bar = 1 -- Highlight current location
+vim.g.vimtex_view_skim_sync = 1        -- Forward sync after compilation
 
 -- Start a Neovim RPC server for robust inverse search (used by Skim)
 do
@@ -110,18 +105,18 @@ do
 end
 
 -- Ensure VimTeX uses the correct local leader (must match init.lua setting)
-vim.g.vimtex_mappings_enabled = 1       -- Enable VimTeX mappings
-vim.g.vimtex_imaps_enabled = 1          -- Enable insert mode mappings
+vim.g.vimtex_mappings_enabled = 1 -- Enable VimTeX mappings
+vim.g.vimtex_imaps_enabled = 1    -- Enable insert mode mappings
 
 -- Compiler configuration with synctex enabled for reverse sync
 vim.g.vimtex_compiler_latexmk = {
-    options = {
-        '-pdf',
-        '-pdflatex=lualatex',
-        '-synctex=1',                    -- Essential for reverse sync
-        '-interaction=nonstopmode',
-        '-file-line-error',
-    }
+  options = {
+    '-pdf',
+    '-pdflatex=lualatex',
+    '-synctex=1', -- Essential for reverse sync
+    '-interaction=nonstopmode',
+    '-file-line-error',
+  }
 }
 
 -- Markdown preview configuration
@@ -129,13 +124,13 @@ vim.g.mkdp_auto_start = 0
 
 -- Create user command for manual VimTeX initialisation
 vim.api.nvim_create_user_command('InitVimTeX', function()
-    vim.cmd("runtime! autoload/vimtex.vim")
-    if vim.fn.exists('*vimtex#init') == 1 then
-        vim.fn['vimtex#init']()
-        print("VimTeX initialised manually")
-    else
-        print("VimTeX initialisation failed - autoload not found")
-    end
+  vim.cmd("runtime! autoload/vimtex.vim")
+  if vim.fn.exists('*vimtex#init') == 1 then
+    vim.fn['vimtex#init']()
+    print("VimTeX initialised manually")
+  else
+    print("VimTeX initialisation failed - autoload not found")
+  end
 end, { desc = "Manually initialise VimTeX" })
 
 -- Automatically initialise VimTeX for TeX buffers
@@ -180,8 +175,8 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end,
 })
 
--- Auto-save on focus loss/exit (from LunarVim)
-vim.api.nvim_create_autocmd({"FocusLost", "VimLeavePre"}, {
+-- Auto-save on focus loss/exit
+vim.api.nvim_create_autocmd({ "FocusLost", "VimLeavePre" }, {
   group = augroup,
   desc = "Auto-save on focus loss or exit",
   callback = function()
@@ -200,12 +195,12 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
--- File-specific settings (from LunarVim)
+-- File-specific settings
 vim.api.nvim_create_autocmd("BufEnter", {
-    group = augroup,
-    pattern = { "*.json", "*.jsonc", "*.md" },
-    desc = "Enable wrap mode for specific files",
-    command = "setlocal wrap",
+  group = augroup,
+  pattern = { "*.json", "*.jsonc", "*.md" },
+  desc = "Enable wrap mode for specific files",
+  command = "setlocal wrap",
 })
 
 -- File type specific settings
@@ -218,14 +213,14 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- Syntax highlighting for zsh files (from LunarVim)
+-- Syntax highlighting for zsh files
 vim.api.nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = "zsh",
-    desc = "Use bash highlighting for zsh",
-    callback = function()
-        pcall(function()
-            require("nvim-treesitter.highlight").attach(0, "bash")
-        end)
-    end,
+  group = augroup,
+  pattern = "zsh",
+  desc = "Use bash highlighting for zsh",
+  callback = function()
+    pcall(function()
+      require("nvim-treesitter.highlight").attach(0, "bash")
+    end)
+  end,
 })
