@@ -200,16 +200,7 @@ if starter_ok then
 	-- Force header colour keep it across colourscheme changes
 	local starter_header_colour = "#4A6D8C" -- Muted blue-black
 
-	-- Ensure dashboard shows on startup when no files are provided
-	vim.api.nvim_create_autocmd("VimEnter", {
-		once = true,
-		callback = function()
-			-- Show dashboard if no files were provided as arguments
-			if vim.fn.argc() == 0 then
-				vim.cmd("MiniStarter")
-			end
-		end,
-	})
+	-- Set header colour and ensure it persists across colourscheme changes
 	pcall(vim.api.nvim_set_hl, 0, "MiniStarterHeader", { fg = starter_header_colour, bold = true })
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		callback = function()
@@ -289,9 +280,23 @@ if starter_ok then
 		end
 	end
 
+	-- Combined VimEnter autocmd that handles both dashboard startup and refresh
 	vim.api.nvim_create_autocmd("VimEnter", {
 		once = true,
 		callback = function()
+			-- Show dashboard if no files were provided as arguments
+			if vim.fn.argc() == 0 then
+				-- Use pcall to safely try to show the dashboard
+				local ok = pcall(vim.cmd, "MiniStarter")
+				if not ok then
+					-- If MiniStarter command fails, try again after a delay
+					vim.defer_fn(function()
+						pcall(vim.cmd, "MiniStarter")
+					end, 100)
+				end
+			end
+
+			-- Refresh starter content after a delay
 			vim.defer_fn(refresh_starter, 120)
 		end,
 	})
