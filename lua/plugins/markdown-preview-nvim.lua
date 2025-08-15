@@ -30,4 +30,3 @@ vim.g.mkdp_highlight_css = "" -- Custom highlight CSS
 vim.g.mkdp_port = "" -- Port for preview server
 vim.g.mkdp_page_title = "${name}" -- Page title format
 vim.g.mkdp_filetypes = { "markdown" } -- File types to enable
-vim.g.mkdp_theme = "dark" -- Theme for preview
