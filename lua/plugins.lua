@@ -28,7 +28,9 @@ local plugins = {
 	-- Navigation - File and project navigation tools
 	{ url = "https://github.com/nvim-telescope/telescope.nvim",   name = "telescope.nvim" }, -- Fuzzy finder
 	{ url = "https://github.com/nvim-lua/plenary.nvim",           name = "plenary.nvim" },   -- Utility library (required by telescope)
-	-- { url = 'https://github.com/justinmk/vim-sneak', name = 'vim-sneak' },          -- Enhanced motion
+	{ url = "https://github.com/nvim-telescope/telescope-fzf-native.nvim", name = "telescope-fzf-native.nvim", build = "make" }, -- FZF sorter for telescope
+	{ url = "https://github.com/nvim-telescope/telescope-frecency.nvim", name = "telescope-frecency.nvim", dependencies = { "sqlite.lua" } }, -- Frequency and recency based sorting
+	{ url = "https://github.com/kkharji/sqlite.lua", name = "sqlite.lua" }, -- SQLite for telescope-frecency
 	{ url = "https://github.com/nvim-tree/nvim-tree.lua",         name = "nvim-tree.lua" },  -- File explorer
 	{ url = "https://github.com/nvim-tree/nvim-web-devicons",     name = "nvim-web-devicons" }, -- File icons
 	{ url = "https://github.com/folke/which-key.nvim",            name = "which-key.nvim" }, -- Keymap popup helper

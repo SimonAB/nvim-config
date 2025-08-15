@@ -90,42 +90,42 @@ obsidian.setup({
             opts = { noremap = false, expr = true, buffer = true },
         },
         -- Create new note
-        ["<leader>on"] = {
+        ["<leader>On"] = {
             action = function()
                 return require("obsidian").util.new_note()
             end,
             opts = { desc = "New Obsidian note" },
         },
         -- Insert link
-        ["<leader>ol"] = {
+        ["<leader>Ol"] = {
             action = function()
                 return require("obsidian").util.insert_link()
             end,
             opts = { desc = "Insert Obsidian link" },
         },
         -- Follow link
-        ["<leader>of"] = {
+        ["<leader>Of"] = {
             action = function()
                 return require("obsidian").util.follow_link()
             end,
             opts = { desc = "Follow Obsidian link" },
         },
         -- Toggle checkbox
-        ["<leader>oc"] = {
+        ["<leader>Oc"] = {
             action = function()
                 return require("obsidian").util.toggle_checkbox()
             end,
             opts = { desc = "Toggle Obsidian checkbox" },
         },
         -- Show backlinks
-        ["<leader>ob"] = {
+        ["<leader>Ob"] = {
             action = function()
                 return require("obsidian").util.show_backlinks()
             end,
             opts = { desc = "Show Obsidian backlinks" },
         },
         -- Show outgoing links
-        ["<leader>oo"] = {
+        ["<leader>Oo"] = {
             action = function()
                 return require("obsidian").util.show_outgoing_links()
             end,
