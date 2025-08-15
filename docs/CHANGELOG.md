@@ -1,6 +1,27 @@
 # Changelog
 
-## [Latest] - Uppercase Group Key Standardisation
+## [Latest] - Documentation Updates and Consistency Review
+
+### Documentation Improvements
+- **README.md**: Updated to reflect current keymap structure with uppercase group keys
+- **Plugin Architecture**: Updated plugin list to include mini-nvim subdirectory structure
+- **Keymap Documentation**: All key mappings now accurately reflect current configuration
+- **British Spelling**: Verified and maintained throughout all documentation
+- **Installation Guide**: Current and accurate installation instructions
+
+### Configuration Review
+- **Review Report**: Updated to reflect current state with uppercase group keys
+- **Consistency Check**: All documentation now matches actual configuration
+- **Plugin List**: Accurate representation of current plugin structure
+- **Keymap Structure**: Documentation reflects professional uppercase group organisation
+
+### Benefits
+- **Accurate Documentation**: All guides now match the actual configuration
+- **Professional Appearance**: Consistent uppercase group keys throughout
+- **Easy Maintenance**: Clear documentation structure for future updates
+- **User Experience**: Reliable installation and usage instructions
+
+## [Previous] - Uppercase Group Key Standardisation
 
 ### Major Keymap Reorganisation
 - **Uppercase Group Keys**: Standardised all which-key group prefixes to use **uppercase letters** for consistency and improved visual clarity
@@ -48,7 +69,7 @@
 - **Enhanced Workflow**: More intuitive key combinations that align with group names
 - **Improved Discoverability**: Easier to remember and navigate keymap structure
 
-## [Previous] - Keymap Reorganisation
+## [Earlier] - Keymap Reorganisation
 
 ### Group Letter Remapping
 - **Toggle Group**: Remapped from `<leader>T*` to `<leader>Y*` to resolve collision with Terminal group

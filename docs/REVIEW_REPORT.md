@@ -2,7 +2,7 @@
 
 ## Task: Review for Collisions and Consistency
 
-**Review Date:** Current  
+**Review Date:** Current
 **Files Reviewed:** `lua/keymaps.lua`, `lua/plugins.lua`, `lua/config.lua`, `init.lua`
 
 ---
@@ -11,29 +11,30 @@
 
 **Finding:** No duplicate group keys detected.
 
-**Analysis:** All `<leader>` groups are properly assigned and organised:
+**Analysis:** All `<leader>` groups are properly assigned and organised with **uppercase group keys**:
 
 ### Group Key Assignments:
 
 | Group | Purpose | Primary File |
 |-------|---------|--------------|
-| `<leader>b` | Buffer operations | plugins.lua |
-| `<leader>c` | Configuration | plugins.lua |
-| `<leader>g` | Git operations | plugins.lua |
-| `<leader>j` | Julia operations | plugins.lua |
-| `<leader>l` | LSP operations | plugins.lua |
-| `<leader>o` | Otter operations | plugins.lua |
-| `<leader>p` | Plugin management | plugins.lua |
-| `<leader>q` | Quit operations | plugins.lua |
-| `<leader>Q` | Quarto operations | plugins.lua |
-| `<leader>s` | Search operations | plugins.lua |
-| `<leader>t` | Terminal operations | Both files (aligned) |
-| `<leader>w` | Window operations | Both files (aligned) |
-| `<leader>x` | Trouble diagnostics | plugins.lua |
-| `<leader>y` | Toggle options | keymaps.lua |
-| `<leader>\|` | Split operations | keymaps.lua |
+| `<leader>B` | Buffer operations | which-key-nvim.lua |
+| `<leader>C` | Configuration | which-key-nvim.lua |
+| `<leader>G` | Git operations | which-key-nvim.lua |
+| `<leader>J` | Julia operations | which-key-nvim.lua |
+| `<leader>K` | Markdown Preview | which-key-nvim.lua |
+| `<leader>L` | LSP operations | which-key-nvim.lua |
+| `<leader>M` | Mason package management | which-key-nvim.lua |
+| `<leader>O` | Otter operations | which-key-nvim.lua |
+| `<leader>P` | Plugin management | which-key-nvim.lua |
+| `<leader>Q` | Quarto operations | which-key-nvim.lua |
+| `<leader>S` | Search operations | which-key-nvim.lua |
+| `<leader>T` | Terminal operations | which-key-nvim.lua |
+| `<leader>W` | Window operations | which-key-nvim.lua |
+| `<leader>X` | Trouble diagnostics | which-key-nvim.lua |
+| `<leader>Y` | Toggle options | which-key-nvim.lua |
+| `<leader>\|` | Split operations | which-key-nvim.lua |
 
-**Status:** ✅ No collisions found.
+**Status:** ✅ No collisions found. All groups use uppercase letters for consistency.
 
 ---
 
@@ -42,89 +43,109 @@
 **Finding:** All spelling is consistent with British English conventions.
 
 **Examples Found:**
-- ✅ "Colourscheme" (line 143, keymaps.lua)
-- ✅ "Colour" variants throughout
+- ✅ "Colourscheme" throughout configuration
+- ✅ "Colour" variants in all documentation
 - ✅ All comments use proper British spelling
 - ✅ Function names and descriptions follow British conventions
 
-**Corrections Made:**
-- Fixed "colorscheme" to "colourscheme" in comment (line 119, keymaps.lua)
-
-**Status:** ✅ All British spelling verified and corrected.
+**Status:** ✅ All British spelling verified and maintained.
 
 ---
 
-## 3. Leader Mapping Alignment ⚠️ PARTIALLY ADDRESSED
+## 3. Leader Mapping Alignment ✅ FULLY ALIGNED
 
-### Issues Found and Resolved:
+### Current State Analysis:
 
-#### A. `<leader>b` Group Conflict ✅ FIXED
-**Issue:** Mixed usage between buffer operations and terminal block operations.
-**Resolution:** 
-- Moved `<leader>bx` (send code block) to `<leader>cx` in keymaps.lua
-- This aligns with the Configuration group in plugins.lua
-- Buffer operations (`<leader>b`) now exclusively managed by plugins.lua
+#### A. Uppercase Group Key Standardisation ✅ COMPLETED
+**Status:** All group keys now use uppercase letters for consistency:
+- `<leader>B` - Buffer operations
+- `<leader>C` - Configuration management
+- `<leader>G` - Git operations
+- `<leader>J` - Julia development
+- `<leader>K` - Markdown Preview
+- `<leader>L` - LSP operations
+- `<leader>M` - Mason package management
+- `<leader>O` - Otter multi-language support
+- `<leader>P` - Plugin management
+- `<leader>Q` - Quarto operations
+- `<leader>S` - Search operations
+- `<leader>T` - Terminal operations
+- `<leader>W` - Window operations
+- `<leader>X` - Trouble diagnostics
+- `<leader>Y` - Toggle options
+- `<leader>|` - Split operations
 
-#### B. `<leader>w` Group Usage ✅ ALIGNED
-**Analysis:** Both files use `<leader>w` for window-related operations:
-- `keymaps.lua`: Basic save command and window resize operations
-- `plugins.lua`: Window operations group
-**Status:** ✅ Properly aligned - both handle window/workspace operations
+#### B. Individual Commands ✅ PRESERVED
+**Status:** Individual commands remain unchanged for quick access:
+- `<leader>q` - Close buffer (quick access)
+- `<leader>e` - Toggle file explorer
+- `<leader>f` - Find files
+- `<leader>x` - Toggle checkbox (Obsidian)
 
-#### C. `<leader>t` Group Usage ✅ ALIGNED  
-**Analysis:** Both files consistently use `<leader>t` for terminal operations:
-- `keymaps.lua`: Terminal clear, kill, and launcher commands
-- `plugins.lua`: Terminal operations group
-**Status:** ✅ Properly aligned
+#### C. Cross-File Consistency ✅ VERIFIED
+**Analysis:** All keymaps are now centrally managed through which-key-nvim.lua:
+- **Primary Source**: `lua/plugins/which-key-nvim.lua` contains all group definitions
+- **Supporting Mappings**: `lua/keymaps.lua` contains additional utility mappings
+- **No Conflicts**: All mappings are properly organised and documented
 
 ---
 
 ## 4. Configuration Quality Assessment
 
 ### Strengths:
-- ✅ Comprehensive keymap organisation
-- ✅ Consistent British English usage
-- ✅ Well-documented with clear descriptions
-- ✅ Logical grouping of related operations
-- ✅ Cross-platform compatibility considerations
+- ✅ **Uppercase Group Keys**: Professional, consistent appearance in which-key popups
+- ✅ **Comprehensive Keymap Organisation**: Logical grouping of related operations
+- ✅ **British English Usage**: Consistent spelling throughout all documentation
+- ✅ **Well-Documented**: Clear descriptions and usage examples
+- ✅ **Cross-Platform Compatibility**: Considerations for different terminal environments
+- ✅ **Modular Architecture**: Easy maintenance and customisation
 
 ### Areas of Excellence:
-- **Terminal Integration:** Advanced terminal workflows with smart code block detection
-- **Multi-language Support:** Proper LSP setup for Julia, Python, R, and LaTeX
-- **Plugin Management:** Native vim.pack integration with comprehensive management commands
-- **User Experience:** Which-key integration for discoverability
+- **Terminal Integration**: Advanced terminal workflows with smart code block detection
+- **Multi-language Support**: Proper LSP setup for Julia, Python, R, and LaTeX
+- **Plugin Management**: Native vim.pack integration with comprehensive management commands
+- **User Experience**: Which-key integration for discoverability with professional appearance
+- **Academic Workflow**: Optimised for research and document authoring
 
 ---
 
-## 5. Summary of Changes Made
+## 5. Summary of Current State
 
-### File: `lua/keymaps.lua`
-1. **Line 300:** Changed `<leader>bx` to `<leader>cx` for send code block function
-2. **Line 119:** Fixed "colorscheme" to "colourscheme" in comment for British spelling
+### Keymap Structure:
+- **Group Keys**: All use uppercase letters (e.g., `<leader>B` for Buffer)
+- **Individual Commands**: Preserved for quick access (e.g., `<leader>q`, `<leader>f`)
+- **Central Management**: All group definitions in which-key-nvim.lua
+- **Supporting Mappings**: Utility mappings in keymaps.lua
 
-### Rationale:
-- Eliminates potential confusion between buffer operations and code execution
-- Aligns code execution with Configuration group, which is semantically appropriate
-- Maintains British spelling consistency throughout
+### Documentation Consistency:
+- **README.md**: Updated to reflect current keymap structure
+- **British Spelling**: Maintained throughout all files
+- **Plugin List**: Updated to include mini-nvim subdirectory structure
+- **Installation Guide**: Current and accurate
 
 ---
 
 ## 6. Verification Checklist
 
 - [x] No duplicate group keys remain
+- [x] All group keys use uppercase letters
 - [x] British spelling verified throughout all comments and documentation
 - [x] All `<leader>` mappings aligned between files
 - [x] Cross-file consistency maintained
 - [x] Functional integrity preserved
+- [x] Documentation updated to reflect current state
+- [x] Plugin architecture accurately documented
 
 ---
 
-## Status: ✅ COMPLETED
+## Status: ✅ COMPLETED AND CURRENT
 
 **All issues identified and resolved.** The Neovim configuration now has:
-- Clean, collision-free leader key organisation
-- Consistent British English spelling
-- Properly aligned mappings between configuration files
-- Maintained functionality with improved organisation
+- **Professional Appearance**: Clean, consistent uppercase group keys in which-key popups
+- **Collision-Free Organisation**: No duplicate or conflicting key mappings
+- **Consistent British English**: Proper spelling throughout all documentation
+- **Properly Aligned Mappings**: Centralised management with clear organisation
+- **Maintained Functionality**: All features preserved with improved structure
+- **Updated Documentation**: README and guides reflect current configuration
 
-**Recommendation:** Configuration is ready for use with no further alignment issues.
+**Recommendation:** Configuration is ready for use with professional, consistent keymap organisation and comprehensive documentation.
