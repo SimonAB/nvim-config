@@ -15,24 +15,24 @@
 
 ### Group Key Assignments:
 
-| Group | Purpose | Primary File |
-|-------|---------|--------------|
-| `<leader>B` | Buffer operations | which-key-nvim.lua |
-| `<leader>C` | Configuration | which-key-nvim.lua |
-| `<leader>G` | Git operations | which-key-nvim.lua |
-| `<leader>J` | Julia operations | which-key-nvim.lua |
-| `<leader>K` | Markdown Preview | which-key-nvim.lua |
-| `<leader>L` | LSP operations | which-key-nvim.lua |
-| `<leader>M` | Mason package management | which-key-nvim.lua |
-| `<leader>O` | Otter operations | which-key-nvim.lua |
-| `<leader>P` | Plugin management | which-key-nvim.lua |
-| `<leader>Q` | Quarto operations | which-key-nvim.lua |
-| `<leader>S` | Search operations | which-key-nvim.lua |
-| `<leader>T` | Terminal operations | which-key-nvim.lua |
-| `<leader>W` | Window operations | which-key-nvim.lua |
-| `<leader>X` | Trouble diagnostics | which-key-nvim.lua |
-| `<leader>Y` | Toggle options | which-key-nvim.lua |
-| `<leader>\|` | Split operations | which-key-nvim.lua |
+| Group        | Purpose                  | Primary File       |
+|--------------|--------------------------|--------------------|
+| `<leader>B`  | Buffer operations        | which-key-nvim.lua |
+| `<leader>C`  | Configuration            | which-key-nvim.lua |
+| `<leader>G`  | Git operations           | which-key-nvim.lua |
+| `<leader>J`  | Julia operations         | which-key-nvim.lua |
+| `<leader>K`  | Markdown Preview         | which-key-nvim.lua |
+| `<leader>L`  | LSP operations           | which-key-nvim.lua |
+| `<leader>M`  | Mason package management | which-key-nvim.lua |
+| `<leader>O`  | Otter operations         | which-key-nvim.lua |
+| `<leader>P`  | Plugin management        | which-key-nvim.lua |
+| `<leader>Q`  | Quarto operations        | which-key-nvim.lua |
+| `<leader>S`  | Search operations        | which-key-nvim.lua |
+| `<leader>T`  | Terminal operations      | which-key-nvim.lua |
+| `<leader>W`  | Window operations        | which-key-nvim.lua |
+| `<leader>X`  | Trouble diagnostics      | which-key-nvim.lua |
+| `<leader>Y`  | Toggle options           | which-key-nvim.lua |
+| `<leader>\|` | Split operations         | which-key-nvim.lua |
 
 **Status:** ✅ No collisions found. All groups use uppercase letters for consistency.
 
