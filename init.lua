@@ -111,7 +111,7 @@ local function load_active_theme_immediately()
 			end
 		end
 	end
-	
+
 	-- Load only the active theme immediately (only the two themes used for auto switching)
 	if is_dark then
 		pcall(require, "plugins.onedark-nvim")
@@ -170,7 +170,7 @@ end
 vim.defer_fn(function()
 	-- Load and apply active theme immediately (only the two themes used for auto switching)
 	load_active_theme_immediately()
-	
+
 	-- Configure all themes (including the ones loaded immediately)
 	local ok, catppuccin = pcall(require, "catppuccin")
 	if ok then
