@@ -214,9 +214,13 @@ if ok then
 		},
 		-- File explorer
 		-- Find files
+		{ "<leader>f", ":Telescope find_files<CR>", desc = "Find files" },
+		{ "<leader>F", ":Telescope frecency<CR>", desc = "Find files (by frequency/recency)" },
+		{ "<leader>fr", ":lua require('telescope').extensions.frecency.frecency()<CR>", desc = "Refresh frecency database" },
+		{ "<leader>fd", ":lua print('Frecency DB: ' .. vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3')<CR>", desc = "Show frecency database location" },
+		{ "<leader>fb", ":lua vim.fn.delete(vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3') or print('Frecency database deleted. Restart Neovim to rebuild.')<CR>", desc = "Rebuild frecency database" },
 		-- Git operations
 		{ "<leader>G",   group = "Git" },
-		-- Git operations
 		{
 			"<leader>Gs",
 			function()

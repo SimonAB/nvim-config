@@ -7,59 +7,59 @@ local opt = vim.opt
 -- ============================================================================
 
 -- Line numbers
-opt.number = true
+opt.number = true -- Show line numbers
 opt.relativenumber = true -- Show relative line numbers
-opt.signcolumn = "yes"
+opt.signcolumn = "yes" -- Show sign column
 
 -- Indentation
 opt.tabstop = 4    -- Configure tabs
 opt.shiftwidth = 4 -- Set indentation width
-opt.expandtab = true
-opt.smartindent = true
+opt.expandtab = true -- Expand tabs to spaces
+opt.smartindent = true -- Smart indentation
 
 -- Search
-opt.ignorecase = true
-opt.smartcase = true
-opt.hlsearch = true
-opt.incsearch = true
+opt.ignorecase = true -- Ignore case in search
+opt.smartcase = true -- Smart case in search
+opt.hlsearch = true -- Highlight search matches
+opt.incsearch = true -- Incremental search
 
 -- Visual
-opt.cursorline = true
+opt.cursorline = true -- Highlight current line
 opt.wrap = true      -- Enable line wrapping
 opt.linebreak = true -- Wrap at word boundaries
-opt.scrolloff = 8
-opt.sidescrolloff = 8
+opt.scrolloff = 8 -- Scroll offset
+opt.sidescrolloff = 8 -- Side scroll offset
 opt.conceallevel = 2 -- Enable concealment for Obsidian.nvim and VimTex
 
 -- Behavior
-opt.mouse = "a"
-opt.clipboard = "unnamedplus"
-opt.splitbelow = true
-opt.splitright = true
-opt.hidden = true
+opt.mouse = "a" -- Enable mouse
+opt.clipboard = "unnamedplus" -- Use system clipboard
+opt.splitbelow = true -- Split below
+opt.splitright = true -- Split right
+opt.hidden = true -- Hide buffers instead of closing them
 
 -- Performance
-opt.updatetime = 250
-opt.timeoutlen = 300
+opt.updatetime = 250 -- Update time
+opt.timeoutlen = 300 -- Timeout length
 
 -- Files
-opt.swapfile = false
-opt.backup = false
-opt.undofile = true
+opt.swapfile = false -- Disable swap file
+opt.backup = false -- Disable backup file
+opt.undofile = true -- Enable undo file
 
 -- Security
-opt.modeline = false
-opt.exrc = false
+opt.modeline = false -- Disable modeline
+opt.exrc = false -- Disable exrc file
 
 -- Language and spell checking
 opt.spelllang = "en_gb" -- Set British English spelling
-opt.spell = false       -- Disable spell checking by default
+opt.spell = false -- Disable spell checking by default
 
 -- Terminal colours (enables true colour support)
 opt.termguicolors = true
 
 -- Font configuration
-opt.guifont = "LigaSFMonoNerdFont-Regular:h10"
+opt.guifont = "LigaSFMonoNerdFont-Regular:h10" -- Set font
 
 -- ============================================================================
 -- GLOBAL VARIABLES
