@@ -53,10 +53,18 @@ obsidian.setup({
         nvim_cmp = false, -- Disable nvim-cmp since we're using blink.cmp
         min_chars = 2,
         new_notes_location = "current_dir",
-        prepend_note_id = true,
-        prepend_note_path = false,
-        use_path_only = false,
     },
+
+    -- Wiki link function (replaces deprecated completion options)
+    wiki_link_func = function(opts)
+        if opts.id then
+            return string.format("[[%s]]", opts.id)
+        elseif opts.path then
+            return string.format("[[%s]]", opts.path)
+        else
+            return string.format("[[%s]]", opts.alias)
+        end
+    end,
 
     -- Key mappings
     mappings = {
