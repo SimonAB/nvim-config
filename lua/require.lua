@@ -64,6 +64,7 @@ load_plugin_with_priority("auto-dark-mode-nvim", "lazy")     -- Auto theme switc
 load_plugin_with_priority("vimtex", "lazy")                  -- LaTeX support
 load_plugin_with_priority("markdown-preview-nvim", "lazy")   -- Markdown preview
 load_plugin_with_priority("typst-preview-nvim", "lazy")      -- Typst preview
+load_plugin_with_priority("obsidian-nvim", "lazy")           -- Obsidian vault support
 load_plugin_with_priority("otter-nvim", "lazy")              -- Multi-language LSP in documents
 load_plugin_with_priority("quarto-nvim", "lazy")             -- Quarto support
 
