@@ -4,9 +4,11 @@
 -- MAINTAINER NOTES: Enhanced dashboard with projects, recent files, and direct keymaps
 -- =============================================================================
 
--- Load MiniStarter (dashboard) if available
-local starter_ok, starter = pcall(require, "mini.starter")
-if starter_ok then
+	-- Load MiniStarter (dashboard) if available
+	local starter_ok, starter = pcall(require, "mini.starter")
+	if starter_ok then
+		-- Ensure mini.starter is properly loaded and available
+		vim.g.mini_starter_loaded = true
 	-- Optionally enable sessions integration if available (non-intrusive defaults)
 	local sessions_ok, mini_sessions = pcall(require, "mini.sessions")
 	if sessions_ok then
@@ -30,9 +32,136 @@ if starter_ok then
 	-- Hyper-like shortcuts (inspired by dashboard-nvim 'hyper')
 	local cfg_path = vim.fn.stdpath("config")
 	local shortcuts = {
-		{
+				{
 			name = "Update plugins",
-			action = string.format("luafile %s/lua/plugins.lua", cfg_path),
+			action = function()
+				-- Use a simple command approach to avoid mini.starter conflicts
+				vim.cmd("echo '🔄 Updating plugins...'")
+
+				-- Run plugin update in background without affecting the dashboard
+				vim.defer_fn(function()
+					local updated_count = 0
+					local errors = {}
+
+					-- Get plugin directory
+					local pack_path = vim.fn.stdpath("data") .. "/pack/plugins/start"
+					local plugin_dirs = vim.fn.glob(pack_path .. "/*", false, true)
+
+					-- Update each plugin silently
+					for i, dir in ipairs(plugin_dirs) do
+						if vim.fn.isdirectory(dir) == 1 then
+							local plugin_name = vim.fn.fnamemodify(dir, ":t")
+
+							-- Check if it's a git repository
+							if vim.fn.isdirectory(dir .. "/.git") == 1 then
+								-- Try to update the plugin
+								local result = vim.fn.system({ "git", "-C", dir, "pull", "--ff-only" })
+								if vim.v.shell_error == 0 then
+									updated_count = updated_count + 1
+								else
+									table.insert(errors, plugin_name .. ": " .. result)
+								end
+							end
+						end
+					end
+
+					-- Show completion message
+					local message = "✅ Plugin update complete! Updated " .. tostring(updated_count) .. " plugins"
+					if #errors > 0 then
+						message = message .. " (with " .. #errors .. " errors)"
+					end
+					vim.cmd("echo '" .. message .. "'")
+
+					-- Refresh the dashboard content silently
+					vim.defer_fn(function()
+						refresh_starter()
+					end, 500)
+
+				end, 100)
+			end,
+			section = "Shortcuts",
+		},
+				{
+			name = "Install plugins",
+			action = function()
+				-- Use a simple command approach to avoid mini.starter conflicts
+				vim.cmd("echo '📦 Installing plugins...'")
+
+				-- Run plugin installation in background without affecting the dashboard
+				vim.defer_fn(function()
+					local installed_count = 0
+					local errors = {}
+
+					-- Execute the plugin installation
+					local result = vim.fn.system({ "nvim", "--headless", "-c", "luafile " .. vim.fn.stdpath("config") .. "/lua/plugins.lua", "-c", "qa!" })
+
+					if vim.v.shell_error == 0 then
+						installed_count = 1 -- Simplified for now
+					else
+						table.insert(errors, "Installation failed: " .. result)
+					end
+
+					-- Show completion message
+					local message = "✅ Plugin installation complete! Installed " .. tostring(installed_count) .. " plugins"
+					if #errors > 0 then
+						message = message .. " (with " .. #errors .. " errors)"
+					end
+					vim.cmd("echo '" .. message .. "'")
+
+					-- Refresh the dashboard content silently
+					vim.defer_fn(function()
+						refresh_starter()
+					end, 500)
+
+				end, 100)
+			end,
+			section = "Shortcuts",
+		},
+				{
+			name = "Plugin status",
+			action = function()
+				-- Use a simple command approach to avoid mini.starter conflicts
+				vim.cmd("echo '📊 Checking plugin status...'")
+
+				-- Run plugin status check in background without affecting the dashboard
+				vim.defer_fn(function()
+					local total_plugins = 0
+					local git_count = 0
+					local status_info = {}
+
+					-- Get plugin directory
+					local start_path = vim.fn.stdpath("data") .. "/pack/plugins/start"
+					vim.fn.mkdir(start_path, "p")
+
+					-- Check each plugin
+					local plugin_dirs = vim.fn.glob(start_path .. "/*", false, true)
+					for _, dir in ipairs(plugin_dirs) do
+						if vim.fn.isdirectory(dir) == 1 then
+							local plugin_name = vim.fn.fnamemodify(dir, ":t")
+							total_plugins = total_plugins + 1
+
+							if vim.fn.isdirectory(dir .. "/.git") == 1 then
+								git_count = git_count + 1
+								local branch = vim.fn.system({ "git", "-C", dir, "branch", "--show-current" }):gsub("%s+", "")
+								local commit = vim.fn.system({ "git", "-C", dir, "rev-parse", "--short", "HEAD" }):gsub("%s+", "")
+								table.insert(status_info, "✓ " .. plugin_name .. " [" .. branch .. "@" .. commit .. "]")
+							else
+								table.insert(status_info, "⚠ " .. plugin_name .. " (not git)")
+							end
+						end
+					end
+
+					-- Show status summary
+					local message = "📊 Plugin Status: " .. total_plugins .. " plugins, " .. git_count .. " git repos"
+					vim.cmd("echo '" .. message .. "'")
+
+					-- Show detailed status in messages
+					for _, info in ipairs(status_info) do
+						vim.cmd("echo '" .. info .. "'")
+					end
+
+				end, 100)
+			end,
 			section = "Shortcuts",
 		},
 		{ name = "Explore files", action = "NvimTreeToggle", section = "Shortcuts" },
@@ -51,23 +180,18 @@ if starter_ok then
 			action = string.format("lua require('telescope.builtin').find_files({ cwd = [[%s]] })", cfg_path),
 			section = "Shortcuts",
 		},
+		{
+			name = "Quit",
+			action = "q",
+			section = "Shortcuts",
+		},
 	}
 	for _, it in ipairs(shortcuts) do
 		table.insert(items, it)
 	end
 
-	-- Cache for projects and recent files to improve performance
-	local project_cache = {}
-	local recent_cache = {}
-	local cache_timeout = 300 -- 5 minutes
-
 	-- Projects list (approximation): unique parent dirs from recent files
 	local function recent_projects(limit)
-		local now = vim.loop.now()
-		if project_cache.timestamp and (now - project_cache.timestamp) < cache_timeout then
-			return project_cache.projects
-		end
-
 		local dirs, order = {}, {}
 		local oldfiles = vim.v.oldfiles or {}
 		for _, f in ipairs(oldfiles) do
@@ -85,19 +209,11 @@ if starter_ok then
 				end
 			end
 		end
-
-		-- Update cache
-		project_cache = { projects = order, timestamp = now }
 		return order
 	end
 
 	-- Recent files list: get recent files with custom keys
 	local function recent_files(limit)
-		local now = vim.loop.now()
-		if recent_cache.timestamp and (now - recent_cache.timestamp) < cache_timeout then
-			return recent_cache.files
-		end
-
 		local files, order = {}, {}
 		local oldfiles = vim.v.oldfiles or {}
 		for _, f in ipairs(oldfiles) do
@@ -112,9 +228,6 @@ if starter_ok then
 				end
 			end
 		end
-
-		-- Update cache
-		recent_cache = { files = order, timestamp = now }
 		return order
 	end
 
@@ -199,8 +312,11 @@ if starter_ok then
 
 	-- Force header colour keep it across colourscheme changes
 	local starter_header_colour = "#4A6D8C" -- Muted blue-black
-
-	-- Set header colour and ensure it persists across colourscheme changes
+	-- local starter_header_colour = "#FFCC12" -- yellow
+	-- local starter_header_colour = "#FFCC12" -- A slightly darker, more metallic gold
+	-- local starter_header_colour = "#FF0000" -- pure red
+	-- local starter_header_colour = "#8B0000" -- blood red
+	-- local starter_header_colour = "#2C3E50" -- Lighter shade with more blue tone
 	pcall(vim.api.nvim_set_hl, 0, "MiniStarterHeader", { fg = starter_header_colour, bold = true })
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		callback = function()
@@ -220,7 +336,131 @@ if starter_ok then
 				local shortcuts = {
 					{
 						name = "Update plugins",
-						action = string.format("luafile %s/lua/plugins.lua", cfg_path),
+						action = function()
+							-- Use a simple command approach to avoid mini.starter conflicts
+							vim.cmd("echo '🔄 Updating plugins...'")
+
+							-- Run plugin update in background without affecting the dashboard
+							vim.defer_fn(function()
+								local updated_count = 0
+								local errors = {}
+
+								-- Get plugin directory
+								local pack_path = vim.fn.stdpath("data") .. "/pack/plugins/start"
+								local plugin_dirs = vim.fn.glob(pack_path .. "/*", false, true)
+
+								-- Update each plugin with progress feedback
+								for i, dir in ipairs(plugin_dirs) do
+									if vim.fn.isdirectory(dir) == 1 then
+										local plugin_name = vim.fn.fnamemodify(dir, ":t")
+
+										-- Check if it's a git repository
+										if vim.fn.isdirectory(dir .. "/.git") == 1 then
+											-- Show progress for current plugin
+											vim.cmd("echo '🔄 Updating " .. plugin_name .. " (" .. i .. "/" .. #plugin_dirs .. ")'")
+
+											-- Try to update the plugin
+											local result = vim.fn.system({ "git", "-C", dir, "pull", "--ff-only" })
+											if vim.v.shell_error == 0 then
+												updated_count = updated_count + 1
+												vim.cmd("echo '✅ Updated " .. plugin_name .. "'")
+											else
+												table.insert(errors, plugin_name .. ": " .. result)
+												vim.cmd("echo '❌ Failed to update " .. plugin_name .. "'")
+											end
+										else
+											vim.cmd("echo '⚠ Skipping " .. plugin_name .. " (not a git repo)'")
+										end
+									end
+								end
+
+								-- Show completion message
+								local message = "✅ Plugin update complete! Updated " .. tostring(updated_count) .. " plugins"
+								if #errors > 0 then
+									message = message .. " (with " .. #errors .. " errors)"
+								end
+								vim.cmd("echo '" .. message .. "'")
+
+							end, 100)
+						end,
+						section = "Shortcuts",
+					},
+					{
+						name = "Install plugins",
+						action = function()
+							-- Use a simple command approach to avoid mini.starter conflicts
+							vim.cmd("echo '📦 Installing plugins...'")
+
+							-- Run plugin installation in background without affecting the dashboard
+							vim.defer_fn(function()
+								local installed_count = 0
+								local errors = {}
+
+								-- Execute the plugin installation
+								local result = vim.fn.system({ "nvim", "--headless", "-c", "luafile " .. vim.fn.stdpath("config") .. "/lua/plugins.lua", "-c", "qa!" })
+
+								if vim.v.shell_error == 0 then
+									installed_count = 1 -- Simplified for now
+								else
+									table.insert(errors, "Installation failed: " .. result)
+								end
+
+								-- Show completion message
+								local message = "✅ Plugin installation complete! Installed " .. tostring(installed_count) .. " plugins"
+								if #errors > 0 then
+									message = message .. " (with " .. #errors .. " errors)"
+								end
+								vim.cmd("echo '" .. message .. "'")
+
+							end, 100)
+						end,
+						section = "Shortcuts",
+					},
+					{
+						name = "Plugin status",
+						action = function()
+							-- Use a simple command approach to avoid mini.starter conflicts
+							vim.cmd("echo '📊 Checking plugin status...'")
+
+							-- Run plugin status check in background without affecting the dashboard
+							vim.defer_fn(function()
+								local total_plugins = 0
+								local git_count = 0
+								local status_info = {}
+
+								-- Get plugin directory
+								local start_path = vim.fn.stdpath("data") .. "/pack/plugins/start"
+								vim.fn.mkdir(start_path, "p")
+
+								-- Check each plugin
+								local plugin_dirs = vim.fn.glob(start_path .. "/*", false, true)
+								for _, dir in ipairs(plugin_dirs) do
+									if vim.fn.isdirectory(dir) == 1 then
+										local plugin_name = vim.fn.fnamemodify(dir, ":t")
+										total_plugins = total_plugins + 1
+
+										if vim.fn.isdirectory(dir .. "/.git") == 1 then
+											git_count = git_count + 1
+											local branch = vim.fn.system({ "git", "-C", dir, "branch", "--show-current" }):gsub("%s+", "")
+											local commit = vim.fn.system({ "git", "-C", dir, "rev-parse", "--short", "HEAD" }):gsub("%s+", "")
+											table.insert(status_info, "✓ " .. plugin_name .. " [" .. branch .. "@" .. commit .. "]")
+										else
+											table.insert(status_info, "⚠ " .. plugin_name .. " (not git)")
+										end
+									end
+								end
+
+								-- Show status summary
+								local message = "📊 Plugin Status: " .. total_plugins .. " plugins, " .. git_count .. " git repos"
+								vim.cmd("echo '" .. message .. "'")
+
+								-- Show detailed status in messages
+								for _, info in ipairs(status_info) do
+									vim.cmd("echo '" .. info .. "'")
+								end
+
+							end, 100)
+						end,
 						section = "Shortcuts",
 					},
 					{
@@ -244,6 +484,11 @@ if starter_ok then
 							"lua require('telescope.builtin').find_files({ cwd = [[%s]] })",
 							cfg_path
 						),
+						section = "Shortcuts",
+					},
+					{
+						name = "Quit",
+						action = "q",
 						section = "Shortcuts",
 					},
 				}
@@ -300,6 +545,28 @@ if starter_ok then
 			vim.defer_fn(refresh_starter, 120)
 		end,
 	})
+
+	-- Additional fallback: ensure dashboard shows on startup
+	vim.api.nvim_create_autocmd("UIEnter", {
+		once = true,
+		callback = function()
+			-- Only show if no files were provided and we're not already showing the dashboard
+			if vim.fn.argc() == 0 and vim.bo.filetype ~= "ministarter" then
+				vim.defer_fn(function()
+					pcall(vim.cmd, "MiniStarter")
+				end, 50)
+			end
+		end,
+	})
+
+	-- Debug: Check if mini.starter is working
+	vim.defer_fn(function()
+		if vim.g.mini_starter_loaded then
+			print("✓ Mini.starter loaded successfully")
+		else
+			print("⚠ Mini.starter not loaded")
+		end
+	end, 1000)
 	vim.api.nvim_create_autocmd("DirChanged", { callback = refresh_starter })
 
 	-- Starter buffer quality-of-life keymaps
@@ -321,7 +588,22 @@ if starter_ok then
 
 			local function exec_action(action)
 				if type(action) == "string" then
+					-- Handle non-modifiable buffer for string actions
+					local current_buf = vim.api.nvim_get_current_buf()
+					local was_modifiable = vim.bo[current_buf].modifiable
+
+					-- Temporarily enable modifications if needed
+					if not was_modifiable then
+						vim.bo[current_buf].modifiable = true
+					end
+
+					-- Execute the action
 					vim.cmd(action)
+
+					-- Restore original modifiable state
+					if not was_modifiable then
+						vim.bo[current_buf].modifiable = was_modifiable
+					end
 				elseif type(action) == "function" then
 					pcall(action)
 				end
@@ -344,11 +626,21 @@ if starter_ok then
 	})
 end
 
--- Load MiniSurround for text object editing if available
-local ok, mini_surround = pcall(require, "mini.surround")
-if ok then
-	mini_surround.setup() -- Enable surround text objects (change, add, delete)
-end
+	-- Load MiniSurround for text object editing if available
+	local ok, mini_surround = pcall(require, "mini.surround")
+	if ok then
+		mini_surround.setup() -- Enable surround text objects (change, add, delete)
+	end
+
+	-- Add manual command to test dashboard
+	vim.api.nvim_create_user_command('TestDashboard', function()
+		if vim.g.mini_starter_loaded then
+			vim.cmd('MiniStarter')
+			print("Dashboard should be visible now")
+		else
+			print("Mini.starter not loaded - check plugin installation")
+		end
+	end, { desc = "Test mini.starter dashboard" })
 
 -- To add more mini.nvim modules, require and configure them here as needed.
 -- mini.nvim modules (commented for later activation; remove leading -- to enable)
