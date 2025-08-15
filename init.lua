@@ -1,5 +1,4 @@
 -- Modern Neovim Configuration with vim.pack
--- Harmonised from LunarVim using Neovim 0.12+ features
 
 -- Set leader keys early (must be before loading plugins)
 vim.g.mapleader = " "
@@ -36,8 +35,19 @@ do
 	end
 end
 
--- Bootstrap plugins first
-require("plugins")
+-- Load plugins first (install and add to runtime path)
+local project_plugins = vim.fn.stdpath("config") .. "/lua/plugins.lua"
+local ok, err = pcall(dofile, project_plugins)
+if not ok then
+	vim.notify("Failed to load project plugins.lua: " .. tostring(err), vim.log.levels.ERROR)
+end
+
+-- Use the require.lua from the project directory for plugin loading
+local project_require = vim.fn.stdpath("config") .. "/lua/require.lua"
+local ok, err = pcall(dofile, project_require)
+if not ok then
+	vim.notify("Failed to load project require.lua: " .. tostring(err), vim.log.levels.ERROR)
+end
 
 -- Load core configuration
 require("config")
