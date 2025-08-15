@@ -103,29 +103,26 @@ setup_optimized_autocmds()
 local function load_active_theme_only()
 	local is_dark = false
 	local ok_sys, out = pcall(vim.fn.systemlist, { "/usr/bin/defaults", "read", "-g", "AppleInterfaceStyle" })
-	if ok_sys and type(out) == "table" and out[1] == "Dark" then
-		is_dark = true
+	if ok_sys and type(out) == "table" and #out > 0 then
+		-- Check if any line contains "Dark"
+		for _, line in ipairs(out) do
+			if type(line) == "string" and line:match("Dark") then
+				is_dark = true
+				break
+			end
+		end
 	end
 
 	local theme = is_dark and "onedark" or "catppuccin-latte"
 
-	-- Load only the active theme immediately
+	-- Load only the active theme immediately (bypass priority system for immediate theme)
 	if is_dark then
 		pcall(require, "plugins.onedark-nvim")
 		pcall(vim.cmd.colorscheme, "onedark")
 	else
 		pcall(require, "plugins.catppuccin")
-		pcall(vim.cmd.colorscheme, "catppuccin-latte")
+		pcall(vim.cmd.colorscheme, "catppuccin") -- Use base theme name, flavor is configured in setup
 	end
-
-	-- Defer loading other themes
-	vim.defer_fn(function()
-		pcall(require, "plugins.tokyonight-nvim")
-		pcall(require, "plugins.nord-vim")
-		pcall(require, "plugins.github-nvim-theme")
-		pcall(require, "plugins.awesome-vim-colorschemes")
-		pcall(require, "plugins.auto-dark-mode-nvim")
-	end, 1000)
 end
 
 -- Debounced which-key highlight updates

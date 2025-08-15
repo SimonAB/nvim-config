@@ -199,7 +199,7 @@ if starter_ok then
 
 	-- Force header colour keep it across colourscheme changes
 	local starter_header_colour = "#4A6D8C" -- Muted blue-black
-	
+
 	-- Ensure dashboard shows on startup when no files are provided
 	vim.api.nvim_create_autocmd("VimEnter", {
 		once = true,
