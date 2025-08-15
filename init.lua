@@ -61,7 +61,7 @@ require("keymaps")
 -- Consolidated autocmds for better performance
 local function setup_optimized_autocmds()
 	local augroup = vim.api.nvim_create_augroup("OptimizedConfig", { clear = true })
-	
+
 	-- Single autocmd for multiple filetypes
 	vim.api.nvim_create_autocmd("FileType", {
 		group = augroup,
@@ -78,7 +78,7 @@ local function setup_optimized_autocmds()
 			end
 		end,
 	})
-	
+
 	-- Early file type detection for faster LSP startup
 	vim.api.nvim_create_autocmd("BufReadPre", {
 		group = augroup,
@@ -86,7 +86,7 @@ local function setup_optimized_autocmds()
 			local ft = vim.bo.filetype
 			if ft == "julia" then
 				-- Pre-load Julia LSP
-				vim.defer_fn(function() 
+				vim.defer_fn(function()
 					local ok, lspconfig = pcall(require, "lspconfig")
 					if ok then
 						lspconfig.julials.setup()
@@ -106,9 +106,9 @@ local function load_active_theme_only()
 	if ok_sys and type(out) == "table" and out[1] == "Dark" then
 		is_dark = true
 	end
-	
+
 	local theme = is_dark and "onedark" or "catppuccin-latte"
-	
+
 	-- Load only the active theme immediately
 	if is_dark then
 		pcall(require, "plugins.onedark-nvim")
@@ -117,7 +117,7 @@ local function load_active_theme_only()
 		pcall(require, "plugins.catppuccin")
 		pcall(vim.cmd.colorscheme, "catppuccin-latte")
 	end
-	
+
 	-- Defer loading other themes
 	vim.defer_fn(function()
 		pcall(require, "plugins.tokyonight-nvim")
@@ -136,7 +136,7 @@ local function debounced_highlight_update()
 	end
 	highlight_update_timer = vim.defer_fn(function()
 		local colourscheme_name = vim.g.colors_name or "default"
-		
+
 		if colourscheme_name:match("catppuccin") then
 			vim.api.nvim_set_hl(0, "WhichKey", { link = "Function" })
 			vim.api.nvim_set_hl(0, "WhichKeyGroup", { link = "Keyword" })
@@ -173,14 +173,14 @@ end
 vim.defer_fn(function()
 	-- Load active theme first
 	load_active_theme_only()
-	
+
 	-- Apply which-key highlights with debouncing
 	debounced_highlight_update()
-	
+
 	-- Auto-update which-key highlights when colourscheme changes
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		callback = debounced_highlight_update,
 	})
-	
+
 	-- Configuration complete
 end, 300)

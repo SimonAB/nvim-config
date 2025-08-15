@@ -50,18 +50,22 @@ load_plugin_with_priority("awesome-vim-colorschemes", "lazy") -- Theme collectio
 load_plugin_with_priority("auto-dark-mode-nvim", "lazy")     -- Auto theme switching
 
 -- ============================================================================
--- PHASE 5: DEFERRED - DEVELOPMENT TOOLS (Load after core functionality)
+-- PHASE 5: IMMEDIATE - DASHBOARD (Must be available on startup)
 -- ============================================================================
-load_plugin_with_priority("gitsigns-nvim", "deferred")       -- Git integration
-load_plugin_with_priority("mini-nvim", "deferred")           -- Dashboard and text objects
+load_plugin_with_priority("mini-nvim", "immediate")           -- Dashboard and text objects
 
 -- ============================================================================
--- PHASE 6: DEFERRED - TERMINAL & EXECUTION (Load after core functionality)
+-- PHASE 6: DEFERRED - DEVELOPMENT TOOLS (Load after core functionality)
+-- ============================================================================
+load_plugin_with_priority("gitsigns-nvim", "deferred")       -- Git integration
+
+-- ============================================================================
+-- PHASE 7: DEFERRED - TERMINAL & EXECUTION (Load after core functionality)
 -- ============================================================================
 load_plugin_with_priority("toggleterm-nvim", "deferred")     -- Terminal management
 
 -- ============================================================================
--- PHASE 7: LAZY - DOCUMENT PROCESSING (Load last - specialised functionality)
+-- PHASE 8: LAZY - DOCUMENT PROCESSING (Load last - specialised functionality)
 -- ============================================================================
 load_plugin_with_priority("vimtex", "lazy")                  -- LaTeX support
 load_plugin_with_priority("markdown-preview-nvim", "lazy")   -- Markdown preview
@@ -70,6 +74,6 @@ load_plugin_with_priority("otter-nvim", "lazy")              -- Multi-language L
 load_plugin_with_priority("quarto-nvim", "lazy")             -- Quarto support
 
 -- ============================================================================
--- PHASE 8: LAZY - KEYMAP MANAGEMENT (Load last - depends on all other plugins)
+-- PHASE 9: LAZY - KEYMAP MANAGEMENT (Load last - depends on all other plugins)
 -- ============================================================================
 load_plugin_with_priority("which-key-nvim", "lazy")          -- Keymap discovery and management

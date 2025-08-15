@@ -67,7 +67,7 @@ if starter_ok then
 		if project_cache.timestamp and (now - project_cache.timestamp) < cache_timeout then
 			return project_cache.projects
 		end
-		
+
 		local dirs, order = {}, {}
 		local oldfiles = vim.v.oldfiles or {}
 		for _, f in ipairs(oldfiles) do
@@ -85,7 +85,7 @@ if starter_ok then
 				end
 			end
 		end
-		
+
 		-- Update cache
 		project_cache = { projects = order, timestamp = now }
 		return order
@@ -97,7 +97,7 @@ if starter_ok then
 		if recent_cache.timestamp and (now - recent_cache.timestamp) < cache_timeout then
 			return recent_cache.files
 		end
-		
+
 		local files, order = {}, {}
 		local oldfiles = vim.v.oldfiles or {}
 		for _, f in ipairs(oldfiles) do
@@ -112,7 +112,7 @@ if starter_ok then
 				end
 			end
 		end
-		
+
 		-- Update cache
 		recent_cache = { files = order, timestamp = now }
 		return order
@@ -193,10 +193,23 @@ if starter_ok then
 				end,
 			}
 		end)(),
+		-- Ensure dashboard shows on startup when no files provided
+		autoopen = true,
 	})
 
 	-- Force header colour keep it across colourscheme changes
 	local starter_header_colour = "#4A6D8C" -- Muted blue-black
+	
+	-- Ensure dashboard shows on startup when no files are provided
+	vim.api.nvim_create_autocmd("VimEnter", {
+		once = true,
+		callback = function()
+			-- Show dashboard if no files were provided as arguments
+			if vim.fn.argc() == 0 then
+				vim.cmd("MiniStarter")
+			end
+		end,
+	})
 	pcall(vim.api.nvim_set_hl, 0, "MiniStarterHeader", { fg = starter_header_colour, bold = true })
 	vim.api.nvim_create_autocmd("ColorScheme", {
 		callback = function()
