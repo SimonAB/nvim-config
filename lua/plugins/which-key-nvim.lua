@@ -349,6 +349,15 @@ if ok then
 			end,
 			desc = "New note from template",
 		},
+		{
+			"<leader>Op",
+			function()
+				pcall(function()
+					vim.cmd("ObsidianPasteImg")
+				end)
+			end,
+			desc = "Paste image into Obsidian note",
+		},
 
 		-- Toggle options
 		{ "<leader>Y",   group = "Toggle" },
