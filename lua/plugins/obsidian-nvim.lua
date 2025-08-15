@@ -35,9 +35,14 @@ obsidian.setup({
     -- Image settings
     attachments = {
         img_folder = "attachments",
+        confirm_img_paste = false, -- Don't ask for confirmation
+        img_name_func = function()
+            -- Generate date-time filename
+            return os.date("%Y%m%d-%H%M%S")
+        end,
         img_text_func = function(client, path)
-            -- Use date-time as filename for images
-            local filename = os.date("%Y%m%d-%H%M%S")
+            -- Extract filename from path for display
+            local filename = vim.fn.fnamemodify(path, ":t:r") -- Get filename without extension
             return string.format("![%s](%s)", filename, path)
         end,
     },
