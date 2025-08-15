@@ -41,9 +41,9 @@ obsidian.setup({
             return os.date("%Y%m%d-%H%M%S")
         end,
         img_text_func = function(client, path)
-            -- Extract filename from path for display
-            local filename = vim.fn.fnamemodify(path, ":t:r") -- Get filename without extension
-            return string.format("![%s](%s)", filename, path)
+            -- Use vault-relative path for proper markdown links
+            path = client:vault_relative_path(path) or path
+            return string.format("![%s](%s)", path.name, path)
         end,
     },
 
