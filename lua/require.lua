@@ -1,63 +1,75 @@
--- Plugin Loading Orchestration (Optimised for Speed)
+-- Plugin Loading Orchestration (Performance Optimised)
 -- This file orchestrates the loading of all individual plugin configurations
 -- Order optimised for: 1) Dependencies, 2) Lightweight first, 3) Core functionality, 4) UI/Appearance
 
--- ============================================================================
--- PHASE 1: LIGHTWEIGHT UTILITIES & DEPENDENCIES (Load First)
--- ============================================================================
-require("plugins.plenary-nvim")        -- Utility library (dependency for telescope)
+-- Priority-based loading function
+local function load_plugin_with_priority(plugin_name, priority)
+	if priority == "immediate" then
+		require("plugins." .. plugin_name)
+	elseif priority == "deferred" then
+		vim.defer_fn(function() require("plugins." .. plugin_name) end, 200)
+	elseif priority == "lazy" then
+		vim.defer_fn(function() require("plugins." .. plugin_name) end, 1000)
+	end
+end
 
 -- ============================================================================
--- PHASE 2: CORE FUNCTIONALITY (Essential for basic operation)
+-- PHASE 1: IMMEDIATE - LIGHTWEIGHT UTILITIES & DEPENDENCIES (Load First)
 -- ============================================================================
-require("plugins.nvim-web-devicons")   -- File icons (dependency for many UI plugins)
-require("plugins.nvim-treesitter")     -- Syntax highlighting (core functionality)
-require("plugins.blink-cmp")           -- Completion engine (core functionality)
-require("plugins.mason-nvim")          -- LSP server manager (core functionality)
-require("plugins.nvim-lspconfig")      -- LSP configurations (core functionality)
+load_plugin_with_priority("plenary-nvim", "immediate")        -- Utility library (dependency for telescope)
 
 -- ============================================================================
--- PHASE 3: USER INTERFACE (Visual components)
+-- PHASE 2: IMMEDIATE - CORE FUNCTIONALITY (Essential for basic operation)
 -- ============================================================================
-require("plugins.bufferline-nvim")     -- Buffer tabs
-require("plugins.lualine-nvim")        -- Status line
-require("plugins.nvim-tree")           -- File explorer
-require("plugins.telescope")           -- Fuzzy finder
-require("plugins.trouble-nvim")        -- Diagnostics viewer
+load_plugin_with_priority("nvim-web-devicons", "immediate")   -- File icons (dependency for many UI plugins)
+load_plugin_with_priority("nvim-treesitter", "immediate")     -- Syntax highlighting (core functionality)
+load_plugin_with_priority("blink-cmp", "immediate")           -- Completion engine (core functionality)
+load_plugin_with_priority("mason-nvim", "immediate")          -- LSP server manager (core functionality)
+load_plugin_with_priority("nvim-lspconfig", "immediate")      -- LSP configurations (core functionality)
 
 -- ============================================================================
--- PHASE 4: THEMES & APPEARANCE (Load after UI components)
+-- PHASE 3: DEFERRED - USER INTERFACE (Visual components)
 -- ============================================================================
-require("plugins.catppuccin")          -- Primary theme
-require("plugins.onedark-nvim")        -- Alternative theme
-require("plugins.tokyonight-nvim")     -- Alternative theme
-require("plugins.nord-vim")            -- Alternative theme
-require("plugins.github-nvim-theme")   -- Alternative theme
-require("plugins.awesome-vim-colorschemes") -- Theme collection
-require("plugins.auto-dark-mode-nvim") -- Auto theme switching
+load_plugin_with_priority("bufferline-nvim", "deferred")     -- Buffer tabs
+load_plugin_with_priority("lualine-nvim", "deferred")        -- Status line
+load_plugin_with_priority("nvim-tree", "deferred")           -- File explorer
+load_plugin_with_priority("telescope", "deferred")           -- Fuzzy finder
+load_plugin_with_priority("trouble-nvim", "deferred")        -- Diagnostics viewer
 
 -- ============================================================================
--- PHASE 5: DEVELOPMENT TOOLS (Load after core functionality)
+-- PHASE 4: LAZY - THEMES & APPEARANCE (Load after UI components)
 -- ============================================================================
-require("plugins.gitsigns-nvim")       -- Git integration
-require("plugins.mini-nvim")           -- Dashboard and text objects
+-- Note: Active theme is loaded immediately in init.lua
+-- Other themes are loaded lazily to avoid startup overhead
+load_plugin_with_priority("catppuccin", "lazy")              -- Primary theme (if not active)
+load_plugin_with_priority("onedark-nvim", "lazy")            -- Alternative theme (if not active)
+load_plugin_with_priority("tokyonight-nvim", "lazy")         -- Alternative theme
+load_plugin_with_priority("nord-vim", "lazy")                -- Alternative theme
+load_plugin_with_priority("github-nvim-theme", "lazy")       -- Alternative theme
+load_plugin_with_priority("awesome-vim-colorschemes", "lazy") -- Theme collection
+load_plugin_with_priority("auto-dark-mode-nvim", "lazy")     -- Auto theme switching
 
 -- ============================================================================
--- PHASE 6: TERMINAL & EXECUTION (Load after core functionality)
+-- PHASE 5: DEFERRED - DEVELOPMENT TOOLS (Load after core functionality)
 -- ============================================================================
-require("plugins.toggleterm-nvim")     -- Terminal management
+load_plugin_with_priority("gitsigns-nvim", "deferred")       -- Git integration
+load_plugin_with_priority("mini-nvim", "deferred")           -- Dashboard and text objects
 
+-- ============================================================================
+-- PHASE 6: DEFERRED - TERMINAL & EXECUTION (Load after core functionality)
+-- ============================================================================
+load_plugin_with_priority("toggleterm-nvim", "deferred")     -- Terminal management
 
 -- ============================================================================
--- PHASE 7: DOCUMENT PROCESSING (Load last - specialised functionality)
+-- PHASE 7: LAZY - DOCUMENT PROCESSING (Load last - specialised functionality)
 -- ============================================================================
-require("plugins.vimtex")              -- LaTeX support
-require("plugins.markdown-preview-nvim") -- Markdown preview
-require("plugins.typst-preview-nvim")  -- Typst preview
+load_plugin_with_priority("vimtex", "lazy")                  -- LaTeX support
+load_plugin_with_priority("markdown-preview-nvim", "lazy")   -- Markdown preview
+load_plugin_with_priority("typst-preview-nvim", "lazy")      -- Typst preview
+load_plugin_with_priority("otter-nvim", "lazy")              -- Multi-language LSP in documents
+load_plugin_with_priority("quarto-nvim", "lazy")             -- Quarto support
 
-require("plugins.otter-nvim")          -- Multi-language LSP in documents
-require("plugins.quarto-nvim")         -- Quarto support
 -- ============================================================================
--- PHASE 8: KEYMAP MANAGEMENT (Load last - depends on all other plugins)
+-- PHASE 8: LAZY - KEYMAP MANAGEMENT (Load last - depends on all other plugins)
 -- ============================================================================
-require("plugins.which-key-nvim")      -- Keymap discovery and management
+load_plugin_with_priority("which-key-nvim", "lazy")          -- Keymap discovery and management

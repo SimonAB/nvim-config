@@ -84,20 +84,19 @@ else
 	vim.notify("❌ Mason not available - LSP server management will be limited", vim.log.levels.WARN)
 end
 
--- Mason LSP Config integration
-local ok_mason_lspconfig, mason_lspconfig = pcall(require, "mason-lspconfig")
-if ok_mason_lspconfig then
-	mason_lspconfig.setup({
-		-- Automatically install configured servers (with lspconfig)
-		automatic_installation = true,
+-- Mason LSP Config integration (deferred for performance)
+vim.defer_fn(function()
+	local ok_mason_lspconfig, mason_lspconfig = pcall(require, "mason-lspconfig")
+	if ok_mason_lspconfig then
+		mason_lspconfig.setup({
+			-- Automatically install configured servers (with lspconfig)
+			automatic_installation = false, -- Disable auto-install on startup for better performance
 
-		-- Ensure these servers are installed
+		-- Ensure these servers are installed (minimal set for startup)
 		ensure_installed = {
 			-- Core language servers for your academic workflow
-			"julials",           -- Julia language server
+			"julials",           -- Julia language server (most used)
 			"pyright",           -- Python language server (preferred)
-			"pylsp",             -- Python language server (fallback)
-			"r_language_server", -- R language server
 			"texlab",            -- LaTeX language server
 			"lua_ls",            -- Lua language server
 			"bashls",            -- Bash language server
@@ -223,6 +222,7 @@ if ok_mason_lspconfig then
 			end,
 		},
 	})
-else
-	vim.notify("❌ Mason LSP Config not available - LSP server installation will be manual", vim.log.levels.WARN)
-end
+	else
+		vim.notify("❌ Mason LSP Config not available - LSP server installation will be manual", vim.log.levels.WARN)
+	end
+end, 500) -- Defer LSP setup for better startup performance
