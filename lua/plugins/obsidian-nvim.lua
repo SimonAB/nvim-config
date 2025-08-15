@@ -50,7 +50,7 @@ obsidian.setup({
 
     -- Completion and navigation
     completion = {
-        nvim_cmp = true,
+        nvim_cmp = false, -- Disable nvim-cmp since we're using blink.cmp
         min_chars = 2,
         new_notes_location = "current_dir",
         prepend_note_id = true,
