@@ -41,8 +41,6 @@ load_plugin_with_priority("trouble-nvim", "deferred")        -- Diagnostics view
 -- ============================================================================
 -- Note: Active theme is loaded immediately in init.lua
 -- Other themes are loaded lazily to avoid startup overhead
-load_plugin_with_priority("catppuccin", "lazy")              -- Primary theme (if not active)
-load_plugin_with_priority("onedark-nvim", "lazy")            -- Alternative theme (if not active)
 load_plugin_with_priority("tokyonight-nvim", "lazy")         -- Alternative theme
 load_plugin_with_priority("nord-vim", "lazy")                -- Alternative theme
 load_plugin_with_priority("github-nvim-theme", "lazy")       -- Alternative theme
