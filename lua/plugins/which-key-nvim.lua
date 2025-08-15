@@ -275,6 +275,81 @@ if ok then
 			desc = "LazyGit",
 		},
 
+		-- Obsidian operations
+		{ "<leader>O",   group = "Obsidian" },
+		{
+			"<leader>On",
+			function()
+				pcall(function()
+					require("obsidian").util.new_note()
+				end)
+			end,
+			desc = "New Obsidian note",
+		},
+		{
+			"<leader>Ol",
+			function()
+				pcall(function()
+					require("obsidian").util.insert_link()
+				end)
+			end,
+			desc = "Insert Obsidian link",
+		},
+		{
+			"<leader>Of",
+			function()
+				pcall(function()
+					require("obsidian").util.follow_link()
+				end)
+			end,
+			desc = "Follow Obsidian link",
+		},
+		{
+			"<leader>Oc",
+			function()
+				pcall(function()
+					require("obsidian").util.toggle_checkbox()
+				end)
+			end,
+			desc = "Toggle Obsidian checkbox",
+		},
+		{
+			"<leader>Ob",
+			function()
+				pcall(function()
+					require("obsidian").util.show_backlinks()
+				end)
+			end,
+			desc = "Show Obsidian backlinks",
+		},
+		{
+			"<leader>Oo",
+			function()
+				pcall(function()
+					require("obsidian").util.show_outgoing_links()
+				end)
+			end,
+			desc = "Show Obsidian outgoing links",
+		},
+		{
+			"<leader>Ot",
+			function()
+				pcall(function()
+					vim.cmd("ObsidianTemplate")
+				end)
+			end,
+			desc = "Insert Obsidian template",
+		},
+		{
+			"<leader>ON",
+			function()
+				pcall(function()
+					vim.cmd("ObsidianNewFromTemplate")
+				end)
+			end,
+			desc = "New note from template",
+		},
+
 		-- Toggle options
 		{ "<leader>Y",   group = "Toggle" },
 		-- Editor utilities

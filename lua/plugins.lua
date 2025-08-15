@@ -40,6 +40,7 @@ local plugins = {
 	{ url = "https://github.com/lervag/vimtex",                   name = "vimtex" },             -- LaTeX support
 	{ url = "https://github.com/iamcco/markdown-preview.nvim",    name = "markdown-preview.nvim" }, -- Markdown preview
 	{ url = "https://github.com/chomosuke/typst-preview.nvim",    name = "typst-preview.nvim" }, -- Typst preview
+	{ url = "https://github.com/epwalsh/obsidian.nvim",           name = "obsidian.nvim" },      -- Obsidian vault support
 
 	{ url = "https://github.com/jmbuhr/otter.nvim",               name = "otter.nvim" },         -- Code execution in Quarto
 	{ url = "https://github.com/quarto-dev/quarto-nvim",          name = "quarto-nvim" },        -- Quarto support
