@@ -52,8 +52,15 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 │       ├── gitsigns-nvim.lua
 │       ├── lualine-nvim.lua
 │       ├── markdown-preview-nvim.lua
+│       ├── mason-nvim.lua
+│       ├── mini-nvim/
+│       │   ├── config.lua
+│       │   ├── dashboard-content.lua
+│       │   ├── dashboard.lua
+│       │   ├── init.lua
+│       │   ├── plugin-manager.lua
+│       │   └── utils.lua
 │       ├── mini-nvim.lua
-│       ├── molten-nvim.lua
 │       ├── nord-vim.lua
 │       ├── nvim-lspconfig.lua
 │       ├── nvim-tree.lua
@@ -116,8 +123,7 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `mini-nvim.lua` - Dashboard and text objects
 
 #### **Terminal & Execution**
-- `toggletterm-nvim.lua` - Terminal management
-- `molten-nvim.lua` - Jupyter integration
+- `toggleterm-nvim.lua` - Terminal management
 
 #### **Document Processing**
 - `vimtex.lua` - LaTeX support
