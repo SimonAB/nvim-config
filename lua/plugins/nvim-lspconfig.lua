@@ -9,15 +9,23 @@ if not ok then
 	return
 end
 
--- Set up LSP client capabilities, optionally enhanced by blink.cmp for completion
+-- Set up LSP client capabilities with performance optimisations
 local capabilities = vim.lsp.protocol.make_client_capabilities()
+
+-- Minimal capabilities by default for better performance
+capabilities.textDocument.completion.completionItem.snippetSupport = false
+capabilities.textDocument.completion.completionItem.resolveSupport = nil
+
+-- Enhance capabilities only for specific servers that need them
 local blink_ok, blink_lsp = pcall(require, "blink.cmp.lsp")
 if blink_ok then
-	-- Enhance LSP capabilities for completion (blink.cmp integration)
-	capabilities = blink_lsp.default_capabilities(capabilities)
-	capabilities.textDocument.completion.completionItem.resolveSupport = {
+	-- Create enhanced capabilities for servers that need full features
+	local enhanced_capabilities = blink_lsp.default_capabilities(vim.lsp.protocol.make_client_capabilities())
+	enhanced_capabilities.textDocument.completion.completionItem.resolveSupport = {
 		properties = { "documentation", "detail", "additionalTextEdits" },
 	}
+	-- Store enhanced capabilities for use with specific servers
+	_G.enhanced_lsp_capabilities = enhanced_capabilities
 end
 
 -- Common on_attach function for all LSP servers

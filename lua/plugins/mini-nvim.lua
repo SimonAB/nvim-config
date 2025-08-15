@@ -56,8 +56,18 @@ if starter_ok then
 		table.insert(items, it)
 	end
 
+	-- Cache for projects and recent files to improve performance
+	local project_cache = {}
+	local recent_cache = {}
+	local cache_timeout = 300 -- 5 minutes
+
 	-- Projects list (approximation): unique parent dirs from recent files
 	local function recent_projects(limit)
+		local now = vim.loop.now()
+		if project_cache.timestamp and (now - project_cache.timestamp) < cache_timeout then
+			return project_cache.projects
+		end
+		
 		local dirs, order = {}, {}
 		local oldfiles = vim.v.oldfiles or {}
 		for _, f in ipairs(oldfiles) do
@@ -75,11 +85,19 @@ if starter_ok then
 				end
 			end
 		end
+		
+		-- Update cache
+		project_cache = { projects = order, timestamp = now }
 		return order
 	end
 
 	-- Recent files list: get recent files with custom keys
 	local function recent_files(limit)
+		local now = vim.loop.now()
+		if recent_cache.timestamp and (now - recent_cache.timestamp) < cache_timeout then
+			return recent_cache.files
+		end
+		
 		local files, order = {}, {}
 		local oldfiles = vim.v.oldfiles or {}
 		for _, f in ipairs(oldfiles) do
@@ -94,6 +112,9 @@ if starter_ok then
 				end
 			end
 		end
+		
+		-- Update cache
+		recent_cache = { files = order, timestamp = now }
 		return order
 	end
 

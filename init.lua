@@ -1,8 +1,13 @@
--- Modern Neovim Configuration with vim.pack
+-- Modern Neovim Configuration with vim.pack (Performance Optimised)
 
 -- Set leader keys early (must be before loading plugins)
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
+
+-- Cache frequently used paths
+local config_path = vim.fn.stdpath("config")
+local data_path = vim.fn.stdpath("data")
+local cache_path = vim.fn.stdpath("cache")
 
 -- Wrap vim.notify to always run outside fast event contexts to avoid E5560
 do
@@ -36,14 +41,14 @@ do
 end
 
 -- Load plugins first (install and add to runtime path)
-local project_plugins = vim.fn.stdpath("config") .. "/lua/plugins.lua"
+local project_plugins = config_path .. "/lua/plugins.lua"
 local ok, err = pcall(dofile, project_plugins)
 if not ok then
 	vim.notify("Failed to load project plugins.lua: " .. tostring(err), vim.log.levels.ERROR)
 end
 
 -- Use the require.lua from the project directory for plugin loading
-local project_require = vim.fn.stdpath("config") .. "/lua/require.lua"
+local project_require = config_path .. "/lua/require.lua"
 local ok, err = pcall(dofile, project_require)
 if not ok then
 	vim.notify("Failed to load project require.lua: " .. tostring(err), vim.log.levels.ERROR)
@@ -53,139 +58,86 @@ end
 require("config")
 require("keymaps")
 
--- Ensure VimTeX is loaded for TeX files
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = "tex",
-	callback = function()
-		vim.g.vimtex_enabled = 1
-	end,
-})
-
--- Julia LSP auto-start (simplified)
-vim.api.nvim_create_augroup("JuliaLSPAutoStart", { clear = true })
-vim.api.nvim_create_autocmd("FileType", {
-	group = "JuliaLSPAutoStart",
-	pattern = "julia",
-	callback = function()
-		-- Trigger manual LSP start if needed
-		vim.defer_fn(function()
-			vim.cmd("LspStart julials")
-		end, 200)
-	end,
-})
-
--- Configure colourschemes and auto-dark-mode after plugins are loaded
-vim.defer_fn(function()
-	-- Configure catppuccin theme
-	local ok, catppuccin = pcall(require, "catppuccin")
-	if ok then
-		catppuccin.setup({
-			flavour = "mocha", -- latte, frappe, macchiato, mocha
-			background = { -- :h background
-				light = "latte",
-				dark = "mocha",
-			},
-			transparent_background = false,
-			show_end_of_buffer = false,
-			term_colors = false,
-			dim_inactive = {
-				enabled = false,
-				shade = "dark",
-				percentage = 0.15,
-			},
-			integrations = {
-				gitsigns = true,
-				nvimtree = true,
-				telescope = true,
-				treesitter = true,
-				native_lsp = {
-					enabled = true,
-					virtual_text = {
-						errors = { "italic" },
-						hints = { "italic" },
-						warnings = { "italic" },
-						information = { "italic" },
-					},
-					underlines = {
-						errors = { "underline" },
-						hints = { "underline" },
-						warnings = { "underline" },
-						information = { "underline" },
-					},
-				},
-			},
-		})
-	end
-
-	-- Configure onedark theme
-	local ok_onedark, onedark = pcall(require, "onedark")
-	if ok_onedark then
-		onedark.setup({
-			style = "dark", -- dark, darker, cool, deep, warm, warmer, light
-			transparent = false,
-			term_colors = true,
-			ending_tildes = false,
-			cmp_itemkind_reverse = false,
-			code_style = {
-				comments = "italic",
-				keywords = "none",
-				functions = "none",
-				strings = "none",
-				variables = "none",
-			},
-		})
-	end
-
-	-- Configure tokyonight theme
-	local ok_tokyo, tokyonight = pcall(require, "tokyonight")
-	if ok_tokyo then
-		tokyonight.setup({
-			style = "night", -- night, storm, day, moon
-			light_style = "day",
-			transparent = false,
-			terminal_colors = true,
-			styles = {
-				comments = { italic = true },
-				keywords = { italic = true },
-				functions = {},
-				variables = {},
-				sidebars = "dark",
-				floats = "dark",
-			},
-		})
-	end
-
-	-- Apply system theme once (macOS) to avoid polling timers that can leak FDs
-	local function apply_system_theme_once()
-		local is_dark = false
-		local ok_sys, out = pcall(vim.fn.systemlist, { "/usr/bin/defaults", "read", "-g", "AppleInterfaceStyle" })
-		if ok_sys and type(out) == "table" then
-			for _, line in ipairs(out) do
-				if type(line) == "string" and line:match("Dark") then
-					is_dark = true
-					break
-				end
+-- Consolidated autocmds for better performance
+local function setup_optimized_autocmds()
+	local augroup = vim.api.nvim_create_augroup("OptimizedConfig", { clear = true })
+	
+	-- Single autocmd for multiple filetypes
+	vim.api.nvim_create_autocmd("FileType", {
+		group = augroup,
+		pattern = { "tex", "julia", "python", "r", "qmd" },
+		callback = function(args)
+			local ft = args.match
+			if ft == "tex" then
+				vim.g.vimtex_enabled = 1
+			elseif ft == "julia" then
+				-- Trigger manual LSP start if needed
+				vim.defer_fn(function()
+					vim.cmd("LspStart julials")
+				end, 200)
 			end
-		end
-		if is_dark then
-			pcall(vim.cmd.colorscheme, "onedark")
-		else
-			local light_ok = pcall(vim.cmd.colorscheme, "onehalflight")
-			if not light_ok then
-				pcall(vim.cmd.colorscheme, "catppuccin-latte")
+		end,
+	})
+	
+	-- Early file type detection for faster LSP startup
+	vim.api.nvim_create_autocmd("BufReadPre", {
+		group = augroup,
+		callback = function()
+			local ft = vim.bo.filetype
+			if ft == "julia" then
+				-- Pre-load Julia LSP
+				vim.defer_fn(function() 
+					local ok, lspconfig = pcall(require, "lspconfig")
+					if ok then
+						lspconfig.julials.setup()
+					end
+				end, 100)
 			end
-		end
-	end
-	apply_system_theme_once()
+		end,
+	})
+end
 
-	-- Customise which-key highlights to match colourschemes
+setup_optimized_autocmds()
+
+-- Optimised theme loading - load only active theme immediately
+local function load_active_theme_only()
+	local is_dark = false
+	local ok_sys, out = pcall(vim.fn.systemlist, { "/usr/bin/defaults", "read", "-g", "AppleInterfaceStyle" })
+	if ok_sys and type(out) == "table" and out[1] == "Dark" then
+		is_dark = true
+	end
+	
+	local theme = is_dark and "onedark" or "catppuccin-latte"
+	
+	-- Load only the active theme immediately
+	if is_dark then
+		pcall(require, "plugins.onedark-nvim")
+		pcall(vim.cmd.colorscheme, "onedark")
+	else
+		pcall(require, "plugins.catppuccin")
+		pcall(vim.cmd.colorscheme, "catppuccin-latte")
+	end
+	
+	-- Defer loading other themes
 	vim.defer_fn(function()
-		-- Get current colourscheme colours if available
-		local colourscheme_name = vim.g.colors_name or "default"
+		pcall(require, "plugins.tokyonight-nvim")
+		pcall(require, "plugins.nord-vim")
+		pcall(require, "plugins.github-nvim-theme")
+		pcall(require, "plugins.awesome-vim-colorschemes")
+		pcall(require, "plugins.auto-dark-mode-nvim")
+	end, 1000)
+end
 
-		-- Set which-key highlights based on colourscheme
+-- Debounced which-key highlight updates
+local highlight_update_timer
+local function debounced_highlight_update()
+	if highlight_update_timer then
+		vim.loop.timer_stop(highlight_update_timer)
+	end
+	highlight_update_timer = vim.defer_fn(function()
+		local colourscheme_name = vim.g.colors_name or "default"
+		
 		if colourscheme_name:match("catppuccin") then
-			-- Catppuccin theme integration
 			vim.api.nvim_set_hl(0, "WhichKey", { link = "Function" })
 			vim.api.nvim_set_hl(0, "WhichKeyGroup", { link = "Keyword" })
 			vim.api.nvim_set_hl(0, "WhichKeyDesc", { link = "Comment" })
@@ -193,15 +145,13 @@ vim.defer_fn(function()
 			vim.api.nvim_set_hl(0, "WhichKeyFloat", { link = "NormalFloat" })
 			vim.api.nvim_set_hl(0, "WhichKeyBorder", { link = "FloatBorder" })
 		elseif colourscheme_name:match("onedark") then
-			-- OneDark theme integration
-			vim.api.nvim_set_hl(0, "WhichKey", { fg = "#61AFEF" }) -- Blue
-			vim.api.nvim_set_hl(0, "WhichKeyGroup", { fg = "#C678DD" }) -- Purple
-			vim.api.nvim_set_hl(0, "WhichKeyDesc", { fg = "#5C6370" }) -- Comment grey
-			vim.api.nvim_set_hl(0, "WhichKeySeparator", { fg = "#98C379" }) -- Green
-			vim.api.nvim_set_hl(0, "WhichKeyFloat", { bg = "#282C34" }) -- Dark background
-			vim.api.nvim_set_hl(0, "WhichKeyBorder", { fg = "#3E4451" }) -- Border grey
+			vim.api.nvim_set_hl(0, "WhichKey", { fg = "#61AFEF" })
+			vim.api.nvim_set_hl(0, "WhichKeyGroup", { fg = "#C678DD" })
+			vim.api.nvim_set_hl(0, "WhichKeyDesc", { fg = "#5C6370" })
+			vim.api.nvim_set_hl(0, "WhichKeySeparator", { fg = "#98C379" })
+			vim.api.nvim_set_hl(0, "WhichKeyFloat", { bg = "#282C34" })
+			vim.api.nvim_set_hl(0, "WhichKeyBorder", { fg = "#3E4451" })
 		elseif colourscheme_name:match("tokyonight") then
-			-- TokyoNight theme integration
 			vim.api.nvim_set_hl(0, "WhichKey", { link = "Function" })
 			vim.api.nvim_set_hl(0, "WhichKeyGroup", { link = "Keyword" })
 			vim.api.nvim_set_hl(0, "WhichKeyDesc", { link = "Comment" })
@@ -209,7 +159,6 @@ vim.defer_fn(function()
 			vim.api.nvim_set_hl(0, "WhichKeyFloat", { link = "NormalFloat" })
 			vim.api.nvim_set_hl(0, "WhichKeyBorder", { link = "FloatBorder" })
 		else
-			-- Default theme integration
 			vim.api.nvim_set_hl(0, "WhichKey", { link = "Function" })
 			vim.api.nvim_set_hl(0, "WhichKeyGroup", { link = "Keyword" })
 			vim.api.nvim_set_hl(0, "WhichKeyDesc", { link = "Comment" })
@@ -217,45 +166,21 @@ vim.defer_fn(function()
 			vim.api.nvim_set_hl(0, "WhichKeyFloat", { link = "NormalFloat" })
 			vim.api.nvim_set_hl(0, "WhichKeyBorder", { link = "FloatBorder" })
 		end
-	end, 500)
+	end, 100)
+end
 
+-- Configure colourschemes and auto-dark-mode after plugins are loaded
+vim.defer_fn(function()
+	-- Load active theme first
+	load_active_theme_only()
+	
+	-- Apply which-key highlights with debouncing
+	debounced_highlight_update()
+	
 	-- Auto-update which-key highlights when colourscheme changes
 	vim.api.nvim_create_autocmd("ColorScheme", {
-		callback = function()
-			vim.defer_fn(function()
-				local colorscheme_name = vim.g.colors_name or "default"
-
-				if colorscheme_name:match("catppuccin") then
-					vim.api.nvim_set_hl(0, "WhichKey", { link = "Function" })
-					vim.api.nvim_set_hl(0, "WhichKeyGroup", { link = "Keyword" })
-					vim.api.nvim_set_hl(0, "WhichKeyDesc", { link = "Comment" })
-					vim.api.nvim_set_hl(0, "WhichKeySeparator", { link = "String" })
-					vim.api.nvim_set_hl(0, "WhichKeyFloat", { link = "NormalFloat" })
-					vim.api.nvim_set_hl(0, "WhichKeyBorder", { link = "FloatBorder" })
-				elseif colorscheme_name:match("onedark") then
-					vim.api.nvim_set_hl(0, "WhichKey", { fg = "#61AFEF" })
-					vim.api.nvim_set_hl(0, "WhichKeyGroup", { fg = "#C678DD" })
-					vim.api.nvim_set_hl(0, "WhichKeyDesc", { fg = "#5C6370" })
-					vim.api.nvim_set_hl(0, "WhichKeySeparator", { fg = "#98C379" })
-					vim.api.nvim_set_hl(0, "WhichKeyBorder", { fg = "#3E4451" })
-				elseif colorscheme_name:match("tokyonight") then
-					vim.api.nvim_set_hl(0, "WhichKey", { link = "Function" })
-					vim.api.nvim_set_hl(0, "WhichKeyGroup", { link = "Keyword" })
-					vim.api.nvim_set_hl(0, "WhichKeyDesc", { link = "Comment" })
-					vim.api.nvim_set_hl(0, "WhichKeySeparator", { link = "String" })
-					vim.api.nvim_set_hl(0, "WhichKeyFloat", { link = "NormalFloat" })
-					vim.api.nvim_set_hl(0, "WhichKeyBorder", { link = "FloatBorder" })
-				else
-					vim.api.nvim_set_hl(0, "WhichKey", { link = "Function" })
-					vim.api.nvim_set_hl(0, "WhichKeyGroup", { link = "Keyword" })
-					vim.api.nvim_set_hl(0, "WhichKeyDesc", { link = "Comment" })
-					vim.api.nvim_set_hl(0, "WhichKeySeparator", { link = "Delimiter" })
-					vim.api.nvim_set_hl(0, "WhichKeyFloat", { link = "NormalFloat" })
-					vim.api.nvim_set_hl(0, "WhichKeyBorder", { link = "FloatBorder" })
-				end
-			end, 50) -- Small delay to ensure colorscheme is fully loaded
-		end,
+		callback = debounced_highlight_update,
 	})
-
+	
 	-- Configuration complete
 end, 300)
