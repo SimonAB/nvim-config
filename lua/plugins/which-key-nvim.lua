@@ -231,6 +231,49 @@ if ok then
 			end,
 			desc = "Git Pull",
 		},
+		{
+			"<leader>Gg",
+			function()
+				local Terminal = require("toggleterm.terminal").Terminal
+				local lazygit = Terminal:new({
+					cmd = "lazygit",
+					dir = "git_dir", -- open in the Git root for correct repo context
+					hidden = true,
+					direction = "float",
+					float_opts = {
+						border = "curved",
+						width = function()
+							return math.floor(vim.o.columns * 0.9)
+						end,
+						height = function()
+							return math.floor(vim.o.lines * 0.9)
+						end,
+					},
+					close_on_exit = true,
+					-- Configure environment to use nvim as editor for commit messages
+					env = {
+						TERM = "xterm-256color",
+						COLORTERM = "truecolor",
+						EDITOR = "nvim --clean",
+						GIT_EDITOR = "nvim --clean",
+						-- Prevent socket conflicts by unsetting NVIM variables
+						NVIM = "",
+						NVIM_LISTEN_ADDRESS = "",
+					},
+					on_open = function(term)
+						vim.cmd("startinsert!")
+						-- Disable conflicting keymaps while lazygit is open
+						vim.keymap.set("t", "<esc>", "<esc>", { buffer = term.bufnr })
+					end,
+					on_close = function()
+						-- Re-enable keymaps when lazygit closes
+						vim.cmd("stopinsert")
+					end,
+				})
+				lazygit:toggle()
+			end,
+			desc = "LazyGit",
+		},
 
 		-- Toggle options
 		{ "<leader>Y",   group = "Toggle" },
