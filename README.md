@@ -1,6 +1,6 @@
 # ✴︎ StellarVIM: Neovim Configuration for Academic Writing
 
-A comprehensive Neovim configuration optimised for academic research workflows, featuring advanced LaTeX support with bidirectional PDF synchronisation, Julia, Python, and R LSP integration, Quarto document authoring, and intelligent terminal integration. Built for Neovim 0.12+ using modern vim.pack plugin management with a modular, maintainable structure.
+A comprehensive Neovim configuration optimised for academic research workflows, featuring advanced LaTeX support with bidirectional PDF synchronisation, Julia, Python, and R LSP integration, Quarto document authoring, intelligent terminal integration, and markdown preview capabilities. Built for Neovim 0.12+ using modern vim.pack plugin management with a modular, maintainable structure.
 
 ## 🎯 Key Features for Researchers
 
@@ -10,6 +10,12 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - **Quarto**: Full document authoring with Molten Jupyter kernel integration
 - **Otter**: Multi-language LSP support for code chunks in documents
 - **LaTeX**: VimTeX with bibliography management and real-time compilation
+
+### Document Processing & Preview
+- **Markdown Preview**: Live preview with `<leader>Kp` for instant visual feedback
+- **LaTeX Support**: VimTeX with bibliography management and real-time compilation
+- **Typst Preview**: Low-latency Typst document preview
+- **Quarto Integration**: Full document authoring with multi-language support
 
 ### LaTeX Bidirectional Synchronisation
 **Seamless PDF-to-source navigation** via VimTeX and Skim (macOS):
@@ -24,6 +30,7 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - **Version control**: Integrated Git support with LazyGit
 - **Terminal integration**: Smart code block execution with automatic navigation
 - **Theme cycling**: Auto dark mode with multiple theme options
+- **Obsidian integration**: Seamless vault management with image pasting
 
 ## 📁 Modular Structure
 
@@ -52,6 +59,7 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 │       ├── nvim-tree.lua
 │       ├── nvim-treesitter.lua
 │       ├── nvim-web-devicons.lua
+│       ├── obsidian-nvim.lua
 │       ├── onedark-nvim.lua
 │       ├── otter-nvim.lua
 │       ├── plenary-nvim.lua
@@ -74,7 +82,7 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - **Plugin Management**: Native vim.pack system (Neovim 0.12+)
 - **Loading Strategy**: Modular require system with individual plugin files
 - **Configuration**: Each plugin has its own dedicated configuration file
-- **Error Handling**: Graceful fallbacks and safe setup patterns
+- **Error Handling**: Graceful fallbacks and safe setup patterns with proper error reporting
 
 ### Plugin Categories
 
@@ -113,10 +121,11 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 
 #### **Document Processing**
 - `vimtex.lua` - LaTeX support
-- `markdown-preview-nvim.lua` - Markdown preview
+- `markdown-preview-nvim.lua` - Markdown preview with live updates
 - `typst-preview-nvim.lua` - Typst preview
 - `quarto-nvim.lua` - Quarto document authoring
 - `otter-nvim.lua` - Multi-language LSP in documents
+- `obsidian-nvim.lua` - Obsidian vault integration with image pasting
 
 ## ⌨️ Complete Key Mappings
 
@@ -176,6 +185,11 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<leader>Lw` - Workspace diagnostics
 - `<leader>Ls` - Document symbols
 - `<leader>LS` - Workspace symbols
+
+### Markdown Preview (`<leader>K`)
+- `<leader>Kp` - Start Markdown Preview
+- `<leader>Ks` - Stop Markdown Preview
+- `<leader>Kt` - Toggle Markdown Preview
 
 ### Mason Package Management (`<leader>M`)
 - `<leader>Mm` - Open Mason interface
@@ -420,6 +434,14 @@ Each plugin has its own configuration file in `lua/plugins/` for easy maintenanc
 - **Error Isolation**: Plugin failures don't affect the entire system
 - **Easy Debugging**: Isolate issues to specific plugin files
 
+### Performance-Optimised Loading Strategy
+The configuration uses a sophisticated loading orchestration system in `lua/require.lua`:
+- **Immediate Loading**: Core dependencies and essential functionality
+- **Deferred Loading (200ms)**: UI components and document processing
+- **Lazy Loading (1000ms)**: Non-essential themes and keymap management
+- **Error Handling**: Graceful fallbacks with proper error reporting
+- **Logical Grouping**: Related plugins are loaded together
+
 ### LSP Server Management with Mason
 The configuration uses [Mason](https://github.com/mason-org/mason.nvim) for seamless LSP server management:
 - **Automatic Installation**: Language servers are installed automatically when needed
@@ -474,18 +496,24 @@ Use `<leader>Cs` to reload all configuration files during development.
 - Restart Neovim (auto-installs on first run)
 - Clear cache: `rm -rf ~/.local/share/nvim/pack/`
 - Check individual plugin files for configuration errors
+- Check error messages in `:messages` for specific plugin failures
 
 **Configuration changes not taking effect?**
 - Use `<leader>Cs` to reload all configuration
 - Check for syntax errors in individual plugin files
 - Verify plugin dependencies are installed
 
-## 🔄 Maintenance
+**Markdown preview not working?**
+- Ensure the plugin is built: check `~/.local/share/nvim/pack/plugins/start/markdown-preview.nvim/app/bin/`
+- Use `<leader>Kp` to start preview
+- Check browser permissions for local file access
+
+## Maintenance
 
 ### Adding New Plugins
 1. Add plugin to `lua/plugins.lua` plugin list
 2. Create new configuration file in `lua/plugins/`
-3. Add require statement to `lua/require.lua`
+3. Add require statement to `lua/require.lua` with appropriate priority
 4. Restart Neovim or use `<leader>Pi` to install
 
 ### Updating Plugins
@@ -497,6 +525,14 @@ Use `<leader>Cs` to reload all configuration files during development.
 - Each file contains detailed configuration options
 - Use `<leader>Cs` to reload changes
 
+### Performance Optimisation
+The configuration is optimised for fast startup and responsive operation:
+- **Core functionality loads immediately**
+- **UI components load after 200ms**
+- **Non-essential features load after 1000ms**
+- **Error handling prevents startup failures**
+- **Modular structure allows easy customisation**
+
 ---
 
-*Optimised for academic writing and research workflows. Built with modular architecture for maintainability. Made by SimonAB.*
+*Optimised for academic writing and research workflows. Built with modular architecture for maintainability and performance. Made by SimonAB.*
