@@ -32,6 +32,16 @@ obsidian.setup({
         return suffix
     end,
 
+    -- Image settings
+    attachments = {
+        img_folder = "attachments",
+        img_text_func = function(client, path)
+            -- Use date-time as filename for images
+            local filename = os.date("%Y%m%d-%H%M%S")
+            return string.format("![%s](%s)", filename, path)
+        end,
+    },
+
     -- Templates
     templates = {
         folder = "templates",
