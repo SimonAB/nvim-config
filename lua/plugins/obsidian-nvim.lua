@@ -131,6 +131,34 @@ obsidian.setup({
             end,
             opts = { desc = "Show Obsidian outgoing links" },
         },
+                                		-- Markdown preview with Obsidian attachment path
+		["<leader>Ov"] = {
+			action = function()
+				-- Get the current client to access vault information
+				local client = require("obsidian").get_client()
+				if client then
+					-- Set the absolute path to attachments directory for browser access
+					local vault_path = "/Users/s_a_b/Library/Mobile Documents/iCloud~md~obsidian/Documents/Notebook"
+					local attachments_path = vault_path .. "/attachments"
+
+					-- Debug: Print current settings
+					print("Setting mkdp_images_path to: " .. attachments_path)
+					print("Current mkdp_open_to_the_world: " .. tostring(vim.g.mkdp_open_to_the_world))
+					print("Current mkdp_open_ip: " .. tostring(vim.g.mkdp_open_ip))
+
+					vim.g.mkdp_images_path = attachments_path
+
+					-- Verify the setting was applied
+					print("After setting mkdp_images_path: " .. tostring(vim.g.mkdp_images_path))
+
+					-- Start markdown preview
+					vim.cmd("MarkdownPreview")
+				else
+					vim.notify("Not in an Obsidian workspace", vim.log.levels.WARN)
+				end
+			end,
+			opts = { desc = "Start Markdown Preview with Obsidian attachments" },
+		},
     },
 
     -- Note frontmatter

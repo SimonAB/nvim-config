@@ -426,35 +426,511 @@ map({ 'n', 't' }, "<leader>T3", make_terminal_cmd('float'), { desc = "Terminal F
 -- These provide forward/inverse search and compilation control
 -- Using LocalLeader prefix to avoid conflicts with main leader bindings
 
--- Function to set up VimTeX keymaps after VimTeX is loaded
-local function setup_vimtex_keymaps()
-  map("n", "<LocalLeader>lv", ":VimtexView<CR>", { noremap = true, silent = true, desc = "View (forward sync)" })
-  map("n", "<LocalLeader>li", ":VimtexInverseSearch<CR>", { noremap = true, silent = true, desc = "Inverse search" })
-  map("n", "<LocalLeader>ll", ":VimtexCompile<CR>", { noremap = true, silent = true, desc = "Compile (latexmk)" })
-  map("n", "<LocalLeader>lc", ":VimtexClean<CR>", { noremap = true, silent = true, desc = "Clean aux files" })
-  map("n", "<LocalLeader>lS", ":VimtexStop<CR>", { noremap = true, silent = true, desc = "Stop compiler" })
+-- VimTeX keymaps (simple commands)
+map("n", "<localleader>vv", ":VimtexView<CR>", { noremap = true, silent = true, desc = "View (forward sync)" })
+map("n", "<localleader>vi", ":VimtexInverseSearch<CR>", { noremap = true, silent = true, desc = "Inverse search" })
+map("n", "<localleader>vl", ":VimtexCompile<CR>", { noremap = true, silent = true, desc = "Compile (latexmk)" })
+map("n", "<localleader>vc", ":VimtexClean<CR>", { noremap = true, silent = true, desc = "Clean aux files" })
+map("n", "<localleader>vs", ":VimtexStop<CR>", { noremap = true, silent = true, desc = "Stop compiler" })
+
+-- ============================================================================
+-- TYPST KEYMAPS
+-- ============================================================================
+-- Typst integration keymaps for Typst document processing
+-- These provide preview control and PDF compilation
+-- Using LocalLeader prefix to avoid conflicts with main leader bindings
+
+-- Typst preview keymaps (simple commands)
+map("n", "<LocalLeader>tp", ":TypstPreviewToggle<CR>", { noremap = true, silent = true, desc = "Toggle Typst preview" })
+map("n", "<LocalLeader>ts", ":TypstPreviewSyncCursor<CR>", { noremap = true, silent = true, desc = "Sync cursor in preview" })
+
+-- Typst compile PDF using command line
+map("n", "<LocalLeader>tc", function()
+  local current_file = vim.fn.expand('%:p')
+  if current_file == '' then
+    vim.notify("No file is currently open", vim.log.levels.ERROR)
+    return
+  end
+
+  -- Check if file has .typ extension
+  if vim.fn.fnamemodify(current_file, ':e') ~= 'typ' then
+    vim.notify("Current file is not a Typst file (.typ)", vim.log.levels.ERROR)
+    return
+  end
+
+  -- Build the typst compile command (shorthand: typst c <filename>)
+  local cmd = string.format('typst c "%s"', current_file)
+
+  -- Execute the command
+  vim.fn.jobstart(cmd, {
+    on_exit = function(_, exit_code)
+      if exit_code == 0 then
+        vim.notify("PDF compiled successfully", vim.log.levels.INFO)
+      else
+        vim.notify("Failed to compile PDF", vim.log.levels.ERROR)
+      end
+    end,
+    on_stderr = function(_, data)
+      if data and #data > 0 then
+        vim.notify("Typst compilation error: " .. table.concat(data, " "), vim.log.levels.ERROR)
+      end
+    end
+  })
+end, { desc = "Compile PDF with typst c" })
+
+-- Typst watch using command line
+map("n", "<LocalLeader>tw", function()
+  local current_file = vim.fn.expand('%:p')
+  if current_file == '' then
+    vim.notify("No file is currently open", vim.log.levels.ERROR)
+    return
+  end
+
+  -- Check if file has .typ extension
+  if vim.fn.fnamemodify(current_file, ':e') ~= 'typ' then
+    vim.notify("Current file is not a Typst file (.typ)", vim.log.levels.ERROR)
+    return
+  end
+
+  -- Build the typst watch command (shorthand: typst w <filename>)
+  local cmd = string.format('typst w "%s"', current_file)
+
+  -- Execute the command in a terminal
+  local Terminal = require("toggleterm.terminal").Terminal
+  local typst_watch = Terminal:new({
+    cmd = cmd,
+    hidden = true,
+    direction = "horizontal",
+    close_on_exit = false,
+    on_open = function(_)
+      vim.cmd("startinsert!")
+    end,
+  })
+  typst_watch:toggle()
+end, { desc = "Watch file with typst w" })
+
+-- ============================================================================
+-- LEADER KEYMAPS
+-- ============================================================================
+-- Additional leader keymaps that were previously in which-key
+-- These provide various functionality across different plugins
+
+-- File operations
+map("n", "<leader>f", ":Telescope find_files<CR>", { desc = "Find files" })
+map("n", "<leader>F", ":Telescope frecency<CR>", { desc = "Find files (by frequency/recency)" })
+map("n", "<leader>fr", ":lua require('telescope').extensions.frecency.frecency()<CR>", { desc = "Refresh frecency database" })
+map("n", "<leader>fd", ":lua print('Frecency DB: ' .. vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3')<CR>", { desc = "Show frecency database location" })
+map("n", "<leader>fb", ":lua vim.fn.delete(vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3') or print('Frecency database deleted. Restart Neovim to rebuild.')<CR>", { desc = "Rebuild frecency database" })
+
+-- Git operations
+map("n", "<leader>Gs", function()
+  vim.cmd("!git status")
+end, { desc = "Git Status" })
+
+map("n", "<leader>Gp", function()
+  vim.cmd("!git pull")
+end, { desc = "Git Pull" })
+
+map("n", "<leader>Gg", function()
+  local Terminal = require("toggleterm.terminal").Terminal
+  local lazygit = Terminal:new({
+    cmd = "lazygit",
+    dir = "git_dir", -- open in the Git root for correct repo context
+    hidden = true,
+    direction = "float",
+    float_opts = {
+      border = "curved",
+      width = function()
+        return math.floor(vim.o.columns * 0.9)
+      end,
+      height = function()
+        return math.floor(vim.o.lines * 0.9)
+      end,
+    },
+    close_on_exit = true,
+    -- Configure environment to use nvim as editor for commit messages
+    env = {
+      TERM = "xterm-256color",
+      COLORTERM = "truecolor",
+      EDITOR = "nvim --clean",
+      GIT_EDITOR = "nvim --clean",
+      -- Prevent socket conflicts by unsetting NVIM variables
+      NVIM = "",
+      NVIM_LISTEN_ADDRESS = "",
+    },
+    on_open = function(term)
+      vim.cmd("startinsert!")
+      -- Disable conflicting keymaps while lazygit is open
+      vim.keymap.set("t", "<esc>", "<esc>", { buffer = term.bufnr })
+    end,
+    on_close = function()
+      -- Re-enable keymaps when lazygit closes
+      vim.cmd("stopinsert")
+    end,
+  })
+  lazygit:toggle()
+end, { desc = "LazyGit" })
+
+-- Obsidian operations
+map("n", "<leader>On", function()
+  pcall(function()
+    require("obsidian").util.new_note()
+  end)
+end, { desc = "New Obsidian note" })
+
+map("n", "<leader>Ol", function()
+  pcall(function()
+    require("obsidian").util.insert_link()
+  end)
+end, { desc = "Insert Obsidian link" })
+
+map("n", "<leader>Of", function()
+  pcall(function()
+    require("obsidian").util.follow_link()
+  end)
+end, { desc = "Follow Obsidian link" })
+
+map("n", "<leader>Oc", function()
+  pcall(function()
+    require("obsidian").util.toggle_checkbox()
+  end)
+end, { desc = "Toggle Obsidian checkbox" })
+
+map("n", "<leader>Ob", function()
+  pcall(function()
+    require("obsidian").util.show_backlinks()
+  end)
+end, { desc = "Show Obsidian backlinks" })
+
+map("n", "<leader>Og", function()
+  pcall(function()
+    require("obsidian").util.show_outgoing_links()
+  end)
+end, { desc = "Show Obsidian outgoing links" })
+
+map("n", "<leader>Oo", function()
+  local obsidian_path = "/Users/s_a_b/Library/Mobile Documents/iCloud~md~obsidian/Documents/Notebook"
+  require("telescope.builtin").find_files({
+    cwd = obsidian_path,
+    prompt_title = "Obsidian Vault"
+  })
+end, { desc = "Find files in Obsidian vault" })
+
+map("n", "<leader>Ot", function()
+  pcall(function()
+    vim.cmd("ObsidianTemplate")
+  end)
+end, { desc = "Insert Obsidian template" })
+
+map("n", "<leader>ON", function()
+  pcall(function()
+    vim.cmd("ObsidianNewFromTemplate")
+  end)
+end, { desc = "New note from template" })
+
+map("n", "<leader>Op", function()
+  pcall(function()
+    vim.cmd("ObsidianPasteImg")
+  end)
+end, { desc = "Paste image into Obsidian note" })
+
+-- LSP operations
+map("n", "<leader>Ll", function()
+  local clients = vim.lsp.get_active_clients()
+  if #clients == 0 then
+    print("No LSP servers running")
+    return
+  end
+  print("Active LSP servers:")
+  for _, client in ipairs(clients) do
+    local buffers = vim.lsp.get_buffers_by_client_id(client.id)
+    print(string.format("  %s (ID: %d) - %d buffers", client.name, client.id, #buffers))
+  end
+end, { desc = "List available servers" })
+
+map("n", "<leader>Lr", function()
+  local clients = vim.lsp.get_active_clients({ bufnr = 0 })
+  if #clients == 0 then
+    print("No active LSP clients to restart")
+  else
+    print("Restarting LSP...")
+    vim.cmd("LspRestart")
+  end
+end, { desc = "Restart LSP" })
+
+map("n", "<leader>Lf", function()
+  vim.lsp.buf.format({ async = true })
+end, { desc = "Format Document" })
+
+map("n", "<leader>LR", function()
+  vim.lsp.buf.references()
+end, { desc = "Show References" })
+
+map("n", "<leader>Lm", "<cmd>Mason<CR>", { desc = "Open Mason" })
+
+-- Quarto operations
+map("n", "<leader>Qp", function()
+  pcall(function()
+    require("quarto").quartoPreview()
+  end)
+end, { desc = "Quarto Preview" })
+
+map("n", "<leader>Qc", function()
+  pcall(function()
+    require("quarto").quartoClosePreview()
+  end)
+end, { desc = "Close preview" })
+
+map("n", "<leader>Qr", function()
+  pcall(function()
+    vim.cmd("QuartoRender")
+  end)
+end, { desc = "Quarto Render" })
+
+-- Molten keymaps
+map("n", "<leader>Qmi", function()
+  vim.cmd("MoltenImagePopup")
+end, { desc = "Show Image Popup" })
+
+map("n", "<leader>Qml", function()
+  vim.cmd("MoltenEvaluateLine")
+end, { desc = "Evaluate Line" })
+
+map("n", "<leader>Qme", function()
+  vim.cmd("MoltenEvaluateOperator")
+end, { desc = "Evaluate Operator" })
+
+map("n", "<leader>Qmn", function()
+  pcall(function()
+    vim.cmd("MoltenInit")
+  end)
+end, { desc = "Initialise Kernel" })
+
+map("n", "<leader>Qmk", function()
+  pcall(function()
+    vim.cmd("MoltenDeinit")
+  end)
+end, { desc = "Stop Kernel" })
+
+map("n", "<leader>Qmr", function()
+  pcall(function()
+    vim.cmd("MoltenRestart")
+  end)
+end, { desc = "Restart Kernel" })
+
+map("n", "<leader>Qmo", function()
+  pcall(function()
+    vim.cmd("MoltenEvaluateOperator")
+  end)
+end, { desc = "Evaluate Operator" })
+
+map("n", "<leader>Qm<CR>", function()
+  pcall(function()
+    vim.cmd("MoltenEvaluateLine")
+  end)
+end, { desc = "Evaluate Line" })
+
+map("n", "<leader>Qmv", function()
+  pcall(function()
+    vim.cmd("MoltenEvaluateVisual")
+  end)
+end, { desc = "Evaluate Visual" })
+
+map("n", "<leader>Qmf", function()
+  pcall(function()
+    vim.cmd("MoltenReevaluateCell")
+  end)
+end, { desc = "Re-evaluate Cell" })
+
+map("n", "<leader>Qmh", function()
+  pcall(function()
+    vim.cmd("MoltenHideOutput")
+  end)
+end, { desc = "Hide Output" })
+
+map("n", "<leader>Qms", function()
+  pcall(function()
+    vim.cmd("MoltenShowOutput")
+  end)
+end, { desc = "Show Output" })
+
+map("n", "<leader>Qmd", function()
+  pcall(function()
+    vim.cmd("MoltenDelete")
+  end)
+end, { desc = "Delete Cell" })
+
+map("n", "<leader>Qmb", function()
+  pcall(function()
+    vim.cmd("MoltenOpenInBrowser")
+  end)
+end, { desc = "Open in Browser" })
+
+-- Toggle options (these were missing from the moved keymaps)
+map("n", "<leader>Ys", ":set spell!<CR>", { desc = "Toggle Spell Check" })
+map("n", "<leader>Yse", ":set spelllang=en_gb<CR>:set spell<CR>", { desc = "Set spell language to English (British)" })
+map("n", "<leader>Ysf", ":set spelllang=fr<CR>:set spell<CR>", { desc = "Set spell language to French" })
+
+-- Split operations (removing duplicate)
+
+-- Trouble diagnostics
+map("n", "<leader>Xw", ":TroubleToggle workspace_diagnostics<CR>", { desc = "Workspace Diagnostics" })
+map("n", "<leader>Xd", ":TroubleToggle document_diagnostics<CR>", { desc = "Document Diagnostics" })
+map("n", "<leader>Xl", ":TroubleToggle loclist<CR>", { desc = "Location List" })
+map("n", "<leader>Xq", ":TroubleToggle quickfix<CR>", { desc = "Quickfix" })
+
+-- Mason operations
+map("n", "<leader>Mm", "<cmd>Mason<CR>", { desc = "Open Mason" })
+map("n", "<leader>Mi", "<cmd>MasonInstall<CR>", { desc = "Install Package" })
+map("n", "<leader>Mu", "<cmd>MasonUninstall<CR>", { desc = "Uninstall Package" })
+map("n", "<leader>Ml", "<cmd>MasonLog<CR>", { desc = "View Mason Log" })
+map("n", "<leader>Mh", "<cmd>MasonHelp<CR>", { desc = "Mason Help" })
+
+-- Markdown preview keymaps
+map("n", "<leader>Kp", "<cmd>MarkdownPreview<CR>", { desc = "Start Markdown Preview" })
+map("n", "<leader>Ks", "<cmd>MarkdownPreviewStop<CR>", { desc = "Stop Markdown Preview" })
+map("n", "<leader>Kt", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Toggle Markdown Preview" })
+
+-- Configuration reload
+map("n", "<leader>Cs", function()
+  -- Comprehensive configuration reload
+  local config_path = vim.fn.stdpath("config")
+
+  -- Clear Lua module cache for config files to force reload
+  local modules_to_clear = {
+    "config",
+    "keymaps",
+    "plugins",
+  }
+
+  for _, module in ipairs(modules_to_clear) do
+    package.loaded[module] = nil
+  end
+
+  -- Source all configuration files in proper order
+  vim.cmd("source " .. config_path .. "/init.lua")
+
+  -- Show confirmation with file list
+  print("✓ Configuration reloaded!")
+end, { desc = "Source config" })
+
+-- Configuration file find
+map("n", "<leader>Cf", function()
+  local config_path = vim.fn.stdpath("config")
+  vim.cmd("Telescope find_files cwd=" .. config_path)
+end, { desc = "Find config files" })
+
+-- Configuration grep
+map("n", "<leader>Cg", function()
+  local config_path = vim.fn.stdpath("config")
+  vim.cmd("Telescope live_grep cwd=" .. config_path)
+end, { desc = "Grep in config" })
+
+-- Julia-specific operations
+-- Centralised function to open Julia REPL with specified direction
+local function open_julia_repl(direction)
+  local Terminal = require("toggleterm.terminal").Terminal
+  local project_path = vim.fn.shellescape(vim.fn.getcwd())
+  local julia_repl = Terminal:new({
+    cmd = "julia --project=" .. project_path,
+    hidden = true,
+    direction = direction,
+    close_on_exit = false,
+    on_open = function(_)
+      vim.cmd("startinsert!")
+    end,
+  })
+  julia_repl:toggle()
 end
 
--- Autocmd group for VimTeX keymaps
-local vimtex_augroup = vim.api.nvim_create_augroup('VimTexKeymaps', { clear = true })
+map("n", "<leader>Jrh", function()
+  open_julia_repl("horizontal")
+end, { desc = "Horizontal REPL" })
 
--- Set up keymaps when opening TeX files (ensures VimTeX is initialised)
-vim.api.nvim_create_autocmd('FileType', {
-  group = vimtex_augroup,
-  pattern = 'tex',
-  callback = function()
-    -- Small delay to ensure VimTeX is fully initialised
-    vim.defer_fn(function()
-      setup_vimtex_keymaps()
-    end, 100)
-  end,
-})
+map("n", "<leader>Jrv", function()
+  open_julia_repl("vertical")
+end, { desc = "Vertical REPL" })
 
--- Alternative trigger when VimTeX finishes initialisation
-vim.api.nvim_create_autocmd('User', {
-  group = vimtex_augroup,
-  pattern = 'VimtexEventInitPost',
-  callback = function()
-    setup_vimtex_keymaps()
-  end,
-})
+map("n", "<leader>Jrf", function()
+  open_julia_repl("float")
+end, { desc = "Floating REPL" })
+
+map("n", "<leader>Jp", function()
+  -- Show project status using ToggleTerm
+  local Terminal = require("toggleterm.terminal").Terminal
+  local project_path = vim.fn.shellescape(vim.fn.getcwd())
+  local pkg_status = Terminal:new({
+    cmd = "julia --project=" .. project_path .. " -e 'using Pkg; Pkg.status()'",
+    hidden = true,
+    direction = "horizontal",
+    close_on_exit = false,
+    on_open = function(_)
+      vim.cmd("startinsert!")
+    end,
+  })
+  pkg_status:toggle()
+end, { desc = "Project Status" })
+
+map("n", "<leader>Ji", function()
+  -- Instantiate project using ToggleTerm
+  local Terminal = require("toggleterm.terminal").Terminal
+  local project_path = vim.fn.shellescape(vim.fn.getcwd())
+  local pkg_instantiate = Terminal:new({
+    cmd = "julia --project=" .. project_path .. " -e 'using Pkg; Pkg.instantiate()'",
+    hidden = true,
+    direction = "horizontal",
+    close_on_exit = false,
+    on_open = function(_)
+      vim.cmd("startinsert!")
+    end,
+  })
+  pkg_instantiate:toggle()
+end, { desc = "Instantiate Project" })
+
+map("n", "<leader>Ju", function()
+  -- Update project using ToggleTerm
+  local Terminal = require("toggleterm.terminal").Terminal
+  local project_path = vim.fn.shellescape(vim.fn.getcwd())
+  local pkg_update = Terminal:new({
+    cmd = "julia --project=" .. project_path .. " -e 'using Pkg; Pkg.update()'",
+    hidden = true,
+    direction = "horizontal",
+    close_on_exit = false,
+    on_open = function(_)
+      vim.cmd("startinsert!")
+    end,
+  })
+  pkg_update:toggle()
+end, { desc = "Update Project" })
+
+map("n", "<leader>Jt", function()
+  -- Run tests using ToggleTerm
+  local Terminal = require("toggleterm.terminal").Terminal
+  local project_path = vim.fn.shellescape(vim.fn.getcwd())
+  local pkg_test = Terminal:new({
+    cmd = "julia --project=" .. project_path .. " -e 'using Pkg; Pkg.test()'",
+    hidden = true,
+    direction = "horizontal",
+    close_on_exit = false,
+    on_open = function(_)
+      vim.cmd("startinsert!")
+    end,
+  })
+  pkg_test:toggle()
+end, { desc = "Run Tests" })
+
+map("n", "<leader>Jd", function()
+  -- Generate documentation using ToggleTerm
+  local Terminal = require("toggleterm.terminal").Terminal
+  local project_path = vim.fn.shellescape(vim.fn.getcwd())
+  local pkg_docs = Terminal:new({
+    cmd = "julia --project=" .. project_path .. " -e 'using Pkg; using Documenter; makedocs()'",
+    hidden = true,
+    direction = "horizontal",
+    close_on_exit = false,
+    on_open = function(_)
+      vim.cmd("startinsert!")
+    end,
+  })
+  pkg_docs:toggle()
+end, { desc = "Generate Docs" })
