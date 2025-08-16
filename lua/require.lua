@@ -58,7 +58,7 @@ load_plugin_with_priority("toggleterm-nvim", "deferred")     -- Terminal managem
 -- PHASE 6: DEFERRED - DOCUMENT PROCESSING (Load after core functionality)
 -- ============================================================================
 load_plugin_with_priority("vimtex", "deferred")              -- LaTeX support
-load_plugin_with_priority("markdown-preview-nvim", "deferred") -- Markdown preview
+load_plugin_with_priority("markdown-preview-nvim", "immediate") -- Markdown preview (load immediately for Obsidian)
 load_plugin_with_priority("typst-preview-nvim", "deferred")  -- Typst preview
 load_plugin_with_priority("obsidian-nvim", "deferred")       -- Obsidian vault support
 load_plugin_with_priority("otter-nvim", "deferred")          -- Multi-language LSP in documents

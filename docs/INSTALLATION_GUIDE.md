@@ -53,7 +53,7 @@ nvim main.tex
 ## Usage
 
 ### Forward Search (LaTeX → PDF)
-- **In Neovim**: `<localleader>lv` or `:VimtexView`
+- **In Neovim**: `<localleader>vv` or `:VimtexView`
 - **Result**: PDF opens and jumps to corresponding location
 
 ### Inverse Search (PDF → LaTeX)
@@ -61,9 +61,9 @@ nvim main.tex
 - **Result**: Neovim jumps to corresponding line in source file
 
 ### Compilation
-- **Compile**: `<localleader>ll` or `:VimtexCompile`
-- **Clean**: `<localleader>lc` or `:VimtexClean`
-- **Stop**: `<localleader>lS` or `:VimtexStop`
+- **Compile**: `<localleader>vl` or `:VimtexCompile`
+- **Clean**: `<localleader>vc` or `:VimtexClean`
+- **Stop**: `<localleader>vS` or `:VimtexStop`
 
 ## Troubleshooting
 

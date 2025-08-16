@@ -12,9 +12,9 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - **LaTeX**: VimTeX with bibliography management and real-time compilation
 
 ### Document Processing & Preview
-- **Markdown Preview**: Live preview with `<leader>Kp` for instant visual feedback
+- **Markdown Preview**: Live preview with `<leader>Kp` featuring KaTeX math rendering and responsive design
 - **LaTeX Support**: VimTeX with bibliography management and real-time compilation
-- **Typst Preview**: Low-latency Typst document preview
+- **Typst Support**: Low-latency Typst document preview with PDF compilation
 - **Quarto Integration**: Full document authoring with multi-language support
 
 ### LaTeX Bidirectional Synchronisation
@@ -78,7 +78,10 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 │       ├── typst-preview-nvim.lua
 │       ├── vimtex.lua
 │       └── which-key-nvim.lua
-├── scripts/                    # Helper scripts for PDF sync
+├── scripts/                    # Helper scripts and tools
+│   ├── skim_inverse_search.sh
+│   ├── start_nvim_server.sh
+│   └── performance_test.lua
 ├── docs/                       # Comprehensive documentation guides
 └── spell/                      # Spell checking dictionaries
 ```
@@ -154,12 +157,15 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 
 ### Configuration (`<leader>C`)
 - `<leader>Cs` - Reload all configuration files
-- `<leader>Cd` - Browse config directory
-- `<leader>Cg` - Search config directory
+- `<leader>Cf` - Find config files (Telescope in config directory)
+- `<leader>Cg` - Grep in config files (Telescope live_grep in config directory)
 
 ### File Operations
 - `<leader>f` - Find files (Telescope)
-- `<leader>e` - Toggle file explorer (NvimTree)
+- `<leader>F` - Find files by frequency/recency (Telescope frecency)
+- `<leader>fr` - Refresh frecency database
+- `<leader>fd` - Show frecency database location
+- `<leader>fb` - Rebuild frecency database
 
 ### Git Operations (`<leader>G`)
 - `<leader>Gg` - LazyGit interface
@@ -187,10 +193,7 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<leader>Lr` - Restart LSP
 - `<leader>Lf` - Format document
 - `<leader>LR` - Show references
-- `<leader>Ld` - Buffer diagnostics
-- `<leader>Lw` - Workspace diagnostics
-- `<leader>Ls` - Document symbols
-- `<leader>LS` - Workspace symbols
+- `<leader>Lm` - Open Mason
 
 ### Markdown Preview (`<leader>K`)
 - `<leader>Kp` - Start Markdown Preview
@@ -204,9 +207,17 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<leader>Ml` - View Mason log
 - `<leader>Mh` - Mason help
 
-### Otter Multi-language (`<leader>O`)
-- `<leader>Oa` - Activate Otter
-- `<leader>Od` - Deactivate Otter
+### Obsidian Operations (`<leader>O`)
+- `<leader>On` - New Obsidian note
+- `<leader>Ol` - Insert Obsidian link
+- `<leader>Of` - Follow Obsidian link
+- `<leader>Oc` - Toggle Obsidian checkbox
+- `<leader>Ob` - Show Obsidian backlinks
+- `<leader>Og` - Show Obsidian outgoing links
+- `<leader>Oo` - Find files in Obsidian vault (Telescope)
+- `<leader>Ot` - Insert Obsidian template
+- `<leader>ON` - New note from template
+- `<leader>Op` - Paste image into Obsidian note
 
 ### Quarto Operations (`<leader>Q`)
 - `<leader>Qp` - Quarto preview
@@ -286,6 +297,19 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<leader>Pc` - Compile plugins
 - `<leader>Ps` - Sync plugins (install + update + compile)
 
+### VimTeX Operations (`<localleader>v`)
+- `<localleader>vv` - View (forward sync)
+- `<localleader>vi` - Inverse search
+- `<localleader>vl` - Compile (latexmk)
+- `<localleader>vc` - Clean aux files
+- `<localleader>vs` - Stop compiler
+
+### Typst Operations (`<localleader>t`)
+- `<localleader>tp` - Toggle Typst preview
+- `<localleader>ts` - Sync cursor in preview
+- `<localleader>tc` - Compile PDF with `typst c`
+- `<localleader>tw` - Watch file with `typst w`
+
 ### Individual Commands
 - `<leader>q` - Close buffer (quick access)
 - `<leader>x` - Toggle checkbox (Obsidian)
@@ -340,6 +364,9 @@ brew install ripgrep fd
 
 # Git interface
 brew install lazygit
+
+# Typst typesetting system
+brew install typst
 ```
 
 **PDF Viewer (macOS):**
@@ -372,9 +399,26 @@ Use VimTeX's native Skim integration for a simple, robust setup.
    - Compiler uses `-synctex=1`
 
 3. Usage:
-   - Forward search: `<localleader>lv` or `:VimtexView`
+   - Forward search: `<localleader>vv` or `:VimtexView`
    - Inverse search: Cmd+Shift+Click in Skim
-   - Compile: `<localleader>ll`
+   - Compile: `<localleader>vl`
+   - Clean aux files: `<localleader>vc`
+   - Stop compiler: `<localleader>vs`
+
+### Typst Document Processing
+
+Typst is a modern typesetting system with excellent performance and features.
+
+1. Install Typst:
+   ```bash
+   brew install typst
+   ```
+
+2. Usage:
+   - Toggle preview: `<localleader>tp`
+   - Sync cursor: `<localleader>ts`
+   - Compile PDF: `<localleader>tc` (uses `typst c <filename>`)
+   - Watch mode: `<localleader>tw` (uses `typst w <filename>`)
 
 ### Language Server Setup
 
@@ -433,6 +477,15 @@ Built-in theme cycling with system dark mode detection:
 
 ## 🔧 Configuration Management
 
+### Keymap Architecture (Best Practice)
+The configuration follows a clean, maintainable keymap architecture:
+- **Single Source of Truth**: All keymaps defined in `lua/keymaps.lua` using `vim.keymap.set()`
+- **Which-Key Integration**: Automatic discovery and display of keymaps with `desc` fields
+- **No Redundancy**: Eliminated duplicate keymap definitions between files
+- **Immediate Registration**: Keymaps register immediately when Neovim loads
+- **Modular Design**: Easy to disable specific keymap groups
+- **Performance Optimised**: No unnecessary autocmds or duplicate setups
+
 ### Modular Plugin System
 Each plugin has its own configuration file in `lua/plugins/` for easy maintenance:
 - **Individual Configuration**: Modify specific plugins without affecting others
@@ -472,6 +525,7 @@ Use `<leader>Cs` to reload all configuration files during development.
 - Press `<Space>` and wait to see available commands
 - Use `<leader>Sk` to search all keymaps
 - Each plugin file contains detailed configuration comments
+- **Keymap Discovery**: Press any leader key (e.g., `<leader>O`) to see all available commands for that group
 
 ### Additional Guides
 - [Installation Guide](docs/INSTALLATION_GUIDE.md)
