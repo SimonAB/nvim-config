@@ -512,8 +512,10 @@ end, { desc = "Watch file with typst w" })
 -- ============================================================================
 -- LEADER KEYMAPS
 -- ============================================================================
--- Additional leader keymaps that were previously in which-key
 -- These provide various functionality across different plugins
+
+-- File tree
+map("n", "<leader>e", ":NvimTreeToggle<CR>", { desc = "Toggle file tree" })
 
 -- File operations
 map("n", "<leader>f", ":Telescope find_files<CR>", { desc = "Find files" })
