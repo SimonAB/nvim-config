@@ -135,16 +135,43 @@ obsidian.setup({
 
     -- Note frontmatter
     note_frontmatter_func = function(note)
-        -- Add default frontmatter to new notes
+        -- Only generate default frontmatter when none exists.
+        -- If frontmatter exists, preserve it and only update/add the date field.
+        local has_existing = note.metadata ~= nil and next(note.metadata) ~= nil
+
+        if has_existing then
+            local frontmatter = {}
+            for key, value in pairs(note.metadata) do
+                frontmatter[key] = value
+            end
+
+            -- Ensure standard fields are present but do not overwrite if they already exist
+            if frontmatter.id == nil and note.id ~= nil then
+                frontmatter.id = note.id
+            end
+            if frontmatter.aliases == nil and note.aliases ~= nil then
+                frontmatter.aliases = note.aliases
+            end
+            if frontmatter.tags == nil and note.tags ~= nil then
+                frontmatter.tags = note.tags
+            end
+
+            -- Update only the date_modified field
+            frontmatter["date_modified"] = os.date("%Y-%m-%d")
+
+            return frontmatter
+        end
+
         if note.title then
             note:add_alias(note.title)
         end
+
         return {
             id = note.id,
             aliases = note.aliases,
             tags = note.tags,
-            created = os.date("%Y-%m-%d"),
-            modified = os.date("%Y-%m-%d"),
+            date_created = os.date("%Y-%m-%d"),
+            date_modified = os.date("%Y-%m-%d"),
         }
     end,
 
