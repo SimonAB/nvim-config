@@ -81,6 +81,28 @@ map("n", "<S-h>", function()
   end
 end, { desc = "Previous buffer" })
 
+-- Buffer Operations (<leader>B)
+map("n", "<leader>Bf", ":Telescope buffers<CR>", { desc = "Find buffers (Telescope)" })
+map("n", "<leader>Bj", ":BufferLinePick<CR>", { desc = "Jump to buffer (BufferLine pick)" })
+map("n", "<leader>Bb", function()
+  local bufferline_ok = pcall(vim.cmd, "BufferLineCyclePrev")
+  if not bufferline_ok then
+    vim.cmd("bprevious")
+  end
+end, { desc = "Previous buffer" })
+map("n", "<leader>Bn", function()
+  local bufferline_ok = pcall(vim.cmd, "BufferLineCycleNext")
+  if not bufferline_ok then
+    vim.cmd("bnext")
+  end
+end, { desc = "Next buffer" })
+map("n", "<leader>Bq", function()
+  local bufferline_ok = pcall(vim.cmd, "BufferLineClose")
+  if not bufferline_ok then
+    vim.cmd("bdelete")
+  end
+end, { desc = "Close buffer" })
+
 -- Clear search highlights
 map("n", "<Esc>", ":nohlsearch<CR>", { desc = "Clear search highlights" })
 
@@ -166,7 +188,7 @@ local function send_current_code_block()
 
   local start_line = nil
   local end_line = nil
-  local block_type = nil   -- "fenced" or "header"
+  local block_type = nil -- "fenced" or "header"
 
   -- First, check if we're in a fenced code block (```{...} ... ```)
   local fenced_start = nil
@@ -213,7 +235,7 @@ local function send_current_code_block()
       -- Look for the next header line starting from the line after header_start
       for i = header_start + 1, #lines do
         if lines[i] and lines[i]:match("^##") then
-          header_end = i - 1           -- End is the line before the next header
+          header_end = i - 1 -- End is the line before the next header
           break
         end
       end
@@ -240,7 +262,7 @@ local function send_current_code_block()
       -- For fenced blocks, exclude the fence lines
       selection_start = start_line + 1
       selection_end = end_line - 1
-    else     -- header block
+    else -- header block
       -- For header blocks, include all lines including the header
       selection_start = start_line
       selection_end = end_line
@@ -268,7 +290,7 @@ local function send_current_code_block()
       -- Look for next fenced block first
       for i = search_start, #lines do
         if lines[i] and lines[i]:match("^```{.*}") then
-          next_block_start = i + 1           -- Move to first line of code
+          next_block_start = i + 1 -- Move to first line of code
           break
         end
       end
@@ -277,7 +299,7 @@ local function send_current_code_block()
       if not next_block_start then
         for i = search_start, #lines do
           if lines[i] and lines[i]:match("^##") then
-            next_block_start = i             -- Move to header line
+            next_block_start = i -- Move to header line
             break
           end
         end
@@ -427,11 +449,11 @@ map({ 'n', 't' }, "<leader>T3", make_terminal_cmd('float'), { desc = "Terminal F
 -- Using LocalLeader prefix to avoid conflicts with main leader bindings
 
 -- VimTeX keymaps (simple commands)
-map("n", "<localleader>vv", ":VimtexView<CR>", { noremap = true, silent = true, desc = "View (forward sync)" })
-map("n", "<localleader>vi", ":VimtexInverseSearch<CR>", { noremap = true, silent = true, desc = "Inverse search" })
-map("n", "<localleader>vl", ":VimtexCompile<CR>", { noremap = true, silent = true, desc = "Compile (latexmk)" })
-map("n", "<localleader>vc", ":VimtexClean<CR>", { noremap = true, silent = true, desc = "Clean aux files" })
-map("n", "<localleader>vs", ":VimtexStop<CR>", { noremap = true, silent = true, desc = "Stop compiler" })
+map("n", "<localleader>lv", ":VimtexView<CR>", { noremap = true, silent = true, desc = "View (forward sync)" })
+map("n", "<localleader>li", ":VimtexInverseSearch<CR>", { noremap = true, silent = true, desc = "Inverse search" })
+map("n", "<localleader>ll", ":VimtexCompile<CR>", { noremap = true, silent = true, desc = "Compile (latexmk)" })
+map("n", "<localleader>lc", ":VimtexClean<CR>", { noremap = true, silent = true, desc = "Clean aux files" })
+map("n", "<localleader>ls", ":VimtexStop<CR>", { noremap = true, silent = true, desc = "Stop compiler" })
 
 -- ============================================================================
 -- TYPST KEYMAPS
@@ -442,7 +464,8 @@ map("n", "<localleader>vs", ":VimtexStop<CR>", { noremap = true, silent = true, 
 
 -- Typst preview keymaps (simple commands)
 map("n", "<LocalLeader>tp", ":TypstPreviewToggle<CR>", { noremap = true, silent = true, desc = "Toggle Typst preview" })
-map("n", "<LocalLeader>ts", ":TypstPreviewSyncCursor<CR>", { noremap = true, silent = true, desc = "Sync cursor in preview" })
+map("n", "<LocalLeader>ts", ":TypstPreviewSyncCursor<CR>",
+  { noremap = true, silent = true, desc = "Sync cursor in preview" })
 
 -- Typst compile PDF using command line
 map("n", "<LocalLeader>tc", function()
@@ -520,9 +543,13 @@ map("n", "<leader>e", ":NvimTreeToggle<CR>", { desc = "Toggle file tree" })
 -- File operations
 map("n", "<leader>f", ":Telescope find_files<CR>", { desc = "Find files" })
 map("n", "<leader>F", ":Telescope frecency<CR>", { desc = "Find files (by frequency/recency)" })
-map("n", "<leader>fr", ":lua require('telescope').extensions.frecency.frecency()<CR>", { desc = "Refresh frecency database" })
-map("n", "<leader>fd", ":lua print('Frecency DB: ' .. vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3')<CR>", { desc = "Show frecency database location" })
-map("n", "<leader>fb", ":lua vim.fn.delete(vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3') or print('Frecency database deleted. Restart Neovim to rebuild.')<CR>", { desc = "Rebuild frecency database" })
+map("n", "<leader>fr", ":lua require('telescope').extensions.frecency.frecency()<CR>",
+  { desc = "Refresh frecency database" })
+map("n", "<leader>fd", ":lua print('Frecency DB: ' .. vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3')<CR>",
+  { desc = "Show frecency database location" })
+map("n", "<leader>fb",
+  ":lua vim.fn.delete(vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3') or print('Frecency database deleted. Restart Neovim to rebuild.')<CR>",
+  { desc = "Rebuild frecency database" })
 
 -- Git operations
 map("n", "<leader>Gs", function()
