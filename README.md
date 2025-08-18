@@ -297,12 +297,12 @@ A comprehensive Neovim configuration optimised for academic research workflows, 
 - `<leader>Pc` - Compile plugins
 - `<leader>Ps` - Sync plugins (install + update + compile)
 
-### VimTeX Operations (`<localleader>v`)
-- `<localleader>vv` - View (forward sync)
-- `<localleader>vi` - Inverse search
-- `<localleader>vl` - Compile (latexmk)
-- `<localleader>vc` - Clean aux files
-- `<localleader>vs` - Stop compiler
+### VimTeX Operations (`<localleader>l`)
+- `<localleader>lv` - View (forward sync)
+- `<localleader>li` - Inverse search
+- `<localleader>ll` - Compile (latexmk)
+- `<localleader>lc` - Clean aux files
+- `<localleader>ls` - Stop compiler
 
 ### Typst Operations (`<localleader>t`)
 - `<localleader>tp` - Toggle Typst preview
@@ -399,11 +399,11 @@ Use VimTeX's native Skim integration for a simple, robust setup.
    - Compiler uses `-synctex=1`
 
 3. Usage:
-   - Forward search: `<localleader>vv` or `:VimtexView`
+   - Forward search: `<localleader>lv` or `:VimtexView`
    - Inverse search: Cmd+Shift+Click in Skim
-   - Compile: `<localleader>vl`
-   - Clean aux files: `<localleader>vc`
-   - Stop compiler: `<localleader>vs`
+   - Compile: `<localleader>ll`
+   - Clean aux files: `<localleader>lc`
+   - Stop compiler: `<localleader>ls`
 
 ### Typst Document Processing
 
