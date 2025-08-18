@@ -80,7 +80,7 @@ if ok then
 	-- which-key groups for localleader keymaps
 	-- These provide display/help for keymaps defined in keymaps.lua
 	wk.add({
-		{ "<localleader>v", group = "VimTeX" },
+		{ "<localleader>l", group = "VimTeX" },
 		{ "<localleader>t", group = "Typst" },
 	})
 
