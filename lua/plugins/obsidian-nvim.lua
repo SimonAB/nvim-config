@@ -7,6 +7,26 @@ if not ok then
     return
 end
 
+-- Returns today's date in YAML-tagged format (e.g. !2025-08-19)
+local function get_current_yaml_date()
+    return os.date("!%Y-%m-%d")
+end
+
+-- Builds the YAML frontmatter block for a note
+-- id_value: filename without extension
+-- date_value: date string from get_current_yaml_date()
+local function build_yaml_frontmatter(id_value, date_value)
+    return string.format([[
+---
+id: %s
+tags: []
+date_created: %s
+date_modified: %s
+---
+
+]], id_value, date_value, date_value)
+end
+
 obsidian.setup({
     -- Your Obsidian vault path
     workspaces = {
@@ -18,7 +38,7 @@ obsidian.setup({
 
     -- Note settings
     notes_subdir = "notes",
-    new_notes_location = "notes_subdir",
+    new_notes_location = "notes",
     note_id_func = function(title)
         -- Create note IDs with timestamp prefix
         local suffix = ""
@@ -43,7 +63,7 @@ obsidian.setup({
         img_text_func = function(client, path)
             -- Use vault-relative path for proper markdown links
             path = client:vault_relative_path(path) or path
-            return string.format("![%s](%s)", path.name, path)
+            return string.format("![%s](<../%s>)", path.name, path)
         end,
     },
 
@@ -133,47 +153,7 @@ obsidian.setup({
         },
     },
 
-    -- Note frontmatter
-    note_frontmatter_func = function(note)
-        -- Only generate default frontmatter when none exists.
-        -- If frontmatter exists, preserve it and only update/add the date field.
-        local has_existing = note.metadata ~= nil and next(note.metadata) ~= nil
 
-        if has_existing then
-            local frontmatter = {}
-            for key, value in pairs(note.metadata) do
-                frontmatter[key] = value
-            end
-
-            -- Ensure standard fields are present but do not overwrite if they already exist
-            if frontmatter.id == nil and note.id ~= nil then
-                frontmatter.id = note.id
-            end
-            if frontmatter.aliases == nil and note.aliases ~= nil then
-                frontmatter.aliases = note.aliases
-            end
-            if frontmatter.tags == nil and note.tags ~= nil then
-                frontmatter.tags = note.tags
-            end
-
-            -- Update only the date_modified field
-            frontmatter["date_modified"] = os.date("%Y-%m-%d")
-
-            return frontmatter
-        end
-
-        if note.title then
-            note:add_alias(note.title)
-        end
-
-        return {
-            id = note.id,
-            aliases = note.aliases,
-            tags = note.tags,
-            date_created = os.date("%Y-%m-%d"),
-            date_modified = os.date("%Y-%m-%d"),
-        }
-    end,
 
     -- Search settings
     search = {
@@ -211,23 +191,58 @@ obsidian.setup({
         },
     },
 
-    -- Callbacks
+        -- Callbacks
     callbacks = {
         post_setup = function(client)
             -- Called after obsidian.nvim is set up
             vim.notify("Obsidian.nvim configured for your vault", vim.log.levels.INFO)
+
+                        -- Simple autocommand to update date_modified on save
+            vim.api.nvim_create_autocmd("BufWritePre", {
+                pattern = "*.md",
+                callback = function()
+                    local bufnr = vim.api.nvim_get_current_buf()
+                    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+                    local content = table.concat(lines, "\n")
+                    local current_date = get_current_yaml_date()
+
+                    if content:match("^---") then
+                        -- File has YAML header, update date_modified
+                        if content:match("date_modified:") then
+                            local new_content = content:gsub("date_modified:[^\n]*", "date_modified: " .. current_date)
+                            if new_content ~= content then
+                                vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(new_content, "\n"))
+                            end
+                        else
+                            local new_content = content:gsub("(---\n)", "%1date_modified: " .. current_date .. "\n", 1)
+                            if new_content ~= content then
+                                vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(new_content, "\n"))
+                            end
+                        end
+                    else
+                        -- No YAML header, add complete frontmatter
+                        local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t:r")
+                        local frontmatter = build_yaml_frontmatter(filename, current_date)
+
+                        local new_content = frontmatter .. content
+                        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(new_content, "\n"))
+                    end
+                end,
+            })
         end,
-        enter_note = function(note)
-            -- Called when entering a note
-        end,
-        leave_note = function(note)
-            -- Called when leaving a note
-        end,
-        pre_write_note = function(note)
-            -- Called before writing a note
-        end,
-        post_write_note = function(note)
-            -- Called after writing a note
+        new_note = function(note)
+            -- Add frontmatter to new notes
+            local content = note.content or ""
+            local current_date = get_current_yaml_date()
+
+            -- Get filename without extension for the id
+            local filename = note.id or ""
+            if filename == "" and note.path then
+                filename = vim.fn.fnamemodify(note.path, ":t:r")  -- Get filename without extension
+            end
+
+            local frontmatter = build_yaml_frontmatter(filename, current_date)
+            note.content = frontmatter .. content
         end,
     },
 
@@ -240,7 +255,7 @@ obsidian.setup({
     },
 
     -- Advanced settings
-    disable_frontmatter = false,
+    disable_frontmatter = true,
     note_path_func = function(spec)
         -- Custom note path function
         if spec.id and spec.id ~= "" then
