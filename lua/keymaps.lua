@@ -663,6 +663,8 @@ map("n", "<leader>Op", function()
   end)
 end, { desc = "Paste image into Obsidian note" })
 
+map("n", "<leader>Ov", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Toggle Obsidian Preview" })
+
 -- LSP operations
 map("n", "<leader>Ll", function()
   local clients = vim.lsp.get_active_clients()
