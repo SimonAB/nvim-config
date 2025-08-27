@@ -556,6 +556,46 @@ map("n", "<leader>Gs", function()
   vim.cmd("!git status")
 end, { desc = "Git Status" })
 
+-- Grep operations
+map("n", "<leader>g", function()
+  local builtin = require('telescope.builtin')
+  -- Prefer Git root if available, otherwise fall back to current working directory
+  local cwd = vim.fn.systemlist('git rev-parse --show-toplevel')[1]
+  if not cwd or cwd == '' or cwd:match('fatal:') then
+    cwd = vim.loop.cwd() or vim.fn.getcwd()
+  end
+  builtin.live_grep({ cwd = cwd })
+end, { desc = "Grep in project" })
+
+map("n", "<leader>gw", function()
+  local builtin = require('telescope.builtin')
+  local cwd = vim.loop.cwd() or vim.fn.getcwd()
+  builtin.live_grep({ cwd = cwd })
+end, { desc = "Grep in current working directory" })
+
+map("n", "<leader>gh", function()
+  local builtin = require('telescope.builtin')
+  local home = vim.loop.os_homedir() or vim.fn.expand("~")
+  builtin.live_grep({ search_dirs = { home } })
+end, { desc = "Grep in home directory" })
+
+map("n", "<leader>gc", function()
+  local builtin = require('telescope.builtin')
+  local config_path = vim.fn.stdpath("config")
+  builtin.live_grep({ cwd = config_path })
+end, { desc = "Grep in config" })
+
+map("n", "<leader>gf", function()
+  local builtin = require('telescope.builtin')
+  local current_file = vim.fn.expand('%:p')
+  if current_file ~= '' then
+    local current_dir = vim.fn.fnamemodify(current_file, ':h')
+    builtin.live_grep({ cwd = current_dir })
+  else
+    builtin.live_grep()
+  end
+end, { desc = "Grep in current file directory" })
+
 map("n", "<leader>Gp", function()
   vim.cmd("!git pull")
 end, { desc = "Git Pull" })
@@ -853,9 +893,12 @@ end, { desc = "Find config files" })
 
 -- Configuration grep
 map("n", "<leader>Cg", function()
+  local builtin = require('telescope.builtin')
   local config_path = vim.fn.stdpath("config")
-  vim.cmd("Telescope live_grep cwd=" .. config_path)
-end, { desc = "Grep in config" })
+  builtin.live_grep({ cwd = config_path })
+end, { desc = "Grep config files" })
+
+-- Configuration grep (moved to <leader>gc)
 
 -- Julia-specific operations
 -- Centralised function to open Julia REPL with specified direction

@@ -195,6 +195,8 @@ if ok then
 		{ "<leader>F", group = "Frecency" },
 		-- Git operations
 		{ "<leader>G", group = "Git" },
+		-- Grep operations
+		{ "<leader>g", group = "Grep" },
 		-- Obsidian operations
 		{ "<leader>O", group = "Obsidian" },
 		-- Toggle options
