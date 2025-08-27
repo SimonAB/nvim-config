@@ -119,14 +119,14 @@ obsidian.setup({
         -- Insert link
         ["<leader>Ol"] = {
             action = function()
-                return require("obsidian").util.insert_link()
+                vim.cmd("ObsidianLink")
             end,
             opts = { desc = "Insert Obsidian link" },
         },
         -- Follow link
         ["<leader>Of"] = {
             action = function()
-                return require("obsidian").util.follow_link()
+                vim.cmd("ObsidianFollowLink")
             end,
             opts = { desc = "Follow Obsidian link" },
         },
