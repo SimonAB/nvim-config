@@ -316,8 +316,47 @@ function ThemePicker.show_picker()
 
 			-- Select theme and close (standard Telescope behavior)
 			actions_mod.select_default:replace(function()
-				-- Just use Telescope's built-in selection method
+				-- Try Telescope's built-in selection method first
 				local selection = action_state_mod.get_selected_entry()
+
+				-- If that doesn't work (e.g., after search), try to get it from the current line
+				if not selection or not selection.value then
+					-- Get the current line content from the results window
+					local results_win = nil
+					for _, win in ipairs(vim.api.nvim_list_wins()) do
+						local buf = vim.api.nvim_win_get_buf(win)
+						if vim.bo[buf].filetype == "TelescopeResults" then
+							results_win = win
+							break
+						end
+					end
+
+					if results_win then
+						local cursor = vim.api.nvim_win_get_cursor(results_win)
+						local line_content = vim.api.nvim_buf_get_lines(
+							vim.api.nvim_win_get_buf(results_win),
+							cursor[1]-1,
+							cursor[1],
+							false
+						)[1]
+
+						if line_content then
+							-- Extract theme name from the line (remove icons and markers)
+							local theme_name = line_content
+								:gsub("^[○●]%s*", "")  -- Remove selection marker
+								:gsub("^[🌙☀️🎨]%s*", "")  -- Remove category icon
+								:gsub("^%s*(.-)%s*$", "%1")  -- Trim whitespace
+
+							-- Find the corresponding theme entry
+							for _, entry in ipairs(theme_entries) do
+								if entry.display:find(theme_name, 1, true) then
+									selection = { value = entry.theme }
+									break
+								end
+							end
+						end
+					end
+				end
 
 				if selection and selection.value then
 					ThemePicker.select_theme(selection.value)
