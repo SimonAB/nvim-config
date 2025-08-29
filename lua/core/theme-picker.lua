@@ -245,6 +245,7 @@ function ThemePicker.show_picker()
 	end
 
 	local current_preview_theme = nil
+	local current_selected_entry = nil
 
 	-- Create a custom previewer for themes
 	local theme_previewer = previewers_mod.new_buffer_previewer({
@@ -258,6 +259,9 @@ function ThemePicker.show_picker()
 		end,
 
 		define_preview = function(self, entry)
+			-- Store the current entry for selection
+			current_selected_entry = entry
+
 			-- Preview the theme by applying it temporarily
 			if entry and entry.value then
 				ThemePicker.preview_theme(entry.value)
@@ -377,22 +381,23 @@ function ThemePicker.show_picker()
 
 			-- Select theme and close (standard Telescope behavior)
 			actions_mod.select_default:replace(function()
-				-- Get the current cursor position
-				local current_line = vim.api.nvim_win_get_cursor(prompt_bufnr)[1]
+				-- Use the entry tracked by the previewer (most reliable)
+				local selection = current_selected_entry
 
-				-- For now, use the simplest approach: assume the cursor position
-				-- corresponds to the original theme entry index
-				local selection = nil
-				if local_theme_entries and current_line <= #local_theme_entries then
-					local entry = local_theme_entries[current_line]
-					if entry then
-						selection = { value = entry.theme }
-					end
-				end
-
-				-- If that didn't work, try Telescope's method
+				-- Fallback to Telescope's method if previewer didn't track it
 				if not selection or not selection.value then
 					selection = action_state_mod.get_selected_entry()
+				end
+
+				-- Last fallback: use cursor position with original entries
+				if not selection or not selection.value then
+					local current_line = vim.api.nvim_win_get_cursor(prompt_bufnr)[1]
+					if local_theme_entries and current_line <= #local_theme_entries then
+						local entry = local_theme_entries[current_line]
+						if entry then
+							selection = { value = entry.theme }
+						end
+					end
 				end
 
 				if selection and selection.value then
@@ -400,7 +405,7 @@ function ThemePicker.show_picker()
 					vim.notify("Applying theme: " .. selection.value, vim.log.levels.DEBUG)
 					ThemePicker.select_theme(selection.value)
 				else
-					vim.notify("Could not determine selected theme at line " .. current_line, vim.log.levels.ERROR)
+					vim.notify("Could not determine selected theme", vim.log.levels.ERROR)
 				end
 				actions_mod.close(prompt_bufnr)
 			end)
