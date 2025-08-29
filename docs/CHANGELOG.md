@@ -6,12 +6,13 @@
 - **Theme Picker**: Standard Telescope interface for theme selection
   - Visual theme categories (dark 🌙, light ☀️, special 🎨)
   - **Telescope Previewer**: Custom preview panel shows theme info and applies theme
-  - **Standard Search**: Native Telescope fuzzy search and filtering
-  - **Smooth Navigation**: All standard Telescope navigation (j/k, arrows, mouse)
+  - **Smart Search**: Search filtering with instant preview updates
+  - **Enhanced Navigation**: All Telescope navigation (j/k, arrows, gg/G) with preview
   - Quick apply without closing with `<C-y>`
   - Current theme indicator with ● symbol
+  - **Responsive Preview**: Theme updates on all selection changes (search, navigation)
+  - **Search Integration**: Preview updates when search results change
   - **Clean Integration**: Follows Telescope's standard patterns and behavior
-  - **Responsive**: Instant theme application when selecting items
   - **Professional UX**: Consistent with other Telescope pickers
 
 ### 🔧 Enhanced Theme Management

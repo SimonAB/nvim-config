@@ -300,6 +300,63 @@ function ThemePicker.show_picker()
 		previewer = theme_previewer,
 
 		attach_mappings = function(prompt_bufnr, map)
+			-- Force preview update for navigation commands
+			local function force_preview_update()
+				local selection = action_state_mod.get_selected_entry()
+				if selection then
+					ThemePicker.preview_theme(selection.value)
+				end
+			end
+
+			-- Enhanced navigation with preview updates
+			map("n", "gg", function()
+				actions_mod.move_to_top(prompt_bufnr)
+				vim.defer_fn(force_preview_update, 10)
+			end)
+
+			map("n", "G", function()
+				actions_mod.move_to_bottom(prompt_bufnr)
+				vim.defer_fn(force_preview_update, 10)
+			end)
+
+			-- Handle search/filter changes and ensure preview updates
+			local search_update_timer = nil
+			vim.api.nvim_create_autocmd("TextChangedI", {
+				buffer = prompt_bufnr,
+				callback = function()
+					-- Cancel any pending search update
+					if search_update_timer then
+						vim.loop.timer_stop(search_update_timer)
+					end
+
+					-- Schedule a new search update
+					search_update_timer = vim.defer_fn(function()
+						local selection = action_state_mod.get_selected_entry()
+						if selection then
+							ThemePicker.preview_theme(selection.value)
+						end
+						search_update_timer = nil
+					end, 150) -- Slightly longer delay for search
+				end,
+			})
+
+			-- Handle when search is cleared (back to normal mode)
+			vim.api.nvim_create_autocmd("ModeChanged", {
+				buffer = prompt_bufnr,
+				callback = function(args)
+					local new_mode = args.match:match(":(.*)")
+					if new_mode == "n" or new_mode == "nt" then
+						-- Small delay to ensure we're in normal mode
+						vim.defer_fn(function()
+							local selection = action_state_mod.get_selected_entry()
+							if selection then
+								ThemePicker.preview_theme(selection.value)
+							end
+						end, 50)
+					end
+				end,
+			})
+
 			-- Quick theme switching without closing
 			map("i", "<C-y>", function()
 				local selection = action_state_mod.get_selected_entry()
