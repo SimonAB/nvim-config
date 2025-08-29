@@ -4,165 +4,92 @@
 -- =============================================================================
 
 local ThemePicker = {}
-local themes = {}
-local current_theme = nil
 
 -- Get available colorschemes from runtime
-local function get_available_themes()
-	local available = {}
-
-	-- Get built-in colorschemes
-	local builtin_themes = {
+local function get_themes()
+	local themes = {
 		"default", "blue", "darkblue", "delek", "desert", "elflord", "evening",
 		"habamax", "industry", "koehler", "lunaperche", "morning", "murphy",
 		"pablo", "peachpuff", "quiet", "ron", "shine", "slate", "torte", "zellner"
 	}
 
 	-- Get colorschemes from runtime paths
-	local runtime_paths = vim.api.nvim_list_runtime_paths()
-	for _, path in ipairs(runtime_paths) do
+	for _, path in ipairs(vim.api.nvim_list_runtime_paths()) do
 		local colors_dir = path .. "/colors"
 		if vim.fn.isdirectory(colors_dir) == 1 then
-			local files = vim.fn.glob(colors_dir .. "/*.vim", true, true)
-			local lua_files = vim.fn.glob(colors_dir .. "/*.lua", true, true)
-
-			for _, file in ipairs(files) do
-				local name = vim.fn.fnamemodify(file, ":t:r")
-				if not vim.tbl_contains(builtin_themes, name) then
-					table.insert(available, name)
-				end
-			end
-
-			for _, file in ipairs(lua_files) do
-				local name = vim.fn.fnamemodify(file, ":t:r")
-				if not vim.tbl_contains(builtin_themes, name) then
-					table.insert(available, name)
+			for _, pattern in ipairs({"*.vim", "*.lua"}) do
+				for _, file in ipairs(vim.fn.glob(colors_dir .. "/" .. pattern, true, true)) do
+					local name = vim.fn.fnamemodify(file, ":t:r")
+					if not vim.tbl_contains(themes, name) then
+						table.insert(themes, name)
+					end
 				end
 			end
 		end
 	end
 
-	-- Add builtin themes
-	for _, theme in ipairs(builtin_themes) do
-		table.insert(available, theme)
-	end
-
-	-- Remove duplicates and sort
-	local unique = {}
-	for _, theme in ipairs(available) do
-		unique[theme] = true
-	end
-
-	local result = {}
-	for theme, _ in pairs(unique) do
-		table.insert(result, theme)
-	end
-
-	table.sort(result)
-	return result
+	table.sort(themes)
+	return themes
 end
 
--- Enhanced notification system
-local function notify(message, level, opts)
-	local default_opts = {
-		title = "Theme Picker",
-		timeout = 2000,
-	}
-	local final_opts = vim.tbl_extend("force", default_opts, opts or {})
-	vim.notify(message, level, final_opts)
-end
-
--- Get theme display info
-local function get_theme_info(theme_name)
-	local info = {
-		name = theme_name,
-		display_name = theme_name:gsub("_", " "):gsub("-", " "),
-		is_current = theme_name == (vim.g.colors_name or "default"),
-		category = "unknown"
-	}
-
-	-- Categorize themes
-	local categories = {
-		-- Dark themes
-		dark = { "onedark", "tokyonight", "nord", "github_dark", "dracula", "gruvbox", "solarized", "monokai" },
-		-- Light themes
-		light = { "github_light", "catppuccin_latte", "solarized_light", "gruvbox_light", "one_light" },
-		-- Special themes
-		special = { "catppuccin", "tokyonight_night", "tokyonight_day", "tokyonight_moon" }
-	}
-
-	for category, theme_list in pairs(categories) do
-		for _, theme in ipairs(theme_list) do
-			if theme_name:find(theme) then
-				info.category = category
-				break
-			end
-		end
-		if info.category ~= "unknown" then break end
-	end
-
-	return info
-end
-
--- Format theme entry for display
-local function format_theme_entry(theme_name)
-	local info = get_theme_info(theme_name)
-	local icon = info.is_current and "● " or "○ "
-	local category_icon = ""
-
-	if info.category == "dark" then
-		category_icon = "🌙 "
-	elseif info.category == "light" then
-		category_icon = "☀️  "
-	else
-		category_icon = "🎨 "
-	end
+-- Create theme entry
+local function create_entry(theme)
+	local is_current = theme == (vim.g.colors_name or "default")
+	local category = theme:find("dark") and "dark" or theme:find("light") and "light" or "special"
+	local icon = is_current and "●" or "○"
+	local category_icon = category == "dark" and "🌙" or category == "light" and "☀️" or "🎨"
 
 	return {
-		value = theme_name,
-		display = icon .. category_icon .. info.display_name,
-		ordinal = theme_name,
-		info = info
+		value = theme,
+		display = string.format("%s %s %s", icon, category_icon, theme:gsub("_", " "):gsub("-", " ")),
+		ordinal = theme,
 	}
 end
 
--- Ensure Telescope is loaded
-local function ensure_telescope_loaded()
-	local max_attempts = 10
-	local attempt = 0
+-- Load Telescope modules safely
+local function load_telescope_modules()
+	local modules = {
+		pickers = "telescope.pickers",
+		finders = "telescope.finders",
+		config = "telescope.config",
+		actions = "telescope.actions",
+		action_state = "telescope.action_state",
+		entry_display = "telescope.pickers.entry_display",
+		previewers = "telescope.previewers"
+	}
 
-	while attempt < max_attempts do
-		local ok, telescope = pcall(require, "telescope")
-		if ok then
-			return telescope
+	local loaded = {}
+	for name, module in pairs(modules) do
+		local ok, mod = pcall(require, module)
+		if not ok then
+			vim.notify("Failed to load " .. module, vim.log.levels.WARN)
+			return nil
 		end
-
-		-- Try to load Telescope plugin configuration
-		pcall(require, "plugins.telescope")
-
-		-- Wait a bit for Telescope to load
-		vim.wait(50)
-		attempt = attempt + 1
+		loaded[name] = mod
 	end
 
-	return nil
+	loaded.config = loaded.config.values
+	return loaded
+end
+
+-- Notification helper
+local function notify(msg, level)
+	vim.notify(msg, level or vim.log.levels.INFO, { title = "Theme Picker", timeout = 2000 })
 end
 
 -- Create floating window picker
 function ThemePicker.show_picker()
-	local available_themes = get_available_themes()
+	local themes = get_themes()
 
-	if #available_themes == 0 then
+	if #themes == 0 then
 		notify("No themes found!", vim.log.levels.ERROR)
 		return
 	end
 
-	-- Ensure Telescope is loaded
-	local telescope = ensure_telescope_loaded()
-	if not telescope then
-		-- Fallback: use vim.ui.select if Telescope fails
-		notify("Using fallback theme selector (Telescope not available)", vim.log.levels.WARN)
-		ThemePicker.show_fallback_picker(available_themes)
+	-- Load Telescope modules
+	local mods = load_telescope_modules()
+	if not mods then
+		notify("Failed to load Telescope modules", vim.log.levels.WARN)
 		return
 	end
 
@@ -238,7 +165,7 @@ function ThemePicker.show_picker()
 		})
 	end
 
-	
+
 
 	-- Create a custom previewer for themes
 	local theme_previewer = previewers_mod.new_buffer_previewer({
@@ -277,58 +204,53 @@ function ThemePicker.show_picker()
 		end,
 	})
 
-	-- Format initial theme entries
-	local function create_theme_entries(themes)
-		local entries = {}
-		for _, theme in ipairs(themes) do
-			table.insert(entries, format_theme_entry(theme))
-		end
-		return entries
+	-- Create theme entries
+	local entries = {}
+	for _, theme in ipairs(themes) do
+		table.insert(entries, create_entry(theme))
 	end
 
-	local initial_entries = create_theme_entries(available_themes)
-
-	pickers_mod.new({}, {
+	-- Create picker
+	mods.pickers.new({}, {
 		prompt_title = "🎨 Select Theme",
-		finder = finders_mod.new_table({
-			results = initial_entries,
+		finder = mods.finders.new_table({
+			results = entries,
 			entry_maker = function(entry)
 				return {
 					value = entry.value,
 					display = make_display,
 					ordinal = entry.ordinal,
-					info = entry.info,
 				}
 			end,
 		}),
-		sorter = conf_mod.generic_sorter({}),
+		sorter = mods.config.generic_sorter({}),
 		previewer = theme_previewer,
 
 		attach_mappings = function(prompt_bufnr, map)
 			-- Quick theme switching without closing
 			map("i", "<C-y>", function()
-				local selection = action_state_mod.get_selected_entry()
+				local selection = mods.action_state.get_selected_entry()
 				if selection then
 					ThemePicker.select_theme(selection.value)
 				end
 			end)
 
 			map("n", "<C-y>", function()
-				local selection = action_state_mod.get_selected_entry()
+				local selection = mods.action_state.get_selected_entry()
 				if selection then
 					ThemePicker.select_theme(selection.value)
 				end
 			end)
 
 			-- Select theme and close (standard Telescope behavior)
-			actions_mod.select_default:replace(function()
-				local selection = action_state_mod.get_selected_entry()
+			mods.actions.select_default:replace(function()
+				local selection = mods.action_state.get_selected_entry()
 				if selection and selection.value then
 					ThemePicker.select_theme(selection.value)
 				else
-					vim.notify("Could not determine selected theme", vim.log.levels.ERROR)
+					notify("Could not determine selected theme", vim.log.levels.ERROR)
 				end
-				actions_mod.close(prompt_bufnr)
+				mods.actions.close(prompt_bufnr)
 			end)
 
 			return true
@@ -559,7 +481,7 @@ end
 
 -- Cycle through themes (legacy support)
 function ThemePicker.cycle_theme()
-	local available_themes = get_available_themes()
+	local available_themes = get_themes()
 	if #available_themes == 0 then return end
 
 	local current = ThemePicker.get_current_theme()
