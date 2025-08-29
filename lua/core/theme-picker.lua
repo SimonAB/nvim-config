@@ -148,31 +148,6 @@ local function ensure_telescope_loaded()
 	return nil
 end
 
--- Filter themes based on search query (nvim-tree style)
-local function filter_themes(themes, query)
-	if not query or query == "" then
-		return themes
-	end
-
-	local filtered = {}
-	local query_lower = query:lower()
-
-	vim.notify("Filtering " .. #themes .. " themes with query: '" .. query .. "'", vim.log.level.DEBUG)
-
-	for _, theme in ipairs(themes) do
-		local info = get_theme_info(theme)
-		local searchable_text = (info.display_name .. " " .. theme):lower()
-
-		if searchable_text:find(query_lower, 1, true) then
-			table.insert(filtered, theme)
-			vim.notify("Match found: " .. info.display_name, vim.log.level.DEBUG)
-		end
-	end
-
-	vim.notify("Filter complete: " .. #filtered .. " matches found", vim.log.level.DEBUG)
-	return filtered
-end
-
 -- Create floating window picker
 function ThemePicker.show_picker()
 	local available_themes = get_available_themes()
@@ -181,9 +156,6 @@ function ThemePicker.show_picker()
 		notify("No themes found!", vim.log.levels.ERROR)
 		return
 	end
-
-	-- Start with all themes
-	local filtered_themes = available_themes
 
 	-- Ensure Telescope is loaded
 	local telescope = ensure_telescope_loaded()
@@ -266,23 +238,8 @@ function ThemePicker.show_picker()
 		})
 	end
 
-	-- Custom filter state (nvim-tree style)
-	local filter_query = ""
+	-- State for periodic selection checking
 	local current_picker = nil
-	local current_filtered_themes = available_themes -- Start with all themes
-
-	local function update_picker_results(picker, query)
-		filter_query = query
-		current_filtered_themes = filter_themes(available_themes, query)
-
-		vim.notify("Filter '" .. query .. "' found " .. #current_filtered_themes .. " themes", vim.log.level.INFO)
-
-		-- For now, just show the count - we'll implement the actual refresh later
-		-- This will help us debug if the filtering is working
-		if #current_filtered_themes == 0 then
-			vim.notify("No themes match your filter", vim.log.level.WARN)
-		end
-	end
 
 	-- Create a custom previewer for themes
 	local theme_previewer = previewers_mod.new_buffer_previewer({
@@ -330,10 +287,10 @@ function ThemePicker.show_picker()
 		return entries
 	end
 
-	local initial_entries = create_theme_entries(current_filtered_themes)
+	local initial_entries = create_theme_entries(available_themes)
 
 	pickers_mod.new({}, {
-		prompt_title = "🎨 Select Theme (Type to filter)",
+		prompt_title = "🎨 Select Theme",
 		finder = finders_mod.new_table({
 			results = initial_entries,
 			entry_maker = function(entry)
@@ -351,55 +308,53 @@ function ThemePicker.show_picker()
 		attach_mappings = function(prompt_bufnr, map)
 			current_picker = action_state_mod.get_current_picker(prompt_bufnr)
 
-			-- Custom filtering (nvim-tree style)
-			local filter_timer = nil
-			vim.api.nvim_create_autocmd("TextChangedI", {
-				buffer = prompt_bufnr,
-				callback = function()
-					-- Cancel any pending filter update
-					if filter_timer then
-						vim.loop.timer_stop(filter_timer)
+			-- Live preview for all navigation (including jumps)
+			local preview_timer = nil
+			local function trigger_preview()
+				if preview_timer then
+					vim.loop.timer_stop(preview_timer)
+				end
+				preview_timer = vim.defer_fn(function()
+					local selection = action_state_mod.get_selected_entry()
+					if selection and selection.value then
+						ThemePicker.preview_theme(selection.value)
 					end
+				end, 50) -- Quick response for navigation
+			end
 
-					-- Get the current input
-					local current_line = vim.api.nvim_get_current_line()
-					local query = current_line:gsub("^%s*(.-)%s*$", "%1") -- trim whitespace
-
-					-- Debug: show what we're filtering
-					vim.notify("Filtering: '" .. query .. "'", vim.log.level.DEBUG)
-
-					-- Schedule filter update
-					filter_timer = vim.defer_fn(function()
-						if current_picker and query ~= filter_query then
-							update_picker_results(current_picker, query)
-							vim.notify("Filter applied: " .. #current_filtered_themes .. " themes match", vim.log.level.DEBUG)
-						end
-						filter_timer = nil
-					end, 150) -- Debounce for smooth filtering
-				end,
+			-- Detect cursor movement (covers j/k and other movements)
+			vim.api.nvim_create_autocmd("CursorMoved", {
+				buffer = prompt_bufnr,
+				callback = trigger_preview,
 			})
 
-			-- Clear filter on Escape (double press)
-			local escape_pressed = false
-			map("i", "<Esc>", function()
-				if escape_pressed then
-					-- Second escape: clear filter and close
-					if filter_query ~= "" then
-						filter_query = ""
-						if current_picker then
-							update_picker_results(current_picker, "")
-						end
-					end
-					actions_mod.close(prompt_bufnr)
-				else
-					-- First escape: just exit insert mode
-					escape_pressed = true
-					vim.cmd("stopinsert")
-					vim.defer_fn(function()
-						escape_pressed = false
-					end, 1000) -- Reset after 1 second
-				end
+			-- Explicit handling for jump commands
+
+			map("n", "gg", function()
+				actions_mod.move_to_top(prompt_bufnr)
+				vim.defer_fn(trigger_preview, 10)
 			end)
+
+			map("n", "G", function()
+				actions_mod.move_to_bottom(prompt_bufnr)
+				vim.defer_fn(trigger_preview, 10)
+			end)
+
+			-- Ensure preview updates for any selection change
+			-- This covers search results, jumps, and all navigation
+			local last_selection = nil
+			local check_timer = vim.loop.new_timer()
+
+			local function check_selection_change()
+				local current_selection = action_state_mod.get_selected_entry()
+				if current_selection and current_selection.value ~= last_selection then
+					last_selection = current_selection.value
+					trigger_preview()
+				end
+			end
+
+			-- Check for selection changes periodically
+			check_timer:start(0, 100, vim.schedule_wrap(check_selection_change))
 
 			-- Quick theme switching without closing
 			map("i", "<C-y>", function()
@@ -418,47 +373,14 @@ function ThemePicker.show_picker()
 
 			-- Select theme and close (standard Telescope behavior)
 			actions_mod.select_default:replace(function()
-				-- Try Telescope's built-in selection method first
-				local selection = action_state_mod.get_selected_entry()
-
-				-- If that doesn't work (e.g., after search), try to get it from the current line
-				if not selection or not selection.value then
-					-- Get the current line content from the results window
-					local results_win = nil
-					for _, win in ipairs(vim.api.nvim_list_wins()) do
-						local buf = vim.api.nvim_win_get_buf(win)
-						if vim.bo[buf].filetype == "TelescopeResults" then
-							results_win = win
-							break
-						end
-					end
-
-					if results_win then
-						local cursor = vim.api.nvim_win_get_cursor(results_win)
-						local line_content = vim.api.nvim_buf_get_lines(
-							vim.api.nvim_win_get_buf(results_win),
-							cursor[1]-1,
-							cursor[1],
-							false
-						)[1]
-
-						if line_content then
-							-- Extract theme name from the line (remove icons and markers)
-							local theme_name = line_content
-								:gsub("^[○●]%s*", "")  -- Remove selection marker
-								:gsub("^[🌙☀️🎨]%s*", "")  -- Remove category icon
-								:gsub("^%s*(.-)%s*$", "%1")  -- Trim whitespace
-
-							-- Find the corresponding theme entry
-							for _, entry in ipairs(theme_entries) do
-								if entry.display:find(theme_name, 1, true) then
-									selection = { value = entry.theme }
-									break
-								end
-							end
-						end
-					end
+				-- Clean up timer
+				if check_timer then
+					check_timer:stop()
+					check_timer:close()
 				end
+
+				-- Get current selection
+				local selection = action_state_mod.get_selected_entry()
 
 				if selection and selection.value then
 					ThemePicker.select_theme(selection.value)
