@@ -6,11 +6,14 @@
 - **Theme Picker**: Rich floating window interface for theme selection
   - Visual theme categories (dark 🌙, light ☀️, special 🎨)
   - **Automatic Live Preview**: Themes preview instantly as cursor moves
+  - **Smart Search Integration**: Search and navigation work seamlessly together
+  - **Continuous Preview Checking**: Handles search filtering with live updates
   - Quick apply without closing with `<C-y>`
   - Fuzzy search through all available themes
   - Current theme indicator with ● symbol
   - **No Number Indexing**: Clean scrolling list without numbered entries
   - **Smooth Navigation**: Arrow keys, j/k, and mouse scrolling support
+  - **Dual Mode Operation**: Insert mode for search, normal mode for navigation
 
 ### 🔧 Enhanced Theme Management
 - **Modular Architecture**: New `core/theme-picker.lua` module

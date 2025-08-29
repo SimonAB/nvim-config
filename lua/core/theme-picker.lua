@@ -255,9 +255,10 @@ function ThemePicker.show_picker()
 		sorter = conf_mod.generic_sorter({}),
 		previewer = false, -- Disable preview for faster loading
 		attach_mappings = function(prompt_bufnr, map)
-			-- Automatic live preview on cursor movement
+			-- Automatic live preview on cursor movement and result changes
 			local last_selection = nil
 			local preview_timer = nil
+			local preview_check_timer = nil
 
 			local function do_live_preview()
 				local selection = action_state_mod.get_selected_entry()
@@ -272,18 +273,56 @@ function ThemePicker.show_picker()
 				if preview_timer then
 					vim.loop.timer_stop(preview_timer)
 				end
-				preview_timer = vim.defer_fn(do_live_preview, 150) -- 150ms debounce
+				preview_timer = vim.defer_fn(do_live_preview, 150)
 			end
 
-			-- Auto-preview on selection change
+			-- Continuous preview checking (handles search filtering)
+			local function start_preview_checker()
+				if preview_check_timer then
+					vim.loop.timer_stop(preview_check_timer)
+				end
+				preview_check_timer = vim.loop.new_timer()
+				preview_check_timer:start(0, 200, vim.schedule_wrap(function()
+					local selection = action_state_mod.get_selected_entry()
+					if selection and selection.value ~= last_selection then
+						trigger_preview()
+					end
+				end))
+			end
+
+			-- Start the preview checker
+			start_preview_checker()
+
+			-- Auto-preview on cursor movement (immediate response)
 			vim.api.nvim_create_autocmd("CursorMoved", {
 				buffer = prompt_bufnr,
 				callback = trigger_preview,
 			})
 
-			-- Manual preview (legacy support)
+			-- Detect mode changes for better UX feedback
+			local current_mode = "normal"
+			vim.api.nvim_create_autocmd("ModeChanged", {
+				buffer = prompt_bufnr,
+				callback = function(args)
+					local new_mode = args.match:match(":(.*)")
+					current_mode = (new_mode == "i" or new_mode == "ic" or new_mode == "ix") and "insert" or "normal"
+
+					-- Optional: Could add visual feedback here if needed
+					-- For now, keeping the interface clean
+				end,
+			})
+
+			-- Manual preview triggers (for both modes)
 			map("i", "<C-p>", do_live_preview)
 			map("n", "<C-p>", do_live_preview)
+
+			-- Enhanced navigation in insert mode
+			map("i", "<C-j>", function()
+				actions_mod.move_selection_next(prompt_bufnr)
+			end)
+			map("i", "<C-k>", function()
+				actions_mod.move_selection_previous(prompt_bufnr)
+			end)
 
 			-- Select theme and close
 			actions_mod.select_default:replace(function()
@@ -291,8 +330,12 @@ function ThemePicker.show_picker()
 				if selection then
 					ThemePicker.select_theme(selection.value)
 				end
+				-- Clean up timers
 				if preview_timer then
 					vim.loop.timer_stop(preview_timer)
+				end
+				if preview_check_timer then
+					vim.loop.timer_stop(preview_check_timer)
 				end
 				actions_mod.close(prompt_bufnr)
 			end)
