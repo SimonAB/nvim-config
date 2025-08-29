@@ -300,10 +300,13 @@ function ThemePicker.show_picker()
 		previewer = theme_previewer,
 
 		attach_mappings = function(prompt_bufnr, map)
+			-- Store theme entries in local scope for the mappings
+			local local_theme_entries = theme_entries
+
 			-- Force preview update for navigation commands
 			local function force_preview_update()
 				local selection = action_state_mod.get_selected_entry()
-				if selection then
+				if selection and selection.value then
 					ThemePicker.preview_theme(selection.value)
 				end
 			end
@@ -374,9 +377,55 @@ function ThemePicker.show_picker()
 
 			-- Select theme and close (standard Telescope behavior)
 			actions_mod.select_default:replace(function()
+				-- Try multiple methods to get the current selection
 				local selection = action_state_mod.get_selected_entry()
-				if selection then
+
+				-- If that doesn't work, try to get it from the current line
+				if not selection or not selection.value then
+					-- Get current line from results window
+					local results_win = nil
+					for _, win in ipairs(vim.api.nvim_list_wins()) do
+						local buf = vim.api.nvim_win_get_buf(win)
+						if vim.bo[buf].filetype == "TelescopeResults" then
+							results_win = win
+							break
+						end
+					end
+
+					if results_win then
+						local cursor = vim.api.nvim_win_get_cursor(results_win)
+						local line = vim.api.nvim_buf_get_lines(vim.api.nvim_win_get_buf(results_win), cursor[1]-1, cursor[1], false)[1]
+
+						-- Extract theme name from the display line
+						if line then
+							-- The line format is: "○/● category_icon theme_name"
+							-- We need to extract just the theme name part after the icons
+							-- Remove the selection indicator and category icon, keep the theme name
+							local theme_part = line:gsub("^[○●]%s*", "")  -- Remove selection indicator
+							theme_part = theme_part:gsub("^[🌙☀️🎨]%s*", "")  -- Remove category icon
+							local theme_name = theme_part:match("^%s*(.+)")  -- Extract theme name
+
+							if theme_name then
+								-- Find the matching theme entry by comparing the theme name part
+								for _, entry in ipairs(local_theme_entries) do
+									local entry_theme_part = entry.display:gsub("^[○●]%s*", "")
+									entry_theme_part = entry_theme_part:gsub("^[🌙☀️🎨]%s*", "")
+									entry_theme_part = entry_theme_part:match("^%s*(.+)")
+
+									if entry_theme_part and theme_name:find(entry_theme_part, 1, true) then
+										selection = { value = entry.theme }
+										break
+									end
+								end
+							end
+						end
+					end
+				end
+
+				if selection and selection.value then
 					ThemePicker.select_theme(selection.value)
+				else
+					vim.notify("No valid selection found", vim.log.levels.WARN)
 				end
 				actions_mod.close(prompt_bufnr)
 			end)
