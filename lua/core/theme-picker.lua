@@ -244,9 +244,6 @@ function ThemePicker.show_picker()
 		})
 	end
 
-	local current_preview_theme = nil
-	local current_selected_entry = nil
-
 	-- Create a custom previewer for themes
 	local theme_previewer = previewers_mod.new_buffer_previewer({
 		title = "Theme Preview",
@@ -259,9 +256,6 @@ function ThemePicker.show_picker()
 		end,
 
 		define_preview = function(self, entry)
-			-- Store the current entry for selection
-			current_selected_entry = entry
-
 			-- Preview the theme by applying it temporarily
 			if entry and entry.value then
 				ThemePicker.preview_theme(entry.value)
@@ -304,65 +298,6 @@ function ThemePicker.show_picker()
 		previewer = theme_previewer,
 
 		attach_mappings = function(prompt_bufnr, map)
-			-- Store theme entries in local scope for the mappings
-			local local_theme_entries = theme_entries
-
-			-- Force preview update for navigation commands
-			local function force_preview_update()
-				local selection = action_state_mod.get_selected_entry()
-				if selection and selection.value then
-					ThemePicker.preview_theme(selection.value)
-				end
-			end
-
-			-- Enhanced navigation with preview updates
-			map("n", "gg", function()
-				actions_mod.move_to_top(prompt_bufnr)
-				vim.defer_fn(force_preview_update, 10)
-			end)
-
-			map("n", "G", function()
-				actions_mod.move_to_bottom(prompt_bufnr)
-				vim.defer_fn(force_preview_update, 10)
-			end)
-
-			-- Handle search/filter changes and ensure preview updates
-			local search_update_timer = nil
-			vim.api.nvim_create_autocmd("TextChangedI", {
-				buffer = prompt_bufnr,
-				callback = function()
-					-- Cancel any pending search update
-					if search_update_timer then
-						vim.loop.timer_stop(search_update_timer)
-					end
-
-					-- Schedule a new search update
-					search_update_timer = vim.defer_fn(function()
-						local selection = action_state_mod.get_selected_entry()
-						if selection then
-							ThemePicker.preview_theme(selection.value)
-						end
-						search_update_timer = nil
-					end, 150) -- Slightly longer delay for search
-				end,
-			})
-
-			-- Handle when search is cleared (back to normal mode)
-			vim.api.nvim_create_autocmd("ModeChanged", {
-				buffer = prompt_bufnr,
-				callback = function(args)
-					local new_mode = args.match:match(":(.*)")
-					if new_mode == "n" or new_mode == "nt" then
-						-- Small delay to ensure we're in normal mode
-						vim.defer_fn(function()
-							local selection = action_state_mod.get_selected_entry()
-							if selection then
-								ThemePicker.preview_theme(selection.value)
-							end
-						end, 50)
-					end
-				end,
-			})
 
 			-- Quick theme switching without closing
 			map("i", "<C-y>", function()
@@ -381,24 +316,8 @@ function ThemePicker.show_picker()
 
 			-- Select theme and close (standard Telescope behavior)
 			actions_mod.select_default:replace(function()
-				-- Use the entry tracked by the previewer (most reliable)
-				local selection = current_selected_entry
-
-				-- Fallback to Telescope's method if previewer didn't track it
-				if not selection or not selection.value then
-					selection = action_state_mod.get_selected_entry()
-				end
-
-				-- Last fallback: use cursor position with original entries
-				if not selection or not selection.value then
-					local current_line = vim.api.nvim_win_get_cursor(prompt_bufnr)[1]
-					if local_theme_entries and current_line <= #local_theme_entries then
-						local entry = local_theme_entries[current_line]
-						if entry then
-							selection = { value = entry.theme }
-						end
-					end
-				end
+				-- Just use Telescope's built-in selection method
+				local selection = action_state_mod.get_selected_entry()
 
 				if selection and selection.value then
 					ThemePicker.select_theme(selection.value)
