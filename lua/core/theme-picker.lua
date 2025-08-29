@@ -157,15 +157,19 @@ local function filter_themes(themes, query)
 	local filtered = {}
 	local query_lower = query:lower()
 
+	vim.notify("Filtering " .. #themes .. " themes with query: '" .. query .. "'", vim.log.level.DEBUG)
+
 	for _, theme in ipairs(themes) do
 		local info = get_theme_info(theme)
 		local searchable_text = (info.display_name .. " " .. theme):lower()
 
 		if searchable_text:find(query_lower, 1, true) then
 			table.insert(filtered, theme)
+			vim.notify("Match found: " .. info.display_name, vim.log.level.DEBUG)
 		end
 	end
 
+	vim.notify("Filter complete: " .. #filtered .. " matches found", vim.log.level.DEBUG)
 	return filtered
 end
 
@@ -265,21 +269,18 @@ function ThemePicker.show_picker()
 	-- Custom filter state (nvim-tree style)
 	local filter_query = ""
 	local current_picker = nil
+	local current_filtered_themes = available_themes -- Start with all themes
 
 	local function update_picker_results(picker, query)
 		filter_query = query
-		filtered_themes = filter_themes(available_themes, query)
+		current_filtered_themes = filter_themes(available_themes, query)
 
-		-- Format filtered themes for display
-		local new_entries = {}
-		for _, theme in ipairs(filtered_themes) do
-			table.insert(new_entries, format_theme_entry(theme))
-		end
+		vim.notify("Filter '" .. query .. "' found " .. #current_filtered_themes .. " themes", vim.log.level.INFO)
 
-		-- Update the picker with new results
-		if picker and picker.finder then
-			picker.finder.results = new_entries
-			picker:refresh()
+		-- For now, just show the count - we'll implement the actual refresh later
+		-- This will help us debug if the filtering is working
+		if #current_filtered_themes == 0 then
+			vim.notify("No themes match your filter", vim.log.level.WARN)
 		end
 	end
 
@@ -329,7 +330,7 @@ function ThemePicker.show_picker()
 		return entries
 	end
 
-	local initial_entries = create_theme_entries(filtered_themes)
+	local initial_entries = create_theme_entries(current_filtered_themes)
 
 	pickers_mod.new({}, {
 		prompt_title = "🎨 Select Theme (Type to filter)",
@@ -364,10 +365,14 @@ function ThemePicker.show_picker()
 					local current_line = vim.api.nvim_get_current_line()
 					local query = current_line:gsub("^%s*(.-)%s*$", "%1") -- trim whitespace
 
+					-- Debug: show what we're filtering
+					vim.notify("Filtering: '" .. query .. "'", vim.log.level.DEBUG)
+
 					-- Schedule filter update
 					filter_timer = vim.defer_fn(function()
 						if current_picker and query ~= filter_query then
 							update_picker_results(current_picker, query)
+							vim.notify("Filter applied: " .. #current_filtered_themes .. " themes match", vim.log.level.DEBUG)
 						end
 						filter_timer = nil
 					end, 150) -- Debounce for smooth filtering
