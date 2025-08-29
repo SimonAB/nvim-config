@@ -238,8 +238,7 @@ function ThemePicker.show_picker()
 		})
 	end
 
-	-- State for periodic selection checking
-	local current_picker = nil
+	
 
 	-- Create a custom previewer for themes
 	local theme_previewer = previewers_mod.new_buffer_previewer({
@@ -306,105 +305,24 @@ function ThemePicker.show_picker()
 		previewer = theme_previewer,
 
 		attach_mappings = function(prompt_bufnr, map)
-			current_picker = action_state_mod.get_current_picker(prompt_bufnr)
-
-			-- Get selection from current cursor position in results
-			local function get_selection_from_cursor()
-				-- Find the results window
-				local results_win = nil
-				for _, win in ipairs(vim.api.nvim_list_wins()) do
-					local buf = vim.api.nvim_win_get_buf(win)
-					if vim.bo[buf].filetype == "TelescopeResults" then
-						results_win = win
-						break
-					end
-				end
-
-				if results_win then
-					local cursor = vim.api.nvim_win_get_cursor(results_win)
-					local line_idx = cursor[1] - 1  -- Convert to 0-based indexing
-
-					-- Get the current results from the picker
-					if current_picker and current_picker.finder and current_picker.finder.results then
-						local results = current_picker.finder.results
-						if results[line_idx + 1] then  -- Convert back to 1-based for Lua tables
-							return results[line_idx + 1]
-						end
-					end
-				end
-
-				-- Fallback to Telescope's method
-				return action_state_mod.get_selected_entry()
-			end
-
-			-- Live preview for all navigation
-			local preview_timer = nil
-			local function trigger_preview()
-				if preview_timer then
-					vim.loop.timer_stop(preview_timer)
-				end
-				preview_timer = vim.defer_fn(function()
-					local selection = get_selection_from_cursor()
-					if selection and selection.value then
-						ThemePicker.preview_theme(selection.value)
-					end
-				end, 50)
-			end
-
-			-- Detect cursor movement in results window
-			local results_buf = nil
-			for _, win in ipairs(vim.api.nvim_list_wins()) do
-				local buf = vim.api.nvim_win_get_buf(win)
-				if vim.bo[buf].filetype == "TelescopeResults" then
-					results_buf = buf
-					break
-				end
-			end
-
-			if results_buf then
-				vim.api.nvim_create_autocmd("CursorMoved", {
-					buffer = results_buf,
-					callback = trigger_preview,
-				})
-			end
-
-			-- Explicit handling for jump commands
-			map("n", "gg", function()
-				actions_mod.move_to_top(prompt_bufnr)
-				vim.defer_fn(trigger_preview, 20)
-			end)
-
-			map("n", "G", function()
-				actions_mod.move_to_bottom(prompt_bufnr)
-				vim.defer_fn(trigger_preview, 20)
-			end)
-
 			-- Quick theme switching without closing
 			map("i", "<C-y>", function()
-				local selection = get_selection_from_cursor()
-				if selection and selection.value then
+				local selection = action_state_mod.get_selected_entry()
+				if selection then
 					ThemePicker.select_theme(selection.value)
 				end
 			end)
 
 			map("n", "<C-y>", function()
-				local selection = get_selection_from_cursor()
-				if selection and selection.value then
+				local selection = action_state_mod.get_selected_entry()
+				if selection then
 					ThemePicker.select_theme(selection.value)
 				end
 			end)
 
 			-- Select theme and close (standard Telescope behavior)
 			actions_mod.select_default:replace(function()
-				-- Clean up timer
-				if preview_timer then
-					preview_timer:stop()
-					preview_timer:close()
-				end
-
-				-- Get current selection from cursor position
-				local selection = get_selection_from_cursor()
-
+				local selection = action_state_mod.get_selected_entry()
 				if selection and selection.value then
 					ThemePicker.select_theme(selection.value)
 				else
