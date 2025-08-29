@@ -237,8 +237,10 @@ function ThemePicker.show_picker()
 		})
 	end
 
+	local current_preview_theme = nil
+
 	pickers_mod.new({}, {
-		prompt_title = "🎨 Select Theme",
+		prompt_title = "🎨 Select Theme (Live Preview)",
 		finder = finders_mod.new_table({
 			results = theme_entries,
 			entry_maker = function(entry)
@@ -253,23 +255,44 @@ function ThemePicker.show_picker()
 		sorter = conf_mod.generic_sorter({}),
 		previewer = false, -- Disable preview for faster loading
 		attach_mappings = function(prompt_bufnr, map)
-			-- Preview theme on selection
-			local preview_theme = function()
+			-- Automatic live preview on cursor movement
+			local last_selection = nil
+			local preview_timer = nil
+
+			local function do_live_preview()
 				local selection = action_state_mod.get_selected_entry()
-				if selection then
+				if selection and selection.value ~= last_selection then
+					last_selection = selection.value
 					ThemePicker.preview_theme(selection.value)
 				end
 			end
 
-			-- Map preview to selection movement
-			map("i", "<C-p>", preview_theme)
-			map("n", "<C-p>", preview_theme)
+			-- Debounced live preview to avoid flickering
+			local function trigger_preview()
+				if preview_timer then
+					vim.loop.timer_stop(preview_timer)
+				end
+				preview_timer = vim.defer_fn(do_live_preview, 150) -- 150ms debounce
+			end
+
+			-- Auto-preview on selection change
+			vim.api.nvim_create_autocmd("CursorMoved", {
+				buffer = prompt_bufnr,
+				callback = trigger_preview,
+			})
+
+			-- Manual preview (legacy support)
+			map("i", "<C-p>", do_live_preview)
+			map("n", "<C-p>", do_live_preview)
 
 			-- Select theme and close
 			actions_mod.select_default:replace(function()
 				local selection = action_state_mod.get_selected_entry()
 				if selection then
 					ThemePicker.select_theme(selection.value)
+				end
+				if preview_timer then
+					vim.loop.timer_stop(preview_timer)
 				end
 				actions_mod.close(prompt_bufnr)
 			end)
@@ -289,52 +312,212 @@ function ThemePicker.show_picker()
 				end
 			end)
 
+			-- Trigger initial preview
+			vim.defer_fn(trigger_preview, 100)
+
 			return true
 		end,
 	}):find()
 end
 
--- Fallback theme picker using vim.ui.select
+-- Fallback theme picker with scrolling and live preview
 function ThemePicker.show_fallback_picker(themes)
-	local theme_names = {}
-	for _, theme in ipairs(themes) do
+	local current_index = 1
+	local current_preview_theme = nil
+
+	-- Create theme display entries
+	local theme_entries = {}
+	for i, theme in ipairs(themes) do
 		local info = get_theme_info(theme)
-		local indicator = info.is_current and "● " or "○ "
-		local category = info.category == "dark" and "🌙 " or
-		                info.category == "light" and "☀️ " or "🎨 "
-		table.insert(theme_names, indicator .. category .. info.display_name)
+		local entry = {
+			index = i,
+			theme = theme,
+			display = string.format("%s %s %s",
+				info.is_current and "●" or "○",
+				info.category == "dark" and "🌙" or
+				info.category == "light" and "☀️" or "🎨",
+				info.display_name
+			),
+			info = info
+		}
+		table.insert(theme_entries, entry)
+		if info.is_current then
+			current_index = i
+		end
 	end
 
-	vim.ui.select(theme_names, {
-		prompt = "🎨 Select Theme:",
-		format_item = function(item) return item end,
-	}, function(choice, idx)
-		if choice and idx then
-			local theme_name = themes[idx]
-			if theme_name then
-				ThemePicker.select_theme(theme_name)
-			end
+	-- Create floating window
+	local width = 50
+	local height = math.min(#theme_entries, 15)
+	local row = math.floor((vim.o.lines - height) / 2)
+	local col = math.floor((vim.o.columns - width) / 2)
+
+	local buf = vim.api.nvim_create_buf(false, true)
+	local win = vim.api.nvim_open_win(buf, true, {
+		relative = "editor",
+		row = row,
+		col = col,
+		width = width,
+		height = height,
+		style = "minimal",
+		border = "rounded",
+		title = "🎨 Select Theme (Live Preview)",
+		title_pos = "center",
+	})
+
+	-- Set buffer content
+	local lines = {}
+	for _, entry in ipairs(theme_entries) do
+		table.insert(lines, entry.display)
+	end
+	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+
+	-- Highlight current selection
+	local function update_highlight()
+		vim.api.nvim_buf_clear_namespace(buf, -1, 0, -1)
+		vim.api.nvim_buf_add_highlight(buf, -1, "CursorLine", current_index - 1, 0, -1)
+
+		-- Live preview
+		local current_entry = theme_entries[current_index]
+		if current_entry and current_entry.theme ~= current_preview_theme then
+			current_preview_theme = current_entry.theme
+			ThemePicker.preview_theme(current_entry.theme)
 		end
-	end)
+	end
+
+	-- Set initial highlight
+	update_highlight()
+
+	-- Key mappings
+	local function close_window()
+		vim.api.nvim_win_close(win, true)
+		vim.api.nvim_buf_delete(buf, { force = true })
+	end
+
+	local function select_current()
+		local current_entry = theme_entries[current_index]
+		if current_entry then
+			ThemePicker.select_theme(current_entry.theme)
+		end
+		close_window()
+	end
+
+	local function move_selection(direction)
+		current_index = current_index + direction
+		if current_index < 1 then
+			current_index = #theme_entries
+		elseif current_index > #theme_entries then
+			current_index = 1
+		end
+		update_highlight()
+
+		-- Scroll window if needed
+		local first_visible = vim.fn.line('w0', win)
+		local last_visible = vim.fn.line('w$', win)
+
+		if current_index < first_visible then
+			vim.api.nvim_win_set_cursor(win, {current_index, 0})
+		elseif current_index > last_visible then
+			local new_top = current_index - (last_visible - first_visible)
+			vim.api.nvim_win_set_cursor(win, {new_top, 0})
+		end
+		vim.api.nvim_win_set_cursor(win, {current_index, 0})
+	end
+
+	-- Buffer-local keymaps
+	vim.api.nvim_buf_set_keymap(buf, 'n', '<Esc>', '', {
+		callback = close_window,
+		noremap = true,
+		silent = true
+	})
+
+	vim.api.nvim_buf_set_keymap(buf, 'n', '<CR>', '', {
+		callback = select_current,
+		noremap = true,
+		silent = true
+	})
+
+	vim.api.nvim_buf_set_keymap(buf, 'n', 'q', '', {
+		callback = close_window,
+		noremap = true,
+		silent = true
+	})
+
+	vim.api.nvim_buf_set_keymap(buf, 'n', 'j', '', {
+		callback = function() move_selection(1) end,
+		noremap = true,
+		silent = true
+	})
+
+	vim.api.nvim_buf_set_keymap(buf, 'n', 'k', '', {
+		callback = function() move_selection(-1) end,
+		noremap = true,
+		silent = true
+	})
+
+	vim.api.nvim_buf_set_keymap(buf, 'n', '<Down>', '', {
+		callback = function() move_selection(1) end,
+		noremap = true,
+		silent = true
+	})
+
+	vim.api.nvim_buf_set_keymap(buf, 'n', '<Up>', '', {
+		callback = function() move_selection(-1) end,
+		noremap = true,
+		silent = true
+	})
+
+	-- Set cursor to current selection
+	vim.api.nvim_win_set_cursor(win, {current_index, 0})
+
+	-- Set buffer options
+	vim.bo[buf].modifiable = false
+	vim.bo[buf].buftype = 'nofile'
+	vim.bo[buf].bufhidden = 'wipe'
 end
 
--- Preview theme (temporary application)
+-- Preview theme (temporary application) with debouncing
+local preview_timer = nil
+local last_preview_theme = nil
+
 function ThemePicker.preview_theme(theme_name)
-	local ok, err = pcall(vim.cmd.colorscheme, theme_name)
-	if not ok then
-		notify("Failed to preview theme: " .. theme_name, vim.log.levels.WARN)
-	else
-		-- Temporarily show theme name
-		local info = get_theme_info(theme_name)
-		vim.notify("Previewing: " .. info.display_name, vim.log.levels.INFO, { timeout = 1000 })
+	-- Avoid redundant previews
+	if theme_name == last_preview_theme then
+		return
 	end
+
+	-- Clear any pending preview
+	if preview_timer then
+		vim.loop.timer_stop(preview_timer)
+	end
+
+	-- Debounce theme preview to avoid flickering
+	preview_timer = vim.defer_fn(function()
+		local ok, err = pcall(vim.cmd.colorscheme, theme_name)
+		if ok then
+			last_preview_theme = theme_name
+			-- Only show notification for manual previews, not auto-previews
+			local info = get_theme_info(theme_name)
+			vim.notify("Previewing: " .. info.display_name, vim.log.levels.INFO, { timeout = 500 })
+		else
+			notify("Failed to preview theme: " .. theme_name, vim.log.levels.WARN)
+		end
+		preview_timer = nil
+	end, 50) -- 50ms debounce for smooth experience
 end
 
 -- Select and apply theme permanently
 function ThemePicker.select_theme(theme_name)
+	-- Clear any pending preview
+	if preview_timer then
+		vim.loop.timer_stop(preview_timer)
+		preview_timer = nil
+	end
+
 	local ok, err = pcall(vim.cmd.colorscheme, theme_name)
 	if ok then
 		current_theme = theme_name
+		last_preview_theme = theme_name -- Update preview state
 		local info = get_theme_info(theme_name)
 		notify("Theme changed to: " .. info.display_name, vim.log.levels.INFO)
 

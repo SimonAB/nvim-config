@@ -160,10 +160,11 @@ The enhanced theme system provides multiple ways to switch themes:
 
 The theme picker features:
 - 🎨 **Visual Categories**: Themes are categorized (dark 🌙, light ☀️, special 🎨)
-- ⚡ **Live Preview**: See themes instantly with `<C-p>`
+- ⚡ **Live Preview**: Automatic theme preview as you move cursor
 - 🎯 **Quick Apply**: Apply without closing with `<C-y>`
 - 🔍 **Search & Filter**: Fuzzy search through all available themes
-- 🛡️ **Fallback Support**: Works even if Telescope fails to load
+- 📜 **Smooth Scrolling**: Navigate with arrow keys, j/k, or mouse
+- 🛡️ **Fallback Support**: Custom scrolling interface if Telescope fails
 
 ## Next Steps
 
