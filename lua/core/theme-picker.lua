@@ -401,8 +401,6 @@ function ThemePicker.show_picker()
 				end
 
 				if selection and selection.value then
-					-- Debug: show what we're selecting
-					vim.notify("Applying theme: " .. selection.value, vim.log.levels.DEBUG)
 					ThemePicker.select_theme(selection.value)
 				else
 					vim.notify("Could not determine selected theme", vim.log.levels.ERROR)
