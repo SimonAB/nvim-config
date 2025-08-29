@@ -1,3 +1,6 @@
+-- Capture process start time as early as possible for dashboard stats
+_G.__nvim_start_ts = _G.__nvim_start_ts or (vim.loop and vim.loop.hrtime and vim.loop.hrtime() or nil)
+
 -- Modern Neovim Configuration with vim.pack (Performance Optimised)
 
 -- Set leader keys early (must be before loading plugins)
