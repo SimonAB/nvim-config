@@ -255,6 +255,33 @@ if ok then
 	end, desc = "Mason Status" },
 		-- Markdown preview
 		{ "<leader>K", group = "Markdown" },
+
+		-- Plugin management (enhanced with progress feedback)
+		{ "<leader>Cu", group = "Update" },
+		{ "<leader>Cua", function()
+			local ok, PluginManager = pcall(require, "core.plugin-manager")
+			if ok then
+				PluginManager.update_all_plugins()
+			else
+				vim.notify("Plugin Manager not available", vim.log.levels.WARN)
+			end
+		end, desc = "Update All Plugins" },
+		{ "<leader>Cus", function()
+			local ok, PluginManager = pcall(require, "core.plugin-manager")
+			if ok then
+				PluginManager.show_status()
+			else
+				vim.notify("Plugin Manager not available", vim.log.levels.WARN)
+			end
+		end, desc = "Plugin Status" },
+		{ "<leader>Cuc", function()
+			local ok, PluginManager = pcall(require, "core.plugin-manager")
+			if ok then
+				PluginManager.cleanup_orphaned()
+			else
+				vim.notify("Plugin Manager not available", vim.log.levels.WARN)
+			end
+		end, desc = "Cleanup Orphaned" },
 	})
 
 	-- All individual keymaps are now defined in keymaps.lua with desc fields

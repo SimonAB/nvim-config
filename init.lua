@@ -102,3 +102,7 @@ setup_optimized_autocmds()
 -- Initialize optimized theme system
 local ThemeManager = require("core.theme-manager")
 ThemeManager.init()
+
+-- Initialize enhanced plugin manager
+local PluginManager = require("core.plugin-manager")
+PluginManager.init()
