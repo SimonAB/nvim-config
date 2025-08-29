@@ -7,7 +7,9 @@ local DocGenerator = {}
 
 -- Generate plugin reference from current configuration
 function DocGenerator.generate_plugin_reference()
-    local plugins = require("plugins")
+    -- Load plugin list via dofile to avoid side effects in require cache
+    local config_dir = vim.fn.stdpath and vim.fn.stdpath("config") or "~/.config/nvim"
+    local plugins = dofile(config_dir .. "/lua/plugins.lua")
     local content = {
         "# Plugin Reference",
         "",

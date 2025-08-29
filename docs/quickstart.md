@@ -168,6 +168,8 @@ The theme picker features:
 - ⌨️ **Smart Input**: Insert mode for filtering, normal mode for navigation
 - 🛡️ **Fallback Support**: Custom scrolling interface if Telescope fails
 
+Filter controls (fallback picker): press `f` to cycle All → Dark → Light; or `d`, `l`, `a` to directly pick a filter.
+
 ## Next Steps
 
 1. **Explore Features**: Use Which-Key (`<Space>`) to discover commands
