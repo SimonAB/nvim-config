@@ -377,33 +377,22 @@ function ThemePicker.show_picker()
 
 			-- Select theme and close (standard Telescope behavior)
 			actions_mod.select_default:replace(function()
-				-- Try to get the current selection using Telescope's built-in method
-				local selection = action_state_mod.get_selected_entry()
+				-- Get the current cursor position
+				local current_line = vim.api.nvim_win_get_cursor(prompt_bufnr)[1]
 
-				-- If that fails, try a simple approach using the picker state
-				if not selection or not selection.value then
-					-- Get the current picker and try to get selection from there
-					local picker = action_state_mod.get_current_picker(prompt_bufnr)
-					if picker then
-						local row = vim.api.nvim_win_get_cursor(prompt_bufnr)[1]
-						local results = picker.finder.results
-						if results and results[row] then
-							selection = results[row]
-						end
+				-- For now, use the simplest approach: assume the cursor position
+				-- corresponds to the original theme entry index
+				local selection = nil
+				if local_theme_entries and current_line <= #local_theme_entries then
+					local entry = local_theme_entries[current_line]
+					if entry then
+						selection = { value = entry.theme }
 					end
 				end
 
-				-- Final fallback: just get the first visible entry
+				-- If that didn't work, try Telescope's method
 				if not selection or not selection.value then
-					if local_theme_entries and #local_theme_entries > 0 then
-						local current_line = vim.api.nvim_win_get_cursor(prompt_bufnr)[1]
-						if current_line <= #local_theme_entries then
-							local entry = local_theme_entries[current_line]
-							if entry then
-								selection = { value = entry.theme }
-							end
-						end
-					end
+					selection = action_state_mod.get_selected_entry()
 				end
 
 				if selection and selection.value then
@@ -411,7 +400,7 @@ function ThemePicker.show_picker()
 					vim.notify("Applying theme: " .. selection.value, vim.log.levels.DEBUG)
 					ThemePicker.select_theme(selection.value)
 				else
-					vim.notify("Could not determine selected theme", vim.log.levels.ERROR)
+					vim.notify("Could not determine selected theme at line " .. current_line, vim.log.levels.ERROR)
 				end
 				actions_mod.close(prompt_bufnr)
 			end)
