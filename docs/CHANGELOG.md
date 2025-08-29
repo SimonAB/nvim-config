@@ -3,15 +3,16 @@
 ## [Latest] - Enhanced Theme Management System
 
 ### 🎨 New Features
-- **Theme Picker**: Standard Telescope interface for theme selection
+- **Theme Picker**: Enhanced Telescope interface with nvim-tree style filtering
   - Visual theme categories (dark 🌙, light ☀️, special 🎨)
   - **Telescope Previewer**: Custom preview panel shows theme info and applies theme
-  - **Smart Search**: Search filtering with instant preview updates
+  - **Nvim-tree Style Filtering**: Live filtering as you type with immediate updates
+  - **Smart Input Modes**: Insert mode for filtering, normal mode for navigation
   - **Enhanced Navigation**: All Telescope navigation (j/k, arrows, gg/G) with preview
   - Quick apply without closing with `<C-y>`
   - Current theme indicator with ● symbol
   - **Responsive Preview**: Theme updates on all selection changes (search, navigation)
-  - **Search Integration**: Preview updates when search results change
+  - **Debounced Filtering**: Smooth 150ms debounced filter updates
   - **Clean Integration**: Follows Telescope's standard patterns and behavior
   - **Professional UX**: Consistent with other Telescope pickers
 

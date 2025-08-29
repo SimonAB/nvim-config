@@ -161,10 +161,11 @@ The enhanced theme system provides multiple ways to switch themes:
 The theme picker features:
 - 🎨 **Visual Categories**: Themes are categorized (dark 🌙, light ☀️, special 🎨)
 - 👁️ **Live Preview Panel**: See theme info and preview in dedicated panel
-- 🔍 **Smart Search**: Type to filter themes with instant preview updates
+- 🔍 **Nvim-tree Style Filtering**: Type to filter themes with live updates
 - 🎯 **Quick Apply**: Apply without closing with `<C-y>`
-- 📜 **Enhanced Navigation**: All Telescope navigation (j/k, arrows, gg/G, etc.)
+- 📜 **Full Navigation**: All Telescope navigation (j/k, arrows, gg/G) + filtering
 - 🖼️ **Responsive Preview**: Theme updates instantly on all selection changes
+- ⌨️ **Smart Input**: Insert mode for filtering, normal mode for navigation
 - 🛡️ **Fallback Support**: Custom scrolling interface if Telescope fails
 
 ## Next Steps
