@@ -148,6 +148,27 @@ local function ensure_telescope_loaded()
 	return nil
 end
 
+-- Filter themes based on search query (nvim-tree style)
+local function filter_themes(themes, query)
+	if not query or query == "" then
+		return themes
+	end
+
+	local filtered = {}
+	local query_lower = query:lower()
+
+	for _, theme in ipairs(themes) do
+		local info = get_theme_info(theme)
+		local searchable_text = (info.display_name .. " " .. theme):lower()
+
+		if searchable_text:find(query_lower, 1, true) then
+			table.insert(filtered, theme)
+		end
+	end
+
+	return filtered
+end
+
 -- Create floating window picker
 function ThemePicker.show_picker()
 	local available_themes = get_available_themes()
@@ -157,11 +178,8 @@ function ThemePicker.show_picker()
 		return
 	end
 
-	-- Format themes for telescope
-	local theme_entries = {}
-	for _, theme in ipairs(available_themes) do
-		table.insert(theme_entries, format_theme_entry(theme))
-	end
+	-- Start with all themes
+	local filtered_themes = available_themes
 
 	-- Ensure Telescope is loaded
 	local telescope = ensure_telescope_loaded()
@@ -244,6 +262,27 @@ function ThemePicker.show_picker()
 		})
 	end
 
+	-- Custom filter state (nvim-tree style)
+	local filter_query = ""
+	local current_picker = nil
+
+	local function update_picker_results(picker, query)
+		filter_query = query
+		filtered_themes = filter_themes(available_themes, query)
+
+		-- Format filtered themes for display
+		local new_entries = {}
+		for _, theme in ipairs(filtered_themes) do
+			table.insert(new_entries, format_theme_entry(theme))
+		end
+
+		-- Update the picker with new results
+		if picker and picker.finder then
+			picker.finder.results = new_entries
+			picker:refresh()
+		end
+	end
+
 	-- Create a custom previewer for themes
 	local theme_previewer = previewers_mod.new_buffer_previewer({
 		title = "Theme Preview",
@@ -281,10 +320,21 @@ function ThemePicker.show_picker()
 		end,
 	})
 
+	-- Format initial theme entries
+	local function create_theme_entries(themes)
+		local entries = {}
+		for _, theme in ipairs(themes) do
+			table.insert(entries, format_theme_entry(theme))
+		end
+		return entries
+	end
+
+	local initial_entries = create_theme_entries(filtered_themes)
+
 	pickers_mod.new({}, {
-		prompt_title = "🎨 Select Theme",
+		prompt_title = "🎨 Select Theme (Type to filter)",
 		finder = finders_mod.new_table({
-			results = theme_entries,
+			results = initial_entries,
 			entry_maker = function(entry)
 				return {
 					value = entry.value,
@@ -298,6 +348,53 @@ function ThemePicker.show_picker()
 		previewer = theme_previewer,
 
 		attach_mappings = function(prompt_bufnr, map)
+			current_picker = action_state_mod.get_current_picker(prompt_bufnr)
+
+			-- Custom filtering (nvim-tree style)
+			local filter_timer = nil
+			vim.api.nvim_create_autocmd("TextChangedI", {
+				buffer = prompt_bufnr,
+				callback = function()
+					-- Cancel any pending filter update
+					if filter_timer then
+						vim.loop.timer_stop(filter_timer)
+					end
+
+					-- Get the current input
+					local current_line = vim.api.nvim_get_current_line()
+					local query = current_line:gsub("^%s*(.-)%s*$", "%1") -- trim whitespace
+
+					-- Schedule filter update
+					filter_timer = vim.defer_fn(function()
+						if current_picker and query ~= filter_query then
+							update_picker_results(current_picker, query)
+						end
+						filter_timer = nil
+					end, 150) -- Debounce for smooth filtering
+				end,
+			})
+
+			-- Clear filter on Escape (double press)
+			local escape_pressed = false
+			map("i", "<Esc>", function()
+				if escape_pressed then
+					-- Second escape: clear filter and close
+					if filter_query ~= "" then
+						filter_query = ""
+						if current_picker then
+							update_picker_results(current_picker, "")
+						end
+					end
+					actions_mod.close(prompt_bufnr)
+				else
+					-- First escape: just exit insert mode
+					escape_pressed = true
+					vim.cmd("stopinsert")
+					vim.defer_fn(function()
+						escape_pressed = false
+					end, 1000) -- Reset after 1 second
+				end
+			end)
 
 			-- Quick theme switching without closing
 			map("i", "<C-y>", function()
