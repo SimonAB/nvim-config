@@ -1,36 +1,56 @@
-# ✴︎ StellarVIM: Neovim Configuration for Academic Writing
+# ✴︎ StellarVIM
 
-A comprehensive Neovim configuration optimised for academic research workflows, featuring advanced LaTeX support with bidirectional PDF synchronisation, Julia, Python, and R LSP integration, Quarto document authoring, intelligent terminal integration, and markdown preview capabilities. Built for Neovim 0.12+ using modern vim.pack plugin management with a modular, maintainable structure.
+> Modern Neovim configuration for academic writing and research
 
-## 🎯 Key Features for Researchers
+A streamlined Neovim setup optimized for academic workflows with fast startup, comprehensive LSP support, and intelligent document processing.
 
-### Multi-Language Scientific Computing
-- **Julia**: Enhanced LSP with auto-completion, REPL integration, and project management
-- **Python, R, Bash**: Multi-language code execution in unified documents
-- **Quarto**: Full document authoring with Molten Jupyter kernel integration
-- **Otter**: Multi-language LSP support for code chunks in documents
-- **LaTeX**: VimTeX with bibliography management and real-time compilation
+## 🚀 Quick Start
 
-### Document Processing & Preview
-- **Markdown Preview**: Live preview with `<leader>Kp` featuring KaTeX math rendering and responsive design
-- **LaTeX Support**: VimTeX with bibliography management and real-time compilation
-- **Typst Support**: Low-latency Typst document preview with PDF compilation
-- **Quarto Integration**: Full document authoring with multi-language support
+```bash
+git clone https://github.com/your-repo/stellarvim ~/.config/nvim
+cd ~/.config/nvim && ./scripts/setup.sh
+```
 
-### LaTeX Bidirectional Synchronisation
-**Seamless PDF-to-source navigation** via VimTeX and Skim (macOS):
-- **Forward search**: Jump from LaTeX source to corresponding PDF location
-- **Inverse search**: Click PDF to navigate to source code (Cmd+click in Skim)
-- Real-time compilation with LuaLaTeX and synctex support
-- Perfect for managing large documents, theses, and complex mathematical content
+## ✨ Key Features
 
-### Academic Workflow Tools
-- **Citation management**: Bibliography completion and reference jumping
-- **Document navigation**: Telescope fuzzy finding across projects
-- **Version control**: Integrated Git support with LazyGit
-- **Terminal integration**: Smart code block execution with automatic navigation
-- **Theme cycling**: Auto dark mode with multiple theme options
-- **Obsidian integration**: Seamless vault management with image pasting
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Performance** | ✅ <200ms startup | Optimized loading with 3-phase system |
+| **LSP Support** | ✅ Mason-managed | Academic servers: Python, LaTeX, Typst, Julia |
+| **Document Processing** | ✅ Multi-format | LaTeX, Typst, Markdown, Quarto support |
+| **Theme System** | ✅ Auto-switching | System appearance detection |
+| **Terminal Integration** | ✅ Smart execution | Code block detection and execution |
+| **Git Integration** | ✅ Full workflow | Gitsigns + LazyGit + Telescope |
+
+## 📚 Documentation
+
+### Getting Started
+- **[Quick Start](docs/quickstart.md)** - Installation and basic setup
+- **[LSP Setup](docs/advanced/lsp-setup.md)** - Language server configuration
+- **[Performance](docs/advanced/performance.md)** - Optimization and troubleshooting
+
+### Reference
+- **[Keymaps](docs/reference/keymaps.md)** - Complete keybinding reference
+- **[Plugins](docs/reference/plugins.md)** - Plugin configurations and usage
+- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
+
+## 🎯 Highlights
+
+### Academic Workflow
+- **LaTeX Integration**: VimTeX with Skim bidirectional sync
+- **Multi-language Support**: Python, R, Julia, Bash in documents
+- **Citation Management**: Bibliography completion and navigation
+- **Document Preview**: Live markdown and LaTeX preview
+
+### Performance Optimized
+- **3-Phase Loading**: Immediate (0ms) → Deferred (100ms) → Lazy (500ms)
+- **Theme Caching**: Intelligent highlight management
+- **Smart LSP**: Auto-installation with progress tracking
+
+### Developer Experience
+- **Mason UI**: Enhanced package management with batch operations
+- **Which-Key**: Discoverable keymaps with visual feedback
+- **Auto-completion**: Blink.cmp with LSP integration
 
 ## 📁 Modular Structure
 
