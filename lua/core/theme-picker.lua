@@ -126,6 +126,28 @@ local function format_theme_entry(theme_name)
 	}
 end
 
+-- Ensure Telescope is loaded
+local function ensure_telescope_loaded()
+	local max_attempts = 10
+	local attempt = 0
+
+	while attempt < max_attempts do
+		local ok, telescope = pcall(require, "telescope")
+		if ok then
+			return telescope
+		end
+
+		-- Try to load Telescope plugin configuration
+		pcall(require, "plugins.telescope")
+
+		-- Wait a bit for Telescope to load
+		vim.wait(50)
+		attempt = attempt + 1
+	end
+
+	return nil
+end
+
 -- Create floating window picker
 function ThemePicker.show_picker()
 	local available_themes = get_available_themes()
@@ -141,21 +163,51 @@ function ThemePicker.show_picker()
 		table.insert(theme_entries, format_theme_entry(theme))
 	end
 
-	-- Telescope picker configuration
-	local ok, telescope = pcall(require, "telescope")
-	if not ok then
-		notify("Telescope not available", vim.log.levels.ERROR)
+	-- Ensure Telescope is loaded
+	local telescope = ensure_telescope_loaded()
+	if not telescope then
+		notify("Telescope not available. Please ensure telescope.nvim is installed and loaded.", vim.log.levels.ERROR)
 		return
 	end
 
-	local pickers = require("telescope.pickers")
-	local finders = require("telescope.finders")
-	local conf = require("telescope.config").values
-	local actions = require("telescope.actions")
-	local action_state = require("telescope.action_state")
-	local entry_display = require("telescope.pickers.entry_display")
+	-- Safely require Telescope modules
+	local ok, pickers_mod = pcall(require, "telescope.pickers")
+	if not ok then
+		notify("Failed to load Telescope pickers", vim.log.levels.ERROR)
+		return
+	end
 
-	local displayer = entry_display.create({
+	local ok, finders_mod = pcall(require, "telescope.finders")
+	if not ok then
+		notify("Failed to load Telescope finders", vim.log.levels.ERROR)
+		return
+	end
+
+	local ok, conf_mod = pcall(function() return require("telescope.config").values end)
+	if not ok then
+		notify("Failed to load Telescope config", vim.log.levels.ERROR)
+		return
+	end
+
+	local ok, actions_mod = pcall(require, "telescope.actions")
+	if not ok then
+		notify("Failed to load Telescope actions", vim.log.levels.ERROR)
+		return
+	end
+
+	local ok, action_state_mod = pcall(require, "telescope.action_state")
+	if not ok then
+		notify("Failed to load Telescope action_state", vim.log.levels.ERROR)
+		return
+	end
+
+	local ok, entry_display_mod = pcall(require, "telescope.pickers.entry_display")
+	if not ok then
+		notify("Failed to load Telescope entry_display", vim.log.levels.ERROR)
+		return
+	end
+
+	local displayer = entry_display_mod.create({
 		separator = " ",
 		items = {
 			{ width = 2 }, -- Selection indicator
@@ -177,9 +229,9 @@ function ThemePicker.show_picker()
 		})
 	end
 
-	pickers.new({}, {
+	pickers_mod.new({}, {
 		prompt_title = "🎨 Select Theme",
-		finder = finders.new_table({
+		finder = finders_mod.new_table({
 			results = theme_entries,
 			entry_maker = function(entry)
 				return {
@@ -190,12 +242,12 @@ function ThemePicker.show_picker()
 				}
 			end,
 		}),
-		sorter = conf.generic_sorter({}),
+		sorter = conf_mod.generic_sorter({}),
 		previewer = false, -- Disable preview for faster loading
 		attach_mappings = function(prompt_bufnr, map)
 			-- Preview theme on selection
 			local preview_theme = function()
-				local selection = action_state.get_selected_entry()
+				local selection = action_state_mod.get_selected_entry()
 				if selection then
 					ThemePicker.preview_theme(selection.value)
 				end
@@ -206,24 +258,24 @@ function ThemePicker.show_picker()
 			map("n", "<C-p>", preview_theme)
 
 			-- Select theme and close
-			actions.select_default:replace(function()
-				local selection = action_state.get_selected_entry()
+			actions_mod.select_default:replace(function()
+				local selection = action_state_mod.get_selected_entry()
 				if selection then
 					ThemePicker.select_theme(selection.value)
 				end
-				actions.close(prompt_bufnr)
+				actions_mod.close(prompt_bufnr)
 			end)
 
 			-- Quick theme switching without closing
 			map("i", "<C-y>", function()
-				local selection = action_state.get_selected_entry()
+				local selection = action_state_mod.get_selected_entry()
 				if selection then
 					ThemePicker.select_theme(selection.value)
 				end
 			end)
 
 			map("n", "<C-y>", function()
-				local selection = action_state.get_selected_entry()
+				local selection = action_state_mod.get_selected_entry()
 				if selection then
 					ThemePicker.select_theme(selection.value)
 				end

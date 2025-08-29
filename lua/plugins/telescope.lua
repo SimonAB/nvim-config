@@ -7,6 +7,10 @@ if ok then
 	pcall(telescope.load_extension, "fzf")
 	pcall(telescope.load_extension, "frecency")
 
+	-- Safely get sorters
+	local sorters_ok, sorters = pcall(require, "telescope.sorters")
+	local file_sorter = sorters_ok and sorters.fuzzy_with_index_bias or nil
+
 	telescope.setup({
 		defaults = {
 			-- Performance optimisations
@@ -14,7 +18,7 @@ if ok then
 			-- Show only filename, not full path
 			path_display = { "truncate" },
 			-- Use built-in sorter that considers when items were added
-			file_sorter = require("telescope.sorters").fuzzy_with_index_bias,
+			file_sorter = file_sorter,
 			-- Better layout for performance
 			layout_strategy = "horizontal",
 			layout_config = {
