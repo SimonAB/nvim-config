@@ -49,9 +49,24 @@ function M.setup()
 		end
 	end
 
+	-- Compose header with startup stats (LazyVim-style)
+	local function build_header()
+		local ascii = config.HEADER
+		local ms = nil
+		local ok_hr = (vim.loop and vim.loop.hrtime and type(vim.loop.hrtime) == "function")
+		if ok_hr and _G.__nvim_start_ts then
+			local now = vim.loop.hrtime()
+			if type(now) == "number" and now > _G.__nvim_start_ts then
+				ms = math.floor((now - _G.__nvim_start_ts) / 1e6)
+			end
+		end
+		local prefix = ms and ("⚡ Startup: " .. tostring(ms) .. " ms") or "⚡ Startup: n/a"
+		return prefix .. "\n" .. ascii
+	end
+
 	starter.setup({
 		evaluate_single = true,
-		header = config.HEADER,
+		header = build_header(),
 		items = items,
 		content_hooks = (function()
 			local hooks = starter.gen_hook or {}
