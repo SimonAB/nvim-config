@@ -5,6 +5,7 @@
 
 local ThemeManager = {}
 local highlight_cache = {}
+local ThemePicker = nil -- Lazy load to avoid circular dependencies
 
 -- Detect system appearance
 function ThemeManager.detect_system_theme()
@@ -105,6 +106,68 @@ end
 -- Clear highlight cache (useful when reloading config)
 function ThemeManager.clear_highlight_cache()
 	highlight_cache = {}
+end
+
+-- Theme picker integration
+function ThemeManager.show_theme_picker()
+	if not ThemePicker then
+		local ok, picker = pcall(require, "core.theme-picker")
+		if not ok then
+			vim.notify("Theme Picker not available", vim.log.levels.ERROR)
+			return
+		end
+		ThemePicker = picker
+	end
+
+	if ThemePicker.show_picker then
+		ThemePicker.show_picker()
+	else
+		vim.notify("Theme picker show function not available", vim.log.levels.ERROR)
+	end
+end
+
+-- Cycle through themes (legacy support)
+function ThemeManager.cycle_theme()
+	if not ThemePicker then
+		local ok, picker = pcall(require, "core.theme-picker")
+		if ok then
+			ThemePicker = picker
+		end
+	end
+
+	if ThemePicker and ThemePicker.cycle_theme then
+		ThemePicker.cycle_theme()
+	else
+		-- Fallback to original cycling logic
+		local themes = { "catppuccin", "onedark", "tokyonight", "nord", "github_dark" }
+		local current = vim.g.colors_name or "default"
+		local current_index = 1
+
+		for i, theme in ipairs(themes) do
+			if theme == current then
+				current_index = i
+				break
+			end
+		end
+
+		local next_index = current_index % #themes + 1
+		local next_theme = themes[next_index]
+
+		local success = pcall(vim.cmd.colorscheme, next_theme)
+		if success then
+			vim.notify("Switched to " .. next_theme .. " theme", vim.log.levels.INFO)
+		else
+			vim.notify("Failed to switch to " .. next_theme .. " theme", vim.log.levels.WARN)
+		end
+	end
+end
+
+-- Get current theme
+function ThemeManager.get_current_theme()
+	if ThemePicker and ThemePicker.get_current_theme then
+		return ThemePicker.get_current_theme()
+	end
+	return vim.g.colors_name or "default"
 end
 
 -- Setup auto-updating highlights when theme changes

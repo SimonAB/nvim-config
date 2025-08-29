@@ -150,12 +150,27 @@ vim.keymap.set("n", "<leader>mykey", ":MyCommand<CR>", { desc = "My custom comma
 - **Keymap Search**: `<Space>Sk` to search keymaps
 - **Plugin Help**: `:help <plugin-name>` for documentation
 
+## Theme Management
+
+The enhanced theme system provides multiple ways to switch themes:
+
+- **Theme Picker**: `<Space>Ytp` - Opens a floating window with all available themes
+- **Quick Cycle**: `<Space>Yc` - Cycles through your favorite themes
+- **Current Theme**: `<Space>Yts` - Shows your current theme
+
+The theme picker features:
+- 🎨 **Visual Categories**: Themes are categorized (dark 🌙, light ☀️, special 🎨)
+- ⚡ **Live Preview**: See themes instantly with `<C-p>`
+- 🎯 **Quick Apply**: Apply without closing with `<C-y>`
+- 🔍 **Search & Filter**: Fuzzy search through all available themes
+
 ## Next Steps
 
 1. **Explore Features**: Use Which-Key (`<Space>`) to discover commands
 2. **Configure LSP**: Set up language servers for your projects
-3. **Customize**: Add your preferred keymaps and settings
-4. **Learn**: Check [Advanced Usage](advanced/) for power features
+3. **Customize Themes**: Try different themes with `<Space>Ytp`
+4. **Customize**: Add your preferred keymaps and settings
+5. **Learn**: Check [Advanced Usage](advanced/) for power features
 
 ---
 

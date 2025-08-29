@@ -256,6 +256,9 @@ if ok then
 		-- Markdown preview
 		{ "<leader>K", group = "Markdown" },
 
+		-- Theme management (enhanced with floating picker)
+		{ "<leader>Yt", group = "Themes" },
+
 		-- Plugin management (enhanced with progress feedback)
 		{ "<leader>Cu", group = "Update" },
 	})
