@@ -104,5 +104,11 @@ local ThemeManager = require("core.theme-manager")
 ThemeManager.init()
 
 -- Initialize enhanced plugin manager
-local PluginManager = require("core.plugin-manager")
-PluginManager.init()
+vim.defer_fn(function()
+	local ok, PluginManager = pcall(require, "core.plugin-manager")
+	if ok then
+		PluginManager.init()
+	else
+		vim.notify("Enhanced Plugin Manager not available: " .. tostring(PluginManager), vim.log.levels.WARN)
+	end
+end, 100)
