@@ -166,44 +166,52 @@ function ThemePicker.show_picker()
 	-- Ensure Telescope is loaded
 	local telescope = ensure_telescope_loaded()
 	if not telescope then
-		notify("Telescope not available. Please ensure telescope.nvim is installed and loaded.", vim.log.levels.ERROR)
+		-- Fallback: use vim.ui.select if Telescope fails
+		notify("Using fallback theme selector (Telescope not available)", vim.log.levels.WARN)
+		ThemePicker.show_fallback_picker(available_themes)
 		return
 	end
 
 	-- Safely require Telescope modules
 	local ok, pickers_mod = pcall(require, "telescope.pickers")
 	if not ok then
-		notify("Failed to load Telescope pickers", vim.log.levels.ERROR)
+		notify("Failed to load Telescope pickers, using fallback", vim.log.levels.WARN)
+		ThemePicker.show_fallback_picker(available_themes)
 		return
 	end
 
 	local ok, finders_mod = pcall(require, "telescope.finders")
 	if not ok then
-		notify("Failed to load Telescope finders", vim.log.levels.ERROR)
+		notify("Failed to load Telescope finders, using fallback", vim.log.levels.WARN)
+		ThemePicker.show_fallback_picker(available_themes)
 		return
 	end
 
 	local ok, conf_mod = pcall(function() return require("telescope.config").values end)
 	if not ok then
-		notify("Failed to load Telescope config", vim.log.levels.ERROR)
+		notify("Failed to load Telescope config, using fallback", vim.log.levels.WARN)
+		ThemePicker.show_fallback_picker(available_themes)
 		return
 	end
 
 	local ok, actions_mod = pcall(require, "telescope.actions")
 	if not ok then
-		notify("Failed to load Telescope actions", vim.log.levels.ERROR)
+		notify("Failed to load Telescope actions, using fallback", vim.log.levels.WARN)
+		ThemePicker.show_fallback_picker(available_themes)
 		return
 	end
 
 	local ok, action_state_mod = pcall(require, "telescope.action_state")
 	if not ok then
-		notify("Failed to load Telescope action_state", vim.log.levels.ERROR)
+		notify("Failed to load Telescope action_state, using fallback", vim.log.levels.WARN)
+		ThemePicker.show_fallback_picker(available_themes)
 		return
 	end
 
 	local ok, entry_display_mod = pcall(require, "telescope.pickers.entry_display")
 	if not ok then
-		notify("Failed to load Telescope entry_display", vim.log.levels.ERROR)
+		notify("Failed to load Telescope entry_display, using fallback", vim.log.levels.WARN)
+		ThemePicker.show_fallback_picker(available_themes)
 		return
 	end
 
@@ -284,6 +292,30 @@ function ThemePicker.show_picker()
 			return true
 		end,
 	}):find()
+end
+
+-- Fallback theme picker using vim.ui.select
+function ThemePicker.show_fallback_picker(themes)
+	local theme_names = {}
+	for _, theme in ipairs(themes) do
+		local info = get_theme_info(theme)
+		local indicator = info.is_current and "● " or "○ "
+		local category = info.category == "dark" and "🌙 " or
+		                info.category == "light" and "☀️ " or "🎨 "
+		table.insert(theme_names, indicator .. category .. info.display_name)
+	end
+
+	vim.ui.select(theme_names, {
+		prompt = "🎨 Select Theme:",
+		format_item = function(item) return item end,
+	}, function(choice, idx)
+		if choice and idx then
+			local theme_name = themes[idx]
+			if theme_name then
+				ThemePicker.select_theme(theme_name)
+			end
+		end
+	end)
 end
 
 -- Preview theme (temporary application)
