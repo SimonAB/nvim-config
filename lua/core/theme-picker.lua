@@ -51,7 +51,6 @@ local function load_telescope_modules()
 	local modules = {
 		pickers = "telescope.pickers",
 		finders = "telescope.finders",
-		config = "telescope.config",
 		actions = "telescope.actions",
 		action_state = "telescope.action_state",
 		entry_display = "telescope.pickers.entry_display",
@@ -62,13 +61,20 @@ local function load_telescope_modules()
 	for name, module in pairs(modules) do
 		local ok, mod = pcall(require, module)
 		if not ok then
-			vim.notify("Failed to load " .. module, vim.log.levels.WARN)
+			notify("Failed to load " .. module, vim.log.levels.WARN)
 			return nil
 		end
 		loaded[name] = mod
 	end
 
-	loaded.config = loaded.config.values
+	-- Load config separately
+	local ok, config_mod = pcall(require, "telescope.config")
+	if not ok then
+		notify("Failed to load telescope.config", vim.log.levels.WARN)
+		return nil
+	end
+	loaded.config = config_mod.values
+
 	return loaded
 end
 
@@ -89,61 +95,12 @@ function ThemePicker.show_picker()
 	-- Load Telescope modules
 	local mods = load_telescope_modules()
 	if not mods then
-		notify("Failed to load Telescope modules", vim.log.levels.WARN)
+		notify("Failed to load Telescope modules, using fallback", vim.log.levels.WARN)
+		ThemePicker.show_fallback_picker(themes)
 		return
 	end
 
-	-- Safely require Telescope modules
-	local ok, pickers_mod = pcall(require, "telescope.pickers")
-	if not ok then
-		notify("Failed to load Telescope pickers, using fallback", vim.log.levels.WARN)
-		ThemePicker.show_fallback_picker(available_themes)
-		return
-	end
-
-	local ok, finders_mod = pcall(require, "telescope.finders")
-	if not ok then
-		notify("Failed to load Telescope finders, using fallback", vim.log.levels.WARN)
-		ThemePicker.show_fallback_picker(available_themes)
-		return
-	end
-
-	local ok, conf_mod = pcall(function() return require("telescope.config").values end)
-	if not ok then
-		notify("Failed to load Telescope config, using fallback", vim.log.levels.WARN)
-		ThemePicker.show_fallback_picker(available_themes)
-		return
-	end
-
-	local ok, actions_mod = pcall(require, "telescope.actions")
-	if not ok then
-		notify("Failed to load Telescope actions, using fallback", vim.log.levels.WARN)
-		ThemePicker.show_fallback_picker(available_themes)
-		return
-	end
-
-	local ok, action_state_mod = pcall(require, "telescope.action_state")
-	if not ok then
-		notify("Failed to load Telescope action_state, using fallback", vim.log.levels.WARN)
-		ThemePicker.show_fallback_picker(available_themes)
-		return
-	end
-
-	local ok, entry_display_mod = pcall(require, "telescope.pickers.entry_display")
-	if not ok then
-		notify("Failed to load Telescope entry_display, using fallback", vim.log.levels.WARN)
-		ThemePicker.show_fallback_picker(available_themes)
-		return
-	end
-
-	local ok, previewers_mod = pcall(require, "telescope.previewers")
-	if not ok then
-		notify("Failed to load Telescope previewers, using fallback", vim.log.levels.WARN)
-		ThemePicker.show_fallback_picker(available_themes)
-		return
-	end
-
-	local displayer = entry_display_mod.create({
+	local displayer = mods.entry_display.create({
 		separator = " ",
 		items = {
 			{ width = 2 }, -- Selection indicator
@@ -153,50 +110,39 @@ function ThemePicker.show_picker()
 	})
 
 	local function make_display(entry)
-		local info = entry.info
-		local icon = info.is_current and "●" or "○"
-		local category_icon = info.category == "dark" and "🌙" or
-		                     info.category == "light" and "☀️" or "🎨"
+		local is_current = entry.value == (vim.g.colors_name or "default")
+		local category = entry.value:find("dark") and "dark" or entry.value:find("light") and "light" or "special"
+		local icon = is_current and "●" or "○"
+		local category_icon = category == "dark" and "🌙" or category == "light" and "☀️" or "🎨"
 
 		return displayer({
 			{ icon, "TelescopeResultsIdentifier" },
 			{ category_icon },
-			{ info.display_name },
+			{ entry.value:gsub("_", " "):gsub("-", " ") },
 		})
 	end
 
-
-
-	-- Create a custom previewer for themes
-	local theme_previewer = previewers_mod.new_buffer_previewer({
+	-- Create theme previewer
+	local theme_previewer = mods.previewers.new_buffer_previewer({
 		title = "Theme Preview",
-		dyn_title = function(_, entry)
-			return "🎨 " .. (entry.info and entry.info.display_name or entry.value)
-		end,
-
-		get_buffer_by_name = function(_, entry)
-			return entry.value
-		end,
+		dyn_title = function(_, entry) return "🎨 " .. entry.value:gsub("_", " "):gsub("-", " ") end,
+		get_buffer_by_name = function(_, entry) return entry.value end,
 
 		define_preview = function(self, entry)
-			-- Preview the theme by applying it temporarily
 			if entry and entry.value then
 				ThemePicker.preview_theme(entry.value)
 			end
 
-			-- Show theme information in the preview window
 			local lines = {
-				"🎨 Theme: " .. (entry.info and entry.info.display_name or entry.value),
-				"📁 Category: " .. (entry.info and entry.info.category or "unknown"),
+				"🎨 Theme: " .. entry.value:gsub("_", " "):gsub("-", " "),
 				"",
 				"💡 This theme is now active in your editor.",
-				"   Press <Enter> to keep it permanently,",
-				"   or continue browsing other themes.",
+				"   Press <Enter> to keep it permanently.",
 				"",
 				"🔧 Tips:",
-				"   • Use <C-y> to apply without closing",
-				"   • Press <Esc> to cancel and revert",
-				"   • Type to search/filter themes",
+				"   • Use j/k to navigate themes",
+				"   • Press <Enter> to select",
+				"   • Press <C-y> to apply without closing",
 			}
 
 			vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
@@ -297,20 +243,20 @@ function ThemePicker.show_fallback_picker(themes)
 	-- Create theme display entries
 	local theme_entries = {}
 	for i, theme in ipairs(themes) do
-		local info = get_theme_info(theme)
+		local is_current = theme == (vim.g.colors_name or "default")
+		local category = theme:find("dark") and "dark" or theme:find("light") and "light" or "special"
+		local category_icon = category == "dark" and "🌙" or category == "light" and "☀️" or "🎨"
 		local entry = {
 			index = i,
 			theme = theme,
 			display = string.format("%s %s %s",
-				info.is_current and "●" or "○",
-				info.category == "dark" and "🌙" or
-				info.category == "light" and "☀️" or "🎨",
-				info.display_name
-			),
-			info = info
+				is_current and "●" or "○",
+				category_icon,
+				theme:gsub("_", " "):gsub("-", " ")
+			)
 		}
 		table.insert(theme_entries, entry)
-		if info.is_current then
+		if is_current then
 			current_index = i
 		end
 	end
@@ -495,8 +441,7 @@ function ThemePicker.preview_theme(theme_name)
 		if ok then
 			last_preview_theme = theme_name
 			-- Only show notification for manual previews, not auto-previews
-			local info = get_theme_info(theme_name)
-			vim.notify("Previewing: " .. info.display_name, vim.log.levels.INFO, { timeout = 500 })
+			vim.notify("Previewing: " .. theme_name:gsub("_", " "):gsub("-", " "), vim.log.levels.INFO, { timeout = 500 })
 		else
 			notify("Failed to preview theme: " .. theme_name, vim.log.levels.WARN)
 		end
@@ -516,8 +461,7 @@ function ThemePicker.select_theme(theme_name)
 	if ok then
 		current_theme = theme_name
 		last_preview_theme = theme_name -- Update preview state
-		local info = get_theme_info(theme_name)
-		notify("Theme changed to: " .. info.display_name, vim.log.levels.INFO)
+		notify("Theme changed to: " .. theme_name:gsub("_", " "):gsub("-", " "), vim.log.levels.INFO)
 
 		-- Update theme manager cache
 		local ThemeManager = require("core.theme-manager")
