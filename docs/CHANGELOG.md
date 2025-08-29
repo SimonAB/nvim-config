@@ -15,6 +15,8 @@
 - **Integration**: Seamless integration with existing theme manager
 - **Performance**: Optimized theme loading and switching
 - **Feedback**: Enhanced notifications and status updates
+- **Robust Loading**: Handles Telescope loading issues gracefully
+- **Fallback Support**: Works with vim.ui.select when Telescope unavailable
 
 ### ⌨️ New Keybindings
 - **`<Space>Ytp`**: Open theme picker (floating window)

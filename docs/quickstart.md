@@ -163,6 +163,7 @@ The theme picker features:
 - ⚡ **Live Preview**: See themes instantly with `<C-p>`
 - 🎯 **Quick Apply**: Apply without closing with `<C-y>`
 - 🔍 **Search & Filter**: Fuzzy search through all available themes
+- 🛡️ **Fallback Support**: Works even if Telescope fails to load
 
 ## Next Steps
 
