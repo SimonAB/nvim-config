@@ -17,6 +17,7 @@ local LOAD_PHASES = {
 		"nvim-treesitter",    -- Syntax highlighting
 		"mini-nvim",          -- Dashboard and text objects
 		"mason-enhanced",     -- Enhanced Mason UI
+		"plugin-manager",     -- Enhanced plugin manager
 	},
 
 	-- Phase 2: DEFERRED (100ms) - UI and functionality
