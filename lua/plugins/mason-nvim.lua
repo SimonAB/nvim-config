@@ -233,3 +233,17 @@ vim.defer_fn(function()
 		vim.notify("❌ Mason LSP Config not available - LSP server installation will be manual", vim.log.levels.WARN)
 	end
 end, 500) -- Defer LSP setup for better startup performance
+
+-- =============================================================================
+-- ENHANCED MASON UI INTEGRATION
+-- =============================================================================
+
+-- Initialize enhanced Mason UI
+vim.defer_fn(function()
+	local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
+	if ok then
+		MasonUI.init()
+	else
+		vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
+	end
+end, 1000) -- Load after Mason is fully initialized

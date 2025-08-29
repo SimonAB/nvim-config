@@ -219,8 +219,40 @@ if ok then
 		{ "<leader>X", group = "Trouble" },
 		-- Julia-specific operations
 		{ "<leader>J", group = "Julia" },
-		-- Mason operations
-		{ "<leader>M", group = "Mason" },
+			-- Mason operations (enhanced with batch operations)
+	{ "<leader>M", group = "Mason" },
+	{ "<leader>MA", function()
+		local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
+		if ok then
+			MasonUI.install_academic_servers()
+		else
+			vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
+		end
+	end, desc = "Install Academic LSP Servers" },
+	{ "<leader>MR", function()
+		local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
+		if ok then
+			MasonUI.install_all_recommended()
+		else
+			vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
+		end
+	end, desc = "Install All Recommended Servers" },
+	{ "<leader>MU", function()
+		local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
+		if ok then
+			MasonUI.update_all_packages()
+		else
+			vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
+		end
+	end, desc = "Update All Packages" },
+	{ "<leader>MS", function()
+		local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
+		if ok then
+			MasonUI.check_status()
+		else
+			vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
+		end
+	end, desc = "Mason Status" },
 		-- Markdown preview
 		{ "<leader>K", group = "Markdown" },
 	})
