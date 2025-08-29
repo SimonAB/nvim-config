@@ -122,7 +122,7 @@ function ThemePicker.show_picker()
 		})
 	end
 
-	-- Create theme previewer
+	-- Create theme previewer with explicit configuration
 	local theme_previewer = mods.previewers.new_buffer_previewer({
 		title = "Theme Preview",
 		dyn_title = function(_, entry) return "🎨 " .. entry.value:gsub("_", " "):gsub("-", " ") end,
@@ -169,20 +169,20 @@ function ThemePicker.show_picker()
 	end
 
 	-- Create picker with enhanced layout
-	mods.pickers.new({
-		-- Try vertical layout for better preview visibility
-		layout_strategy = "vertical",
+	mods.pickers.new({}, {
+		prompt_title = "🎨 Select Theme",
+		-- Force large layout with preview
+		layout_strategy = "horizontal",
 		layout_config = {
-			vertical = {
-				width = 0.9,  -- Use 90% of screen width
-				height = 0.9, -- Use 90% of screen height
-				preview_height = 0.6, -- Preview takes 60% of the height
+			horizontal = {
+				width = 0.95,  -- Use 95% of screen width
+				height = 0.9,  -- Use 90% of screen height
+				preview_width = 0.7, -- Preview takes 70% of the width
 				preview_cutoff = 1,
 				prompt_position = "top",
+				results_width = 0.3, -- Results take 30% of the width
 			},
 		},
-	}, {
-		prompt_title = "🎨 Select Theme",
 		finder = mods.finders.new_table({
 			results = entries,
 			entry_maker = function(entry)
@@ -195,6 +195,8 @@ function ThemePicker.show_picker()
 		}),
 		sorter = mods.config.generic_sorter({}),
 		previewer = theme_previewer,
+		-- Force preview to be enabled
+		preview = true,
 
 		attach_mappings = function(prompt_bufnr, map)
 			-- Quick theme switching without closing
