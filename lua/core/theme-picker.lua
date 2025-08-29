@@ -134,15 +134,27 @@ function ThemePicker.show_picker()
 			end
 
 			local lines = {
-				"🎨 Theme: " .. entry.value:gsub("_", " "):gsub("-", " "),
+				"╔══════════════════════════════════════════════════════════════════╗",
+				"║                       🎨 THEME PREVIEW                       ║",
+				"╚══════════════════════════════════════════════════════════════════╝",
 				"",
-				"💡 This theme is now active in your editor.",
-				"   Press <Enter> to keep it permanently.",
+				"🎨 Current Theme: " .. entry.value:gsub("_", " "):gsub("-", " "),
 				"",
-				"🔧 Tips:",
-				"   • Use j/k to navigate themes",
-				"   • Press <Enter> to select",
-				"   • Press <C-y> to apply without closing",
+				"💡 LIVE PREVIEW ACTIVE",
+				"   This theme is now applied to your editor!",
+				"",
+				"╔══════════════════════════════════════════════════════════════════╗",
+				"║                          CONTROLS                             ║",
+				"╠══════════════════════════════════════════════════════════════════╣",
+				"║  <Enter>  │ Apply theme permanently and close                 ║",
+				"║  <C-y>    │ Apply theme without closing picker                ║",
+				"║  j/k      │ Navigate themes (1 line at a time)                ║",
+				"║  5j/3k    │ Jump multiple lines (1-9 supported)               ║",
+				"║  <Esc>    │ Cancel and revert to previous theme               ║",
+				"║  <C-c>    │ Cancel and revert to previous theme               ║",
+				"╚══════════════════════════════════════════════════════════════════╝",
+				"",
+				"💡 Tip: Press <C-y> to quickly test multiple themes!",
 			}
 
 			vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
@@ -156,9 +168,18 @@ function ThemePicker.show_picker()
 		table.insert(entries, create_entry(theme))
 	end
 
-	-- Create picker
+	-- Create picker with enhanced layout
 	mods.pickers.new({}, {
 		prompt_title = "🎨 Select Theme",
+		layout_config = {
+			horizontal = {
+				width = 0.9,  -- Use 90% of screen width
+				height = 0.8, -- Use 80% of screen height
+				preview_width = 0.6, -- Preview takes 60% of the width
+				preview_cutoff = 1,
+			},
+		},
+		layout_strategy = "horizontal", -- Side-by-side layout
 		finder = mods.finders.new_table({
 			results = entries,
 			entry_maker = function(entry)
