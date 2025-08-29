@@ -294,10 +294,10 @@ function PluginManager.cleanup_orphaned()
 		local pack_dir = PluginManager.get_plugin_dir()
 		local installed = PluginManager.get_installed_plugins()
 
-		-- Get plugins from the plugin list
-		local ok, plugins = pcall(require, "plugins")
-		if not ok then
-			notify("Could not load plugin list for cleanup", vim.log.levels.ERROR)
+		-- Get plugins from the global plugins table
+		local plugins = _G.neovim_plugins
+		if not plugins or type(plugins) ~= "table" then
+			notify("Could not access plugin list for cleanup. Plugins table not available.", vim.log.levels.ERROR)
 			if handle then handle:finish() end
 			return
 		end
