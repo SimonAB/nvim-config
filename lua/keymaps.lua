@@ -1008,3 +1008,22 @@ map("n", "<leader>Jd", function()
   })
   pkg_docs:toggle()
 end, { desc = "Generate Docs" })
+
+-- =============================================================================
+-- ENHANCED PLUGIN MANAGER KEYBINDINGS
+-- =============================================================================
+
+-- Helper function to safely call PluginManager functions
+local function call_plugin_manager(func_name)
+  local ok, PluginManager = pcall(require, "core.plugin-manager")
+  if ok then
+    PluginManager[func_name](PluginManager)
+  else
+    vim.notify("Plugin Manager not available", vim.log.levels.WARN)
+  end
+end
+
+-- Plugin management keybindings with progress feedback
+map("n", "<leader>Cua", function() call_plugin_manager("update_all_plugins") end, { desc = "Update All Plugins" })
+map("n", "<leader>Cus", function() call_plugin_manager("show_status") end, { desc = "Plugin Status" })
+map("n", "<leader>Cuc", function() call_plugin_manager("cleanup_orphaned") end, { desc = "Cleanup Orphaned Plugins" })

@@ -104,8 +104,5 @@ vim.cmd("packadd nvim-lspconfig")
 vim.cmd("packadd mason.nvim")
 vim.cmd("packadd mason-lspconfig.nvim")
 
--- Store plugins table globally for other modules to access
+-- Sy to cycle through themtore plugins table globally for other modules to access
 _G.neovim_plugins = plugins
-
--- Export plugins table for other modules to use
-return plugins

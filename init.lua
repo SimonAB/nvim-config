@@ -47,12 +47,9 @@ if not ok then
 	vim.notify("Failed to load project plugins.lua: " .. tostring(err), vim.log.levels.ERROR)
 end
 
--- Use the require.lua from the project directory for plugin loading
+-- Load plugin orchestration system
 local project_require = config_path .. "/lua/require.lua"
-local ok, err = pcall(dofile, project_require)
-if not ok then
-	vim.notify("Failed to load project require.lua: " .. tostring(err), vim.log.levels.ERROR)
-end
+pcall(dofile, project_require)
 
 -- Load core configuration
 require("config")
