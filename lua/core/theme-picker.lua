@@ -53,29 +53,49 @@ end
 
 -- Load Telescope modules safely
 local function load_telescope_modules()
-	local modules = {
+	-- Proactively load user Telescope configuration (respects vim.pack lazy load)
+	pcall(require, "plugins.telescope")
+
+	-- Helper to retry require with small waits
+	local function try_require(module_name, retries, delay_ms)
+		local attempts = retries or 8
+		local delay = delay_ms or 25
+		for _ = 1, attempts do
+			local ok, mod = pcall(require, module_name)
+			if ok and mod then
+				return mod
+			end
+			vim.wait(delay)
+		end
+		return nil
+	end
+
+	-- Ensure core telescope is present
+	local telescope_core = try_require("telescope", 10, 30)
+	if not telescope_core then
+		return nil
+	end
+
+	local module_names = {
 		pickers = "telescope.pickers",
 		finders = "telescope.finders",
 		actions = "telescope.actions",
 		action_state = "telescope.action_state",
 		entry_display = "telescope.pickers.entry_display",
-		previewers = "telescope.previewers"
+		previewers = "telescope.previewers",
 	}
 
 	local loaded = {}
-	for name, module in pairs(modules) do
-		local ok, mod = pcall(require, module)
-		if not ok then
-			notify("Failed to load " .. module, vim.log.levels.WARN)
+	for key, module_name in pairs(module_names) do
+		local mod = try_require(module_name, 10, 30)
+		if not mod then
 			return nil
 		end
-		loaded[name] = mod
+		loaded[key] = mod
 	end
 
-	-- Load config separately
-	local ok, config_mod = pcall(require, "telescope.config")
-	if not ok then
-		notify("Failed to load telescope.config", vim.log.levels.WARN)
+	local config_mod = try_require("telescope.config", 10, 30)
+	if not config_mod or not config_mod.values then
 		return nil
 	end
 	loaded.config = config_mod.values
@@ -168,19 +188,16 @@ function ThemePicker.show_picker()
 		table.insert(entries, create_entry(theme))
 	end
 
-	-- Create picker with enhanced layout
+	-- Create picker with minimal configuration first
 	mods.pickers.new({}, {
 		prompt_title = "🎨 Select Theme",
-		-- Force large layout with preview
+		-- Try to force layout
 		layout_strategy = "horizontal",
 		layout_config = {
 			horizontal = {
-				width = 0.95,  -- Use 95% of screen width
-				height = 0.9,  -- Use 90% of screen height
-				preview_width = 0.7, -- Preview takes 70% of the width
-				preview_cutoff = 1,
-				prompt_position = "top",
-				results_width = 0.3, -- Results take 30% of the width
+				width = 0.9,
+				height = 0.8,
+				preview_width = 0.6,
 			},
 		},
 		finder = mods.finders.new_table({
@@ -195,8 +212,6 @@ function ThemePicker.show_picker()
 		}),
 		sorter = mods.config.generic_sorter({}),
 		previewer = theme_previewer,
-		-- Force preview to be enabled
-		preview = true,
 
 		attach_mappings = function(prompt_bufnr, map)
 			-- Quick theme switching without closing
