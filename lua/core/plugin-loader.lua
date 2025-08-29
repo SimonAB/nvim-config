@@ -78,13 +78,13 @@ function PluginLoader.load_all()
 	vim.notify("Loading plugins in optimized phases...", vim.log.levels.INFO)
 
 	-- Phase 1: Immediate
-	self.load_with_phase("immediate", LOAD_PHASES.immediate)
+	PluginLoader.load_with_phase("immediate", LOAD_PHASES.immediate)
 
 	-- Phase 2: Deferred
-	self.load_with_phase("deferred", LOAD_PHASES.deferred)
+	PluginLoader.load_with_phase("deferred", LOAD_PHASES.deferred)
 
 	-- Phase 3: Lazy
-	self.load_with_phase("lazy", LOAD_PHASES.lazy)
+	PluginLoader.load_with_phase("lazy", LOAD_PHASES.lazy)
 
 	vim.notify("Plugin loading complete", vim.log.levels.INFO)
 end

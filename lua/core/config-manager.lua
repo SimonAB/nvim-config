@@ -427,20 +427,20 @@ ConfigManager.performance = {
 -- =============================================================================
 
 function ConfigManager.load_theme_config(theme_name)
-	return self.themes[theme_name] or {}
+	return ConfigManager.themes[theme_name] or {}
 end
 
 function ConfigManager.load_plugin_config(plugin_name)
-	return self.plugins[plugin_name] or {}
+	return ConfigManager.plugins[plugin_name] or {}
 end
 
 function ConfigManager.load_lsp_config(server_name)
-	return self.lsp.servers[server_name] or {}
+	return ConfigManager.lsp.servers[server_name] or {}
 end
 
 function ConfigManager.get_performance_setting(key)
 	local keys = vim.split(key, ".", { plain = true })
-	local value = self.performance
+	local value = ConfigManager.performance
 	for _, k in ipairs(keys) do
 		value = value[k]
 		if not value then return nil end
@@ -459,11 +459,11 @@ function ConfigManager.validate_config()
 	end
 
 	local valid = true
-	valid = valid and validate_section("themes", self.themes)
-	valid = valid and validate_section("plugins", self.plugins)
-	valid = valid and validate_section("lsp", self.lsp)
-	valid = valid and validate_section("ui", self.ui)
-	valid = valid and validate_section("performance", self.performance)
+	valid = valid and validate_section("themes", ConfigManager.themes)
+	valid = valid and validate_section("plugins", ConfigManager.plugins)
+	valid = valid and validate_section("lsp", ConfigManager.lsp)
+	valid = valid and validate_section("ui", ConfigManager.ui)
+	valid = valid and validate_section("performance", ConfigManager.performance)
 
 	if valid then
 		vim.notify("Configuration validation passed", vim.log.levels.INFO)

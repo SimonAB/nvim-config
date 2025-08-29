@@ -17,13 +17,13 @@ end
 
 -- Get theme for current system appearance
 function ThemeManager.get_active_theme()
-	local appearance = self.detect_system_theme()
+	local appearance = ThemeManager.detect_system_theme()
 	return appearance == "dark" and "onedark" or "catppuccin"
 end
 
 -- Load and apply theme immediately (no defer)
 function ThemeManager.load_immediate()
-	local theme = self.get_active_theme()
+	local theme = ThemeManager.get_active_theme()
 	local ok = pcall(vim.cmd.colorscheme, theme)
 	if not ok then
 		vim.notify("Failed to load theme: " .. theme, vim.log.levels.WARN)
@@ -121,14 +121,14 @@ end
 -- Main initialization function
 function ThemeManager.init()
 	-- Load active theme immediately
-	local active_theme = self.load_immediate()
+	local active_theme = ThemeManager.load_immediate()
 
 	-- Setup lazy loading for other themes
-	self.setup_lazy_loading()
+	ThemeManager.setup_lazy_loading()
 
 	-- Setup highlight management
-	self.setup_highlight_autocmd()
-	self.update_which_key_highlights()
+	ThemeManager.setup_highlight_autocmd()
+	ThemeManager.update_which_key_highlights()
 
 	vim.notify("Theme system initialized: " .. active_theme, vim.log.levels.INFO)
 end
