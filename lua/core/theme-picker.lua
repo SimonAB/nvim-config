@@ -5,6 +5,11 @@
 
 local ThemePicker = {}
 
+-- Notification helper
+local function notify(msg, level)
+	vim.notify(msg, level or vim.log.levels.INFO, { title = "Theme Picker", timeout = 2000 })
+end
+
 -- Get available colorschemes from runtime
 local function get_themes()
 	local themes = {
@@ -76,11 +81,6 @@ local function load_telescope_modules()
 	loaded.config = config_mod.values
 
 	return loaded
-end
-
--- Notification helper
-local function notify(msg, level)
-	vim.notify(msg, level or vim.log.levels.INFO, { title = "Theme Picker", timeout = 2000 })
 end
 
 -- Create floating window picker
