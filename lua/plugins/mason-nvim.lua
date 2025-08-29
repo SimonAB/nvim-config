@@ -90,14 +90,15 @@ vim.defer_fn(function()
 	if ok_mason_lspconfig then
 		mason_lspconfig.setup({
 			-- Automatically install configured servers (with lspconfig)
-			automatic_installation = false, -- Disable auto-install on startup for better performance
+			automatic_installation = true, -- Enable auto-install for LSP servers
 
 		-- Ensure these servers are installed (minimal set for startup)
 		ensure_installed = {
 			-- Core language servers for your academic workflow
-			"julials",           -- Julia language server (most used)
+			-- "julials",           -- Julia language server (temporarily disabled due to Julia 1.11.6 bug)
 			"pyright",           -- Python language server (preferred)
 			"texlab",            -- LaTeX language server
+            "tinymist",          -- Typst language server
 			"lua_ls",            -- Lua language server
 			"bashls",            -- Bash language server
 			"jsonls",            -- JSON language server
@@ -115,42 +116,48 @@ vim.defer_fn(function()
 				require("lspconfig")[server_name].setup({})
 			end,
 
-			-- Custom handler for Julia LSP
-			["julials"] = function()
-				require("lspconfig").julials.setup({
-					-- Your existing Julia LSP configuration
-					settings = {
-						julia = {
-							symbolCacheDownload = false,
-							lint = {
-								run = true,
-								missingrefs = "all",
-								call = true,
-								iter = true,
-								nothingcomp = true,
-								constif = true,
-								lazy = true,
-								datadecl = true,
-								typeparam = true,
-								modname = true,
-							},
-							completionmode = "qualify",
-							useRevise = true,
-							execution = {
-								resultDisplay = "both",
-								errorDisplay = "both",
-							},
-						},
-					},
-					init_options = {
-						storagePath = vim.fn.stdpath("cache") .. "/julia_ls",
-						experimentalFeatures = {
-							lspMacroExpansion = true,
-							inlayHints = true,
-						},
-					},
-				})
-			end,
+			-- Custom handler for Julia LSP (temporarily disabled due to Julia 1.11.6 bug)
+			-- ["julials"] = function()
+			-- 	require("lspconfig").julials.setup({
+			-- 		-- Ensure Julia is in PATH for the LSP server
+			-- 		cmd = { vim.fn.stdpath("data") .. "/mason/bin/julia-lsp" },
+			-- 		-- Set environment variables to ensure Julia is available
+			-- 		env = {
+			-- 			PATH = vim.fn.expand("$HOME/.juliaup/bin") .. ":" .. vim.fn.getenv("PATH"),
+			-- 		},
+			-- 		-- Your existing Julia LSP configuration
+			-- 		settings = {
+			-- 			julia = {
+			-- 				symbolCacheDownload = false,
+			-- 				lint = {
+			-- 					run = true,
+			-- 					missingrefs = "all",
+			-- 					call = true,
+			-- 					iter = true,
+			-- 					nothingcomp = true,
+			-- 					constif = true,
+			-- 					lazy = true,
+			-- 					datadecl = true,
+			-- 					typeparam = true,
+			-- 					modname = true,
+			-- 				},
+			-- 				completionmode = "qualify",
+			-- 				useRevise = true,
+			-- 				execution = {
+			-- 					resultDisplay = "both",
+			-- 					errorDisplay = "both",
+			-- 					},
+			-- 				},
+			-- 			},
+			-- 			init_options = {
+			-- 				storagePath = vim.fn.stdpath("cache") .. "/julia_ls",
+			-- 				experimentalFeatures = {
+			-- 					lspMacroExpansion = true,
+			-- 					inlayHints = true,
+			-- 				},
+			-- 			},
+			-- 		})
+			-- 	end,
 
 			-- Custom handler for Python LSP
 			["pyright"] = function()
