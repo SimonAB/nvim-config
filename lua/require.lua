@@ -21,5 +21,3 @@ _G.load_plugin_with_priority = function(plugin_name, priority)
 		vim.notify("Failed to load plugin: " .. plugin_name .. " - " .. tostring(err), vim.log.levels.WARN)
 	end
 end
-
-
