@@ -242,6 +242,37 @@ function ThemePicker.show_picker()
 				end
 			end)
 
+			-- Numeric prefix navigation
+			for i = 1, 9 do
+				map("i", tostring(i) .. "j", function()
+					mods.actions.move_selection_next(prompt_bufnr)
+					for _ = 1, i - 1 do
+						mods.actions.move_selection_next(prompt_bufnr)
+					end
+				end)
+
+				map("n", tostring(i) .. "j", function()
+					mods.actions.move_selection_next(prompt_bufnr)
+					for _ = 1, i - 1 do
+						mods.actions.move_selection_next(prompt_bufnr)
+					end
+				end)
+
+				map("i", tostring(i) .. "k", function()
+					mods.actions.move_selection_previous(prompt_bufnr)
+					for _ = 1, i - 1 do
+						mods.actions.move_selection_previous(prompt_bufnr)
+					end
+				end)
+
+				map("n", tostring(i) .. "k", function()
+					mods.actions.move_selection_previous(prompt_bufnr)
+					for _ = 1, i - 1 do
+						mods.actions.move_selection_previous(prompt_bufnr)
+					end
+				end)
+			end
+
 			-- Select theme and close (standard Telescope behavior)
 			mods.actions.select_default:replace(function()
 				local selection = mods.action_state.get_selected_entry()
@@ -410,6 +441,29 @@ function ThemePicker.show_fallback_picker(themes)
 		noremap = true,
 		silent = true
 	})
+
+	-- Numeric prefix navigation
+	for i = 1, 9 do
+		vim.api.nvim_buf_set_keymap(buf, 'n', tostring(i) .. 'j', '', {
+			callback = function()
+				for _ = 1, i do
+					move_selection(1)
+				end
+			end,
+			noremap = true,
+			silent = true
+		})
+
+		vim.api.nvim_buf_set_keymap(buf, 'n', tostring(i) .. 'k', '', {
+			callback = function()
+				for _ = 1, i do
+					move_selection(-1)
+				end
+			end,
+			noremap = true,
+			silent = true
+		})
+	end
 
 	-- Set cursor to current selection
 	vim.api.nvim_win_set_cursor(win, {current_index, 0})
