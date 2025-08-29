@@ -390,8 +390,14 @@ function ThemePicker.show_fallback_picker(themes)
 
 	-- Key mappings
 	local function close_window()
-		vim.api.nvim_win_close(win, true)
-		vim.api.nvim_buf_delete(buf, { force = true })
+		-- Close window first
+		pcall(vim.api.nvim_win_close, win, true)
+
+		-- Try to delete buffer if it still exists
+		local buf_exists = pcall(vim.api.nvim_buf_is_valid, buf)
+		if buf_exists then
+			pcall(vim.api.nvim_buf_delete, buf, { force = true })
+		end
 	end
 
 	local function select_current()
@@ -473,7 +479,7 @@ function ThemePicker.show_fallback_picker(themes)
 	-- Set buffer options
 	vim.bo[buf].modifiable = false
 	vim.bo[buf].buftype = 'nofile'
-	vim.bo[buf].bufhidden = 'wipe'
+	vim.bo[buf].bufhidden = 'wipe' -- Wipe buffer when window closes
 end
 
 -- Preview theme (temporary application) with debouncing
