@@ -1,0 +1,13 @@
+#!/bin/zsh
+# Cursor-specific shell configuration
+# This ensures Julia is available in Cursor's terminal
+
+# Add Julia to PATH if not already present
+if [[ ":$PATH:" != *":$HOME/.juliaup/bin:"* ]]; then
+    export PATH="$HOME/.juliaup/bin:$PATH"
+fi
+
+# Source your normal zsh configuration
+if [[ -f ~/.zshrc ]]; then
+    source ~/.zshrc
+fi
