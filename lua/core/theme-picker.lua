@@ -215,6 +215,13 @@ function ThemePicker.show_picker()
 		return
 	end
 
+	local ok, previewers_mod = pcall(require, "telescope.previewers")
+	if not ok then
+		notify("Failed to load Telescope previewers, using fallback", vim.log.levels.WARN)
+		ThemePicker.show_fallback_picker(available_themes)
+		return
+	end
+
 	local displayer = entry_display_mod.create({
 		separator = " ",
 		items = {
@@ -239,8 +246,45 @@ function ThemePicker.show_picker()
 
 	local current_preview_theme = nil
 
+	-- Create a custom previewer for themes
+	local theme_previewer = previewers_mod.new_buffer_previewer({
+		title = "Theme Preview",
+		dyn_title = function(_, entry)
+			return "🎨 " .. (entry.info and entry.info.display_name or entry.value)
+		end,
+
+		get_buffer_by_name = function(_, entry)
+			return entry.value
+		end,
+
+		define_preview = function(self, entry)
+			-- Preview the theme by applying it temporarily
+			if entry and entry.value then
+				ThemePicker.preview_theme(entry.value)
+			end
+
+			-- Show theme information in the preview window
+			local lines = {
+				"🎨 Theme: " .. (entry.info and entry.info.display_name or entry.value),
+				"📁 Category: " .. (entry.info and entry.info.category or "unknown"),
+				"",
+				"💡 This theme is now active in your editor.",
+				"   Press <Enter> to keep it permanently,",
+				"   or continue browsing other themes.",
+				"",
+				"🔧 Tips:",
+				"   • Use <C-y> to apply without closing",
+				"   • Press <Esc> to cancel and revert",
+				"   • Type to search/filter themes",
+			}
+
+			vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+			vim.api.nvim_buf_set_option(self.state.bufnr, 'filetype', 'markdown')
+		end,
+	})
+
 	pickers_mod.new({}, {
-		prompt_title = "🎨 Select Theme (Live Preview)",
+		prompt_title = "🎨 Select Theme",
 		finder = finders_mod.new_table({
 			results = theme_entries,
 			entry_maker = function(entry)
@@ -253,93 +297,9 @@ function ThemePicker.show_picker()
 			end,
 		}),
 		sorter = conf_mod.generic_sorter({}),
-		previewer = false, -- Disable preview for faster loading
+		previewer = theme_previewer,
+
 		attach_mappings = function(prompt_bufnr, map)
-			-- Automatic live preview on cursor movement and result changes
-			local last_selection = nil
-			local preview_timer = nil
-			local preview_check_timer = nil
-
-			local function do_live_preview()
-				local selection = action_state_mod.get_selected_entry()
-				if selection and selection.value ~= last_selection then
-					last_selection = selection.value
-					ThemePicker.preview_theme(selection.value)
-				end
-			end
-
-			-- Debounced live preview to avoid flickering
-			local function trigger_preview()
-				if preview_timer then
-					vim.loop.timer_stop(preview_timer)
-				end
-				preview_timer = vim.defer_fn(do_live_preview, 150)
-			end
-
-			-- Continuous preview checking (handles search filtering)
-			local function start_preview_checker()
-				if preview_check_timer then
-					vim.loop.timer_stop(preview_check_timer)
-				end
-				preview_check_timer = vim.loop.new_timer()
-				preview_check_timer:start(0, 200, vim.schedule_wrap(function()
-					local selection = action_state_mod.get_selected_entry()
-					if selection and selection.value ~= last_selection then
-						trigger_preview()
-					end
-				end))
-			end
-
-			-- Start the preview checker
-			start_preview_checker()
-
-			-- Auto-preview on cursor movement (immediate response)
-			vim.api.nvim_create_autocmd("CursorMoved", {
-				buffer = prompt_bufnr,
-				callback = trigger_preview,
-			})
-
-			-- Detect mode changes for better UX feedback
-			local current_mode = "normal"
-			vim.api.nvim_create_autocmd("ModeChanged", {
-				buffer = prompt_bufnr,
-				callback = function(args)
-					local new_mode = args.match:match(":(.*)")
-					current_mode = (new_mode == "i" or new_mode == "ic" or new_mode == "ix") and "insert" or "normal"
-
-					-- Optional: Could add visual feedback here if needed
-					-- For now, keeping the interface clean
-				end,
-			})
-
-			-- Manual preview triggers (for both modes)
-			map("i", "<C-p>", do_live_preview)
-			map("n", "<C-p>", do_live_preview)
-
-			-- Enhanced navigation in insert mode
-			map("i", "<C-j>", function()
-				actions_mod.move_selection_next(prompt_bufnr)
-			end)
-			map("i", "<C-k>", function()
-				actions_mod.move_selection_previous(prompt_bufnr)
-			end)
-
-			-- Select theme and close
-			actions_mod.select_default:replace(function()
-				local selection = action_state_mod.get_selected_entry()
-				if selection then
-					ThemePicker.select_theme(selection.value)
-				end
-				-- Clean up timers
-				if preview_timer then
-					vim.loop.timer_stop(preview_timer)
-				end
-				if preview_check_timer then
-					vim.loop.timer_stop(preview_check_timer)
-				end
-				actions_mod.close(prompt_bufnr)
-			end)
-
 			-- Quick theme switching without closing
 			map("i", "<C-y>", function()
 				local selection = action_state_mod.get_selected_entry()
@@ -355,8 +315,14 @@ function ThemePicker.show_picker()
 				end
 			end)
 
-			-- Trigger initial preview
-			vim.defer_fn(trigger_preview, 100)
+			-- Select theme and close (standard Telescope behavior)
+			actions_mod.select_default:replace(function()
+				local selection = action_state_mod.get_selected_entry()
+				if selection then
+					ThemePicker.select_theme(selection.value)
+				end
+				actions_mod.close(prompt_bufnr)
+			end)
 
 			return true
 		end,
