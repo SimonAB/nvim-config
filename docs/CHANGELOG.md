@@ -1,6 +1,40 @@
 # Changelog
 
-## [Latest] - Documentation Updates and Consistency Review
+## [Latest] - Enhanced Theme Management System
+
+### 🎨 New Features
+- **Theme Picker**: Rich floating window interface for theme selection
+  - Visual theme categories (dark 🌙, light ☀️, special 🎨)
+  - Live preview functionality with `<C-p>`
+  - Quick apply without closing with `<C-y>`
+  - Fuzzy search through all available themes
+  - Current theme indicator with ● symbol
+
+### 🔧 Enhanced Theme Management
+- **Modular Architecture**: New `core/theme-picker.lua` module
+- **Integration**: Seamless integration with existing theme manager
+- **Performance**: Optimized theme loading and switching
+- **Feedback**: Enhanced notifications and status updates
+
+### ⌨️ New Keybindings
+- **`<Space>Ytp`**: Open theme picker (floating window)
+- **`<Space>Yts`**: Show current theme
+- **`<Space>Yc`**: Cycle through themes (enhanced with better fallback)
+
+### 🏗️ Architecture Improvements
+- **Theme Picker Module**: Dedicated theme selection system
+- **Lazy Loading**: Efficient loading of theme picker functionality
+- **Fallback Support**: Graceful degradation when components unavailable
+- **Integration**: Clean integration with existing theme management
+
+### 📚 Documentation Updates
+- **Quickstart Guide**: Added theme management section
+- **Keymap Documentation**: Updated with new theme commands
+- **User Experience**: Clear instructions for theme picker usage
+
+---
+
+## [Previous] - Documentation Updates and Consistency Review
 
 ### Documentation Improvements
 - **README.md**: Updated to reflect current keymap structure with uppercase group keys

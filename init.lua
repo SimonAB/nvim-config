@@ -109,3 +109,11 @@ vim.defer_fn(function()
 		vim.notify("Enhanced Plugin Manager not available: " .. tostring(PluginManager), vim.log.levels.WARN)
 	end
 end, 100)
+
+-- Initialize theme picker
+vim.defer_fn(function()
+	local ok, ThemePicker = pcall(require, "core.theme-picker")
+	if ok then
+		ThemePicker.init()
+	end
+end, 200)
