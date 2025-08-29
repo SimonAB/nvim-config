@@ -169,17 +169,20 @@ function ThemePicker.show_picker()
 	end
 
 	-- Create picker with enhanced layout
-	mods.pickers.new({}, {
-		prompt_title = "🎨 Select Theme",
+	mods.pickers.new({
+		-- Try vertical layout for better preview visibility
+		layout_strategy = "vertical",
 		layout_config = {
-			horizontal = {
+			vertical = {
 				width = 0.9,  -- Use 90% of screen width
-				height = 0.8, -- Use 80% of screen height
-				preview_width = 0.6, -- Preview takes 60% of the width
+				height = 0.9, -- Use 90% of screen height
+				preview_height = 0.6, -- Preview takes 60% of the height
 				preview_cutoff = 1,
+				prompt_position = "top",
 			},
 		},
-		layout_strategy = "horizontal", -- Side-by-side layout
+	}, {
+		prompt_title = "🎨 Select Theme",
 		finder = mods.finders.new_table({
 			results = entries,
 			entry_maker = function(entry)
