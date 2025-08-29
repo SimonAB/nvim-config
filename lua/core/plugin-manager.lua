@@ -6,8 +6,8 @@
 local PluginManager = {}
 local progress_handle = nil
 
--- Progress notification system
-local function create_progress_notification(title, message)
+-- Progress and notification system
+local function create_progress(title, message)
 	if progress_handle then
 		progress_handle:finish()
 	end
@@ -20,7 +20,6 @@ local function create_progress_notification(title, message)
 			percentage = 0,
 		})
 	else
-		-- Fallback to basic notification
 		vim.notify(message, vim.log.levels.INFO, {
 			title = title,
 			timeout = 5000,
@@ -29,14 +28,12 @@ local function create_progress_notification(title, message)
 	return progress_handle
 end
 
--- Enhanced notification system
 local function notify(message, level, opts)
 	local default_opts = {
 		title = "Plugin Manager",
 		timeout = 3000,
 	}
 	local final_opts = vim.tbl_extend("force", default_opts, opts or {})
-
 	vim.notify(message, level, final_opts)
 end
 
@@ -81,7 +78,7 @@ end
 -- Update all plugins with progress feedback
 function PluginManager.update_all_plugins()
 	local plugins = PluginManager.get_installed_plugins()
-	local handle = create_progress_notification("Updating Plugins", "Checking for updates...")
+	local handle = create_progress("Updating Plugins", "Checking for updates...")
 
 	if #plugins == 0 then
 		notify("No plugins found to update", vim.log.levels.WARN)
@@ -177,7 +174,7 @@ function PluginManager.update_plugin(plugin_name)
 		return
 	end
 
-	local handle = create_progress_notification("Updating Plugin", "Updating " .. plugin_name .. "...")
+	local handle = create_progress("Updating Plugin", "Updating " .. plugin_name .. "...")
 
 	vim.defer_fn(function()
 		local cmd = { "git", "-C", plugin_path, "pull", "--ff-only" }
@@ -211,7 +208,7 @@ end
 -- Show plugin status
 function PluginManager.show_status()
 	local plugins = PluginManager.get_installed_plugins()
-	local handle = create_progress_notification("Plugin Status", "Analyzing plugins...")
+	local handle = create_progress("Plugin Status", "Analyzing plugins...")
 
 	vim.defer_fn(function()
 		local total_plugins = #plugins
@@ -288,7 +285,7 @@ end
 
 -- Clean up orphaned plugins (plugins in pack that aren't in the plugin list)
 function PluginManager.cleanup_orphaned()
-	local handle = create_progress_notification("Plugin Cleanup", "Checking for orphaned plugins...")
+	local handle = create_progress("Plugin Cleanup", "Checking for orphaned plugins...")
 
 	vim.defer_fn(function()
 		local pack_dir = PluginManager.get_plugin_dir()
@@ -350,7 +347,7 @@ function PluginManager.cleanup_confirm()
 		return
 	end
 
-	local handle = create_progress_notification("Cleaning Plugins", "Removing orphaned plugins...")
+	local handle = create_progress("Cleaning Plugins", "Removing orphaned plugins...")
 
 	local total = #_G.orphaned_plugins
 	local completed = 0
