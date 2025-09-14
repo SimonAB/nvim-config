@@ -1,99 +1,154 @@
--- Performance Test Script for Neovim Configuration
--- Measures startup time and plugin loading performance
+-- =============================================================================
+-- PERFORMANCE TEST SCRIPT
+-- PURPOSE: Measure and analyse Neovim startup performance
+-- =============================================================================
 
-local start_time = vim.loop.now()
+local M = {}
 
--- Function to measure time taken
-local function measure_time(label, func)
-    local start = vim.loop.now()
-    local result = func()
-    local elapsed = vim.loop.now() - start
-    print(string.format("⏱️  %s: %dms", label, elapsed))
-    return result, elapsed
+-- Performance measurement utilities
+local function measure_startup_time()
+    local start_time = vim.loop.hrtime()
+
+    -- Simulate startup by loading core modules
+    local modules_to_test = {
+        "config",
+        "keymaps",
+        "plugins",
+        "core.theme-manager",
+        "core.plugin-manager",
+        "plugins.mini-nvim.dashboard",
+        "plugins.mini-nvim.dashboard-content"
+    }
+
+    local results = {}
+    for _, module in ipairs(modules_to_test) do
+        local module_start = vim.loop.hrtime()
+        local ok, _ = pcall(require, module)
+        local module_end = vim.loop.hrtime()
+
+        results[module] = {
+            success = ok,
+            time_ms = (module_end - module_start) / 1e6
+        }
+    end
+
+    local end_time = vim.loop.hrtime()
+    local total_time = (end_time - start_time) / 1e6
+
+    return {
+        total_time = total_time,
+        module_times = results
+    }
 end
 
--- Test plugin loading performance
-local function test_plugin_loading()
-    print("\n🔍 Plugin Loading Performance Test")
-    print("=" .. string.rep("=", 50))
+-- Analyse plugin loading performance
+local function analyse_plugin_performance()
+    local plugin_dir = vim.fn.stdpath("data") .. "/pack/plugins/start"
+    local plugins = vim.fn.glob(plugin_dir .. "/*", false, true)
 
-    -- Test immediate plugins
-    measure_time("Plenary (immediate)", function()
-        return pcall(require, "plenary")
-    end)
+    local results = {}
+    for _, plugin_path in ipairs(plugins) do
+        local plugin_name = vim.fn.fnamemodify(plugin_path, ":t")
+        local start_time = vim.loop.hrtime()
 
-    measure_time("Treesitter (immediate)", function()
-        return pcall(require, "nvim-treesitter")
-    end)
+        -- Try to load the plugin
+        local ok = pcall(vim.cmd, "packadd " .. plugin_name)
+        local end_time = vim.loop.hrtime()
 
-    measure_time("Blink CMP (immediate)", function()
-        return pcall(require, "blink.cmp")
-    end)
+        results[plugin_name] = {
+            success = ok,
+            time_ms = (end_time - start_time) / 1e6,
+            path = plugin_path
+        }
+    end
 
-    -- Test deferred plugins
-    measure_time("Telescope (deferred)", function()
-        return pcall(require, "telescope")
-    end)
-
-    measure_time("Bufferline (deferred)", function()
-        return pcall(require, "bufferline")
-    end)
-
-    -- Test lazy plugins
-    measure_time("Which-key (lazy)", function()
-        return pcall(require, "which-key")
-    end)
+    return results
 end
 
--- Test LSP performance
-local function test_lsp_performance()
-    print("\n🔍 LSP Performance Test")
-    print("=" .. string.rep("=", 50))
+-- Generate performance report
+local function generate_report()
+    print("=== NEOVIM PERFORMANCE ANALYSIS ===")
+    print()
 
-    measure_time("LSP Config Setup", function()
-        return pcall(require, "lspconfig")
+    -- Measure startup time
+    print("Measuring startup performance...")
+    local startup_results = measure_startup_time()
+
+    print(string.format("Total startup time: %.2f ms", startup_results.total_time))
+    print()
+
+    print("Module loading times:")
+    for module, data in pairs(startup_results.module_times) do
+        local status = data.success and "✓" or "✗"
+        print(string.format("  %s %s: %.2f ms", status, module, data.time_ms))
+    end
+    print()
+
+    -- Analyse plugin performance
+    print("Analysing plugin performance...")
+    local plugin_results = analyse_plugin_performance()
+
+    print("Plugin loading times:")
+    local sorted_plugins = {}
+    for name, data in pairs(plugin_results) do
+        table.insert(sorted_plugins, {name = name, data = data})
+    end
+
+    table.sort(sorted_plugins, function(a, b)
+        return a.data.time_ms > b.data.time_ms
     end)
 
-    measure_time("Mason Setup", function()
-        return pcall(require, "mason")
-    end)
-end
+    for _, plugin in ipairs(sorted_plugins) do
+        local status = plugin.data.success and "✓" or "✗"
+        print(string.format("  %s %s: %.2f ms", status, plugin.name, plugin.data.time_ms))
+    end
+    print()
 
--- Test dashboard performance
-local function test_dashboard_performance()
-    print("\n🔍 Dashboard Performance Test")
-    print("=" .. string.rep("=", 50))
+    -- Performance recommendations
+    print("=== PERFORMANCE RECOMMENDATIONS ===")
 
-    measure_time("Mini Starter", function()
-        return pcall(require, "mini.starter")
-    end)
-
-    measure_time("Project Cache", function()
-        -- Simulate project list generation
-        local oldfiles = vim.v.oldfiles or {}
-        local count = 0
-        for i = 1, math.min(100, #oldfiles) do
-            if type(oldfiles[i]) == "string" then
-                count = count + 1
-            end
+    local slow_modules = {}
+    for module, data in pairs(startup_results.module_times) do
+        if data.time_ms > 10 then
+            table.insert(slow_modules, {module = module, time = data.time_ms})
         end
-        return count
-    end)
+    end
+
+    if #slow_modules > 0 then
+        print("Slow modules (>10ms):")
+        for _, item in ipairs(slow_modules) do
+            print(string.format("  - %s (%.2f ms)", item.module, item.time))
+        end
+        print("Consider deferring these modules using vim.defer_fn()")
+    end
+
+    local slow_plugins = {}
+    for _, plugin in ipairs(sorted_plugins) do
+        if plugin.data.time_ms > 5 then
+            table.insert(slow_plugins, {name = plugin.name, time = plugin.data.time_ms})
+        end
+    end
+
+    if #slow_plugins > 0 then
+        print("Slow plugins (>5ms):")
+        for _, plugin in ipairs(slow_plugins) do
+            print(string.format("  - %s (%.2f ms)", plugin.name, plugin.time))
+        end
+        print("Consider lazy loading these plugins")
+    end
+
+    print()
+    print("=== OPTIMISATION TIPS ===")
+    print("1. Use vim.defer_fn() for non-critical initialisations")
+    print("2. Implement lazy loading for heavy plugins")
+    print("3. Cache frequently accessed data")
+    print("4. Limit the number of autocmds during startup")
+    print("5. Use pcall() to handle plugin loading errors gracefully")
 end
 
--- Main performance test
-local function run_performance_test()
-    print("🚀 Neovim Performance Test")
-    print("=" .. string.rep("=", 50))
+-- Export functions
+M.measure_startup_time = measure_startup_time
+M.analyse_plugin_performance = analyse_plugin_performance
+M.generate_report = generate_report
 
-    test_plugin_loading()
-    test_lsp_performance()
-    test_dashboard_performance()
-
-    local total_time = vim.loop.now() - start_time
-    print(string.format("\n⏱️  Total Test Time: %dms", total_time))
-    print("✅ Performance test completed!")
-end
-
--- Run the test
-run_performance_test()
+return M
