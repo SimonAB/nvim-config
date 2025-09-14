@@ -11,7 +11,7 @@ M.DASHBOARD = {
 	MAX_RECENT_FILES = 4,
 	RECENT_FILE_KEYS = { "a", "b", "c", "d" },
 	HEADER_COLOUR = "#4A6D8C", -- Muted blue-black
-	REFRESH_DELAY = 120,
+	REFRESH_DELAY = 50,
 	PLUGIN_UPDATE_DELAY = 100,
 }
 

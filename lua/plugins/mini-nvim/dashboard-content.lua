@@ -1,6 +1,6 @@
 -- =============================================================================
 -- MINI.NVIM DASHBOARD CONTENT
--- PURPOSE: Dashboard content generation for mini.nvim
+-- PURPOSE: Dashboard content generation for mini.nvim with caching
 -- =============================================================================
 
 local config = require("plugins.mini-nvim.config")
@@ -9,12 +9,28 @@ local plugin_manager = require("plugins.mini-nvim.plugin-manager")
 
 local M = {}
 
--- Get recent projects from oldfiles
+-- Cache for recent projects and files
+local cached_projects = nil
+local cached_recent_files = nil
+local cache_timestamp = 0
+local CACHE_DURATION = 120000 -- 2 minutes
+
+-- Get recent projects from oldfiles with caching
 function M.get_recent_projects(limit)
+	-- Check cache first
+	local current_time = vim.loop.now()
+	if cached_projects and (current_time - cache_timestamp) < CACHE_DURATION then
+		return vim.list_slice(cached_projects, 1, limit)
+	end
+
 	local dirs, order = {}, {}
 	local oldfiles = vim.v.oldfiles or {}
 
-	for _, f in ipairs(oldfiles) do
+	-- Limit the number of oldfiles to process
+	local max_oldfiles = math.min(#oldfiles, 10)
+
+	for i = 1, max_oldfiles do
+		local f = oldfiles[i]
 		if type(f) == "string" and #f > 0 then
 			local abs = utils.get_absolute_path(f)
 			if abs ~= "" and utils.is_file_accessible(abs) then
@@ -29,15 +45,32 @@ function M.get_recent_projects(limit)
 			end
 		end
 	end
+
+	-- Update cache only if we found results
+	if #order > 0 then
+		cached_projects = order
+		cache_timestamp = current_time
+	end
+
 	return order
 end
 
--- Get recent files from oldfiles
+-- OPTIMISED: Get recent files from oldfiles with caching
 function M.get_recent_files(limit)
+	-- Check cache first
+	local current_time = vim.loop.now()
+	if cached_recent_files and (current_time - cache_timestamp) < CACHE_DURATION then
+		return vim.list_slice(cached_recent_files, 1, limit)
+	end
+
 	local files, order = {}, {}
 	local oldfiles = vim.v.oldfiles or {}
 
-	for _, f in ipairs(oldfiles) do
+	-- Limit the number of oldfiles to process
+	local max_oldfiles = math.min(#oldfiles, 10)
+
+	for i = 1, max_oldfiles do
+		local f = oldfiles[i]
 		if type(f) == "string" and #f > 0 then
 			local abs = utils.get_absolute_path(f)
 			if abs ~= "" and utils.is_file_accessible(abs) and files[abs] == nil then
@@ -49,17 +82,33 @@ function M.get_recent_files(limit)
 			end
 		end
 	end
+
+	-- Update cache only if we found results
+	if #order > 0 then
+		cached_recent_files = order
+		cache_timestamp = current_time
+	end
+
 	return order
 end
 
--- Create shortcuts section
+-- Create shortcuts section with deferred plugin manager
 function M.create_shortcuts()
 	local cfg_path = utils.get_config_directory()
 
 	return {
 		{
 			name = "Update plugins",
-			action = plugin_manager.update_plugins,
+			action = function()
+				-- Defer plugin manager call to avoid blocking
+				vim.defer_fn(function()
+					if plugin_manager and plugin_manager.update_plugins then
+						plugin_manager.update_plugins()
+					else
+						vim.notify("Plugin manager not available", vim.log.levels.WARN)
+					end
+				end, 100)
+			end,
 			section = "Shortcuts",
 		},
 		{
@@ -90,12 +139,15 @@ function M.create_shortcuts()
 	}
 end
 
--- Create projects section
+-- Create projects section with caching
 function M.create_projects()
 	local projects = {}
 	local idx = 1
 
-	for _, dir in ipairs(M.get_recent_projects(config.DASHBOARD.MAX_PROJECTS)) do
+	-- Use cached projects if available
+	local recent_projects = M.get_recent_projects(config.DASHBOARD.MAX_PROJECTS)
+
+	for _, dir in ipairs(recent_projects) do
 		local label = string.format("%d. ", idx)
 		local name = label .. " " .. utils.get_basename(dir)
 		local action = string.format("lua require('telescope.builtin').find_files({ cwd = [[%s]] })", dir)
@@ -106,11 +158,14 @@ function M.create_projects()
 	return projects
 end
 
--- Create recent files section
+-- Create recent files section with caching
 function M.create_recent_files()
 	local recent_files = {}
 
-	for i, file in ipairs(M.get_recent_files(config.DASHBOARD.MAX_RECENT_FILES)) do
+	-- Use cached recent files if available
+	local recent_file_list = M.get_recent_files(config.DASHBOARD.MAX_RECENT_FILES)
+
+	for i, file in ipairs(recent_file_list) do
 		local key = config.DASHBOARD.RECENT_FILE_KEYS[i]
 		local label = string.format("%s. ", key)
 		local name = label .. " " .. utils.get_basename(file)
@@ -121,26 +176,45 @@ function M.create_recent_files()
 	return recent_files
 end
 
--- Create all dashboard items
+-- Prewarm cache for faster subsequent loads
+function M.prewarm_cache()
+	-- Only prewarm if we have oldfiles available and cache is empty
+	local oldfiles = vim.v.oldfiles or {}
+	if #oldfiles > 0 and (not cached_projects or not cached_recent_files) then
+		-- Force cache population
+		M.get_recent_projects(config.DASHBOARD.MAX_PROJECTS)
+		M.get_recent_files(config.DASHBOARD.MAX_RECENT_FILES)
+	end
+end
+
+-- Create all dashboard items with immediate generation for core items
 function M.create_all_items()
 	local items = {}
 
-	-- Add shortcuts
+	-- Add shortcuts (lightweight, always immediate)
 	for _, item in ipairs(M.create_shortcuts()) do
 		table.insert(items, item)
 	end
 
-	-- Add projects
+	-- Load recent files and projects immediately but with optimizations
+	-- Add projects immediately 
 	for _, item in ipairs(M.create_projects()) do
 		table.insert(items, item)
 	end
 
-	-- Add recent files
+	-- Add recent files immediately
 	for _, item in ipairs(M.create_recent_files()) do
 		table.insert(items, item)
 	end
 
 	return items
+end
+
+-- Clear cache function for manual refresh
+function M.clear_cache()
+	cached_projects = nil
+	cached_recent_files = nil
+	cache_timestamp = 0
 end
 
 return M
