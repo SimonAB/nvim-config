@@ -58,7 +58,7 @@ pcall(dofile, project_require)
 require("config")
 require("keymaps")
 
--- Consolidated autocmds for better performance
+-- Consolidated autocmds
 local function setup_optimized_autocmds()
 	local augroup = vim.api.nvim_create_augroup("OptimizedConfig", { clear = true })
 
@@ -70,28 +70,6 @@ local function setup_optimized_autocmds()
 			local ft = args.match
 			if ft == "tex" then
 				vim.g.vimtex_enabled = 1
-			elseif ft == "julia" then
-				-- Trigger manual LSP start if needed
-				vim.defer_fn(function()
-					vim.cmd("LspStart julials")
-				end, 200)
-			end
-		end,
-	})
-
-	-- Early file type detection for faster LSP startup
-	vim.api.nvim_create_autocmd("BufReadPre", {
-		group = augroup,
-		callback = function()
-			local ft = vim.bo.filetype
-			if ft == "julia" then
-				-- Pre-load Julia LSP
-				vim.defer_fn(function()
-					local ok, lspconfig = pcall(require, "lspconfig")
-					if ok then
-						lspconfig.julials.setup()
-					end
-				end, 100)
 			end
 		end,
 	})
@@ -99,11 +77,13 @@ end
 
 setup_optimized_autocmds()
 
--- Initialize optimized theme system
-local ThemeManager = require("core.theme-manager")
-ThemeManager.init()
+-- Defer theme manager initialisation
+vim.defer_fn(function()
+	local ThemeManager = require("core.theme-manager")
+	ThemeManager.init()
+end, 50)
 
--- Initialize enhanced plugin manager
+-- Defer plugin manager initialisation
 vim.defer_fn(function()
 	local ok, PluginManager = pcall(require, "core.plugin-manager")
 	if ok then
@@ -113,10 +93,20 @@ vim.defer_fn(function()
 	end
 end, 100)
 
--- Initialize theme picker
+-- Defer theme picker initialisation
 vim.defer_fn(function()
 	local ok, ThemePicker = pcall(require, "core.theme-picker")
 	if ok then
 		ThemePicker.init()
 	end
 end, 200)
+
+-- Defer dashboard setup
+vim.defer_fn(function()
+	local ok, dashboard = pcall(require, "plugins.mini-nvim.dashboard")
+	if ok then
+		dashboard.setup()
+		dashboard.setup_keymaps()
+		dashboard.setup_autocommands()
+	end
+end, 300)

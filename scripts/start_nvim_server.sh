@@ -30,7 +30,7 @@ cleanup_stale_socket() {
 # Main function
 start_nvim_with_server() {
     cleanup_stale_socket
-    
+
     if is_socket_active "$SERVER_ADDRESS"; then
         echo "✅ Neovim server already running at $SERVER_ADDRESS"
         nvim "$@"
