@@ -26,6 +26,8 @@ function M.setup()
 		vim.g._mini_sessions_setup_done = true
 	end
 
+	-- Prewarm cache before creating items for optimal performance
+	dashboard_content.prewarm_cache()
 	local items = dashboard_content.create_all_items()
 
 	-- Add sessions if available
@@ -61,7 +63,7 @@ function M.setup()
 			end
 		end
 		local prefix = ms and ("⚡ Startup: " .. tostring(ms) .. " ms") or "⚡ Startup: n/a"
-		return prefix .. "\n" .. ascii
+		return ascii ..  "\n" .. prefix
 	end
 
 	starter.setup({
@@ -107,6 +109,8 @@ function M.refresh()
 	end)
 
 	if ok_mini and MiniStarter then
+		-- Prewarm cache before creating new items for consistent behavior
+		dashboard_content.prewarm_cache()
 		local new_items = dashboard_content.create_all_items()
 		MiniStarter.config.items = new_items
 
@@ -184,7 +188,7 @@ function M.setup_autocommands()
 					end, 100)
 				end
 			end
-			vim.defer_fn(M.refresh, config.DASHBOARD.REFRESH_DELAY)
+			vim.defer_fn(M.refresh, 50) -- Reduced since items load immediately now
 		end,
 	})
 
