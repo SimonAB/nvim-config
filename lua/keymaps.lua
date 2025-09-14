@@ -137,43 +137,47 @@ map("n", "<leader>|h", "<cmd>split<CR>", { desc = "Split Horizontal" })
 map("n", "<leader>Yw", ":set wrap!<CR>", { desc = "Toggle wrap" })
 map("n", "<leader>Yn", ":set number!<CR>", { desc = "Toggle line numbers" })
 
--- Enhanced theme management functions
+-- Enhanced theme management functions with deferred loading
 local function show_theme_picker()
-  local ok, ThemeManager = pcall(require, "core.theme-manager")
-  if ok and ThemeManager.show_theme_picker then
-    ThemeManager.show_theme_picker()
-  else
-    vim.notify("Theme Picker not available", vim.log.levels.WARN)
-  end
+  vim.defer_fn(function()
+    local ok, ThemeManager = pcall(require, "core.theme-manager")
+    if ok and ThemeManager.show_theme_picker then
+      ThemeManager.show_theme_picker()
+    else
+      vim.notify("Theme Picker not available", vim.log.levels.WARN)
+    end
+  end, 50)
 end
 
 local function cycle_colorscheme()
-  local ok, ThemeManager = pcall(require, "core.theme-manager")
-  if ok and ThemeManager.cycle_theme then
-    ThemeManager.cycle_theme()
-  else
-    -- Fallback to simple cycling
-    local colorschemes = { "catppuccin", "onedark", "tokyonight", "nord", "github_dark" }
-    local current = vim.g.colors_name or "default"
-    local current_index = 1
+  vim.defer_fn(function()
+    local ok, ThemeManager = pcall(require, "core.theme-manager")
+    if ok and ThemeManager.cycle_theme then
+      ThemeManager.cycle_theme()
+    else
+      -- Fallback to simple cycling
+      local colorschemes = { "catppuccin", "onedark", "tokyonight", "nord", "github_dark" }
+      local current = vim.g.colors_name or "default"
+      local current_index = 1
 
-    for i, scheme in ipairs(colorschemes) do
-      if scheme == current then
-        current_index = i
-        break
+      for i, scheme in ipairs(colorschemes) do
+        if scheme == current then
+          current_index = i
+          break
+        end
+      end
+
+      local next_index = current_index % #colorschemes + 1
+      local next_scheme = colorschemes[next_index]
+
+      local success = pcall(vim.cmd.colorscheme, next_scheme)
+      if success then
+        vim.notify("Switched to " .. next_scheme .. " theme", vim.log.levels.INFO)
+      else
+        vim.notify("Failed to switch to " .. next_scheme .. " theme", vim.log.levels.WARN)
       end
     end
-
-    local next_index = current_index % #colorschemes + 1
-    local next_scheme = colorschemes[next_index]
-
-    local success = pcall(vim.cmd.colorscheme, next_scheme)
-    if success then
-      vim.notify("Switched to " .. next_scheme .. " theme", vim.log.levels.INFO)
-    else
-      vim.notify("Failed to switch to " .. next_scheme .. " theme", vim.log.levels.WARN)
-    end
-  end
+  end, 50)
 end
 
 -- Theme management keybindings

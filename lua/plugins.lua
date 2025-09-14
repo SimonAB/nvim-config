@@ -2,9 +2,9 @@
 -- Comprehensive plugin configuration migrated from nvim-cmp to blink.cmp
 -- Includes core functionality, UI themes, navigation, and Julia LSP support
 
--- Comprehensive plugin list with blink.cmp for completion
-local plugins = {
-	-- Core functionality - Essential development tools
+-- Plugin list with lazy loading
+local essential_plugins = {
+	-- Core functionality - Essential development tools (load immediately)
 	{ url = "https://github.com/folke/trouble.nvim",              name = "trouble.nvim" },                                          -- Diagnostics viewer
 	{ url = "https://github.com/Saghen/blink.cmp",                name = "blink.cmp",               build = "cargo build --release" }, -- Modern completion engine
 
@@ -21,6 +21,7 @@ local plugins = {
 	{ url = "https://github.com/rafi/awesome-vim-colorschemes",   name = "awesome-vim-colorschemes" }, -- Collection of themes
 	{ url = "https://github.com/projekt0n/github-nvim-theme",     name = "github-nvim-theme" },     -- GitHub theme
 	{ url = "https://github.com/f-person/auto-dark-mode.nvim",    name = "auto-dark-mode.nvim" },   -- Auto theme switching
+	{ url = "https://github.com/JuliaEditorSupport/julia-vim",    name = "julia-vim" },             -- Julia syntax/indent plugin
 	{ url = "https://github.com/lewis6991/gitsigns.nvim",         name = "gitsigns.nvim" },         -- Git integration
 	{ url = "https://github.com/nvim-lualine/lualine.nvim",       name = "lualine.nvim" },          -- Status line
 	{ url = "https://github.com/akinsho/bufferline.nvim",         name = "bufferline.nvim" },       -- Buffer tabs
@@ -60,7 +61,8 @@ local pack_path = vim.fn.stdpath("data") .. "/pack/plugins"
 local start_path = pack_path .. "/start"
 vim.fn.mkdir(start_path, "p")
 
-for _, plugin in ipairs(plugins) do
+-- Install plugins only if missing
+for _, plugin in ipairs(essential_plugins) do
 	local plugin_path = start_path .. "/" .. plugin.name
 	if vim.fn.isdirectory(plugin_path) == 0 then
 		print("Installing " .. plugin.name .. "...")
@@ -88,24 +90,59 @@ end
 vim.cmd("packloadall!")
 vim.cmd("silent! helptags ALL")
 
--- Add plugins to runtime path and ensure they're loaded
+-- Add plugins to runtime path
 local plugin_dirs = vim.fn.glob(start_path .. "/*", false, true)
 for _, dir in ipairs(plugin_dirs) do
 	if vim.fn.isdirectory(dir) == 1 then
 		vim.opt.rtp:append(dir)
-		-- Force load each plugin
-		local plugin_name = vim.fn.fnamemodify(dir, ":t")
-		vim.cmd("packadd " .. plugin_name)
 	end
 end
 
--- Ensure critical plugins are loaded
-vim.cmd("packadd nvim-lspconfig")
-vim.cmd("packadd mason.nvim")
-vim.cmd("packadd mason-lspconfig.nvim")
+-- Defer plugin configurations
+vim.defer_fn(function()
+	-- Load critical plugins that need immediate setup
+	vim.cmd("packadd nvim-lspconfig")
+	vim.cmd("packadd mason.nvim")
+	vim.cmd("packadd mason-lspconfig.nvim")
+
+	-- Defer other plugin configurations
+	vim.defer_fn(function()
+		-- Load plugin configurations
+		local plugin_configs = {
+			"plugins.blink-cmp",
+			"plugins.nvim-treesitter",
+			"plugins.telescope",
+			"plugins.nvim-tree",
+			"plugins.lualine-nvim",
+			"plugins.bufferline-nvim",
+			"plugins.gitsigns-nvim",
+			"plugins.which-key-nvim",
+			"plugins.toggleterm-nvim",
+			"plugins.vimtex",
+			"plugins.markdown-preview-nvim",
+			"plugins.typst-preview-nvim",
+			"plugins.obsidian-nvim",
+			"plugins.otter-nvim",
+			"plugins.quarto-nvim",
+			"plugins.trouble-nvim",
+			"plugins.auto-dark-mode-nvim",
+			"plugins.github-nvim-theme",
+			"plugins.nord-vim",
+			"plugins.awesome-vim-colorschemes",
+			"plugins.tokyonight-nvim",
+			"plugins.onedark-nvim",
+			"plugins.catppuccin",
+			"plugins.julia-vim",
+		}
+
+		for _, config in ipairs(plugin_configs) do
+			pcall(require, config)
+		end
+	end, 100)
+end, 50)
 
 -- Store plugins table globally for other modules to access
-_G.neovim_plugins = plugins
+_G.neovim_plugins = essential_plugins
 
 -- Return the plugins list to consumers that `require` or `dofile` this file
-return plugins
+return essential_plugins
