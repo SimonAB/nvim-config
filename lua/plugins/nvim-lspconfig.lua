@@ -49,6 +49,38 @@ end
 -- Additional LSP servers not covered by Mason's ensure_installed
 -- or servers that need custom configuration beyond the defaults
 
+-- Julia LSP setup (bypass Mason due to current instability)
+pcall(function()
+  lspconfig.julials.setup({
+    cmd = {
+      "julia",
+      "--project=@nvim-lspconfig",
+      "--startup-file=no",
+      "--history-file=no",
+      "-e",
+      [[
+        try
+          using LanguageServer, Pkg
+          project_path = try
+            Base.current_project() |> dirname
+          catch
+            dirname(Pkg.Types.Context().env.project_file)
+          end
+          server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, "")
+          run(server)
+        catch err
+          Base.println(stderr, err)
+          Base.println(stderr, sprint(showerror, err, catch_backtrace()))
+          flush(stderr)
+          exit(1)
+        end
+      ]],
+    },
+    on_attach = on_attach,
+    capabilities = _G.enhanced_lsp_capabilities or capabilities,
+  })
+end)
+
 -- Lua LSP setup (if not handled by Mason)
 lspconfig.lua_ls.setup({
 	capabilities = capabilities,
