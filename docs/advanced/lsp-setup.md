@@ -206,15 +206,15 @@ Create `~/.config/nvim/lua/user-lsp.lua`:
 
 ```lua
 -- Custom LSP server setup
-local lspconfig = require("lspconfig")
-
-lspconfig.myserver.setup({
+-- Use the new vim.lsp.config API (Neovim 0.11+)
+vim.lsp.config('myserver', {
   cmd = { "my-server", "--stdio" },
   filetypes = { "myfiletype" },
   settings = {
     -- Server-specific settings
   },
 })
+vim.lsp.enable('myserver')
 ```
 
 ## Advanced Features

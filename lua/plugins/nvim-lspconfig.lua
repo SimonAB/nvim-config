@@ -3,11 +3,8 @@
 -- Mason handles server installation and management automatically.
 -- Keymaps for LSP actions are set per buffer on attach. Completion is enhanced if blink.cmp is available.
 
-local ok, lspconfig = pcall(require, "lspconfig")
-if not ok then
-	vim.notify("❌ lspconfig not available - LSP functionality will be limited", vim.log.levels.WARN)
-	return
-end
+-- Use the new vim.lsp.config API (Neovim 0.11+)
+-- No need to require lspconfig anymore
 
 -- Set up LSP client capabilities with performance optimisations
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -51,7 +48,7 @@ end
 
 -- Julia LSP setup (bypass Mason due to current instability)
 pcall(function()
-  lspconfig.julials.setup({
+  vim.lsp.config('julials', {
     cmd = {
       "julia",
       "--project=@nvim-lspconfig",
@@ -79,10 +76,11 @@ pcall(function()
     on_attach = on_attach,
     capabilities = _G.enhanced_lsp_capabilities or capabilities,
   })
+  vim.lsp.enable('julials')
 end)
 
 -- Lua LSP setup (if not handled by Mason)
-lspconfig.lua_ls.setup({
+vim.lsp.config('lua_ls', {
 	capabilities = capabilities,
 	on_attach = on_attach,
 	settings = {
@@ -103,15 +101,17 @@ lspconfig.lua_ls.setup({
 		},
 	},
 })
+vim.lsp.enable('lua_ls')
 
 -- Additional language servers can be added here as needed
 -- Mason will handle the installation, and this file can provide custom configuration
 
 -- Example: Custom configuration for a specific server
--- lspconfig.some_server.setup({
+-- vim.lsp.config('some_server', {
 --     capabilities = capabilities,
 --     on_attach = on_attach,
 --     settings = {
 --         -- Custom settings here
 --     },
 -- })
+-- vim.lsp.enable('some_server')

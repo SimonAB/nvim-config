@@ -113,7 +113,7 @@ vim.defer_fn(function()
 		handlers = {
 			-- Default handler for installing servers
 			function(server_name)
-				require("lspconfig")[server_name].setup({})
+				vim.lsp.enable(server_name)
 			end,
 
 
@@ -123,7 +123,7 @@ vim.defer_fn(function()
 
 			-- Custom handler for Python LSP
 			["pyright"] = function()
-				require("lspconfig").pyright.setup({
+				vim.lsp.config('pyright', {
 					settings = {
 						python = {
 							analysis = {
@@ -135,11 +135,12 @@ vim.defer_fn(function()
 						},
 					},
 				})
+				vim.lsp.enable('pyright')
 			end,
 
 			-- Custom handler for R LSP
 			["r-languageserver"] = function()
-				require("lspconfig").r_language_server.setup({
+				vim.lsp.config('r_language_server', {
 					settings = {
 						r = {
 							lsp = {
@@ -148,11 +149,12 @@ vim.defer_fn(function()
 						},
 					},
 				})
+				vim.lsp.enable('r_language_server')
 			end,
 
 			-- Custom handler for LaTeX LSP
 			["texlab"] = function()
-				require("lspconfig").texlab.setup({
+				vim.lsp.config('texlab', {
 					settings = {
 						texlab = {
 							auxDirectory = ".",
@@ -188,6 +190,7 @@ vim.defer_fn(function()
 						},
 					},
 				})
+				vim.lsp.enable('texlab')
 			end,
 		},
 	})

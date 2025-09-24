@@ -238,7 +238,7 @@ Consider implementing true lazy loading for plugins that are only used in specif
 vim.api.nvim_create_autocmd("FileType", {
     pattern = { "lua", "python", "javascript" },
     callback = function()
-        require("lspconfig").setup()
+        vim.lsp.enable('lua_ls')
     end,
 })
 ```
