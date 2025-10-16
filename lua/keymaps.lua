@@ -18,6 +18,62 @@
 local map = vim.keymap.set
 
 -- ============================================================================
+-- HELPER FUNCTIONS
+-- ============================================================================
+-- Centralised helper functions for consistent keymap patterns
+
+-- Safe command execution with error handling
+local function safe_cmd(cmd, desc)
+  return function()
+    local success, err = pcall(vim.cmd, cmd)
+    if not success then
+      vim.notify("Command failed: " .. (err or "unknown error"), vim.log.levels.ERROR)
+    end
+  end
+end
+
+-- Safe require with fallback
+local function safe_require(module, fallback_func)
+  return function()
+    local ok, mod = pcall(require, module)
+    if ok and mod then
+      return mod
+    elseif fallback_func then
+      return fallback_func()
+    else
+      vim.notify("Module " .. module .. " not available", vim.log.levels.WARN)
+      return nil
+    end
+  end
+end
+
+-- Terminal creation helper
+local function create_terminal(cmd, opts)
+  local Terminal = require("toggleterm.terminal").Terminal
+  local default_opts = {
+    hidden = true,
+    direction = "horizontal",
+    close_on_exit = false,
+    on_open = function(_)
+      vim.cmd("startinsert!")
+    end,
+  }
+  local terminal = Terminal:new(vim.tbl_extend("force", default_opts, opts or {}))
+  terminal.cmd = cmd
+  return terminal
+end
+
+-- Buffer operations with fallback
+local function buffer_operation(bufferline_cmd, fallback_cmd)
+  return function()
+    local success = pcall(vim.cmd, bufferline_cmd)
+    if not success then
+      vim.cmd(fallback_cmd)
+    end
+  end
+end
+
+-- ============================================================================
 -- GENERAL KEYMAPS
 -- ============================================================================
 -- Basic editor navigation and text manipulation mappings
@@ -37,74 +93,48 @@ map("t", "<C-l>", "<C-\\><C-N><C-w>l", { desc = "Move to right window from termi
 
 -- Window resizing with multiple key combinations for better macOS compatibility
 -- Using Shift+Arrow as primary (more reliable on macOS)
-map("n", "<S-Up>", ":resize -2<CR>", { desc = "Decrease window height" })
-map("n", "<S-Down>", ":resize +2<CR>", { desc = "Increase window height" })
-map("n", "<S-Left>", ":vertical resize -2<CR>", { desc = "Decrease window width" })
-map("n", "<S-Right>", ":vertical resize +2<CR>", { desc = "Increase window width" })
+map("n", "<S-Up>", "<cmd>resize -2<CR>", { desc = "Decrease window height" })
+map("n", "<S-Down>", "<cmd>resize +2<CR>", { desc = "Increase window height" })
+map("n", "<S-Left>", "<cmd>vertical resize -2<CR>", { desc = "Decrease window width" })
+map("n", "<S-Right>", "<cmd>vertical resize +2<CR>", { desc = "Increase window width" })
 
 -- Leader-based resize commands (always reliable)
-map("n", "<leader>Wk", ":resize -2<CR>", { desc = "Decrease window height" })
-map("n", "<leader>Wj", ":resize +2<CR>", { desc = "Increase window height" })
-map("n", "<leader>Wh", ":vertical resize -2<CR>", { desc = "Decrease window width" })
-map("n", "<leader>Wl", ":vertical resize +2<CR>", { desc = "Increase window width" })
+map("n", "<leader>Wk", "<cmd>resize -2<CR>", { desc = "Decrease window height" })
+map("n", "<leader>Wj", "<cmd>resize +2<CR>", { desc = "Increase window height" })
+map("n", "<leader>Wh", "<cmd>vertical resize -2<CR>", { desc = "Decrease window width" })
+map("n", "<leader>Wl", "<cmd>vertical resize +2<CR>", { desc = "Increase window width" })
 
 -- Alt+Arrow for those terminals that support it
-map("n", "<A-Up>", ":resize -2<CR>", { desc = "Decrease window height (Alt)" })
-map("n", "<A-Down>", ":resize +2<CR>", { desc = "Increase window height (Alt)" })
-map("n", "<A-Left>", ":vertical resize -2<CR>", { desc = "Decrease window width (Alt)" })
-map("n", "<A-Right>", ":vertical resize +2<CR>", { desc = "Increase window width (Alt)" })
+map("n", "<A-Up>", "<cmd>resize -2<CR>", { desc = "Decrease window height (Alt)" })
+map("n", "<A-Down>", "<cmd>resize +2<CR>", { desc = "Increase window height (Alt)" })
+map("n", "<A-Left>", "<cmd>vertical resize -2<CR>", { desc = "Decrease window width (Alt)" })
+map("n", "<A-Right>", "<cmd>vertical resize +2<CR>", { desc = "Increase window width (Alt)" })
 
 -- Meta notation (sometimes works on macOS)
-map("n", "<M-Up>", ":resize -2<CR>", { desc = "Decrease window height (Meta)" })
-map("n", "<M-Down>", ":resize +2<CR>", { desc = "Increase window height (Meta)" })
-map("n", "<M-Left>", ":vertical resize -2<CR>", { desc = "Decrease window width (Meta)" })
-map("n", "<M-Right>", ":vertical resize +2<CR>", { desc = "Increase window width (Meta)" })
+map("n", "<M-Up>", "<cmd>resize -2<CR>", { desc = "Decrease window height (Meta)" })
+map("n", "<M-Down>", "<cmd>resize +2<CR>", { desc = "Increase window height (Meta)" })
+map("n", "<M-Left>", "<cmd>vertical resize -2<CR>", { desc = "Decrease window width (Meta)" })
+map("n", "<M-Right>", "<cmd>vertical resize +2<CR>", { desc = "Increase window width (Meta)" })
 
 -- Raw escape sequences for terminals that send them
-map("n", "<Esc>[1;3A", ":resize -2<CR>", { desc = "Decrease window height (ESC seq)" })
-map("n", "<Esc>[1;3B", ":resize +2<CR>", { desc = "Increase window height (ESC seq)" })
-map("n", "<Esc>[1;3C", ":vertical resize +2<CR>", { desc = "Increase window width (ESC seq)" })
-map("n", "<Esc>[1;3D", ":vertical resize -2<CR>", { desc = "Decrease window width (ESC seq)" })
+map("n", "<Esc>[1;3A", "<cmd>resize -2<CR>", { desc = "Decrease window height (ESC seq)" })
+map("n", "<Esc>[1;3B", "<cmd>resize +2<CR>", { desc = "Increase window height (ESC seq)" })
+map("n", "<Esc>[1;3C", "<cmd>vertical resize +2<CR>", { desc = "Increase window width (ESC seq)" })
+map("n", "<Esc>[1;3D", "<cmd>vertical resize -2<CR>", { desc = "Decrease window width (ESC seq)" })
 
 -- Buffer navigation  - fallback if BufferLine not available
-map("n", "<S-l>", function()
-  local bufferline_ok = pcall(vim.cmd, "BufferLineCycleNext")
-  if not bufferline_ok then
-    vim.cmd("bnext")
-  end
-end, { desc = "Next buffer" })
-
-map("n", "<S-h>", function()
-  local bufferline_ok = pcall(vim.cmd, "BufferLineCyclePrev")
-  if not bufferline_ok then
-    vim.cmd("bprevious")
-  end
-end, { desc = "Previous buffer" })
+map("n", "<S-l>", buffer_operation("BufferLineCycleNext", "bnext"), { desc = "Next buffer" })
+map("n", "<S-h>", buffer_operation("BufferLineCyclePrev", "bprevious"), { desc = "Previous buffer" })
 
 -- Buffer Operations (<leader>B)
-map("n", "<leader>Bf", ":Telescope buffers<CR>", { desc = "Find buffers (Telescope)" })
-map("n", "<leader>Bj", ":BufferLinePick<CR>", { desc = "Jump to buffer (BufferLine pick)" })
-map("n", "<leader>Bb", function()
-  local bufferline_ok = pcall(vim.cmd, "BufferLineCyclePrev")
-  if not bufferline_ok then
-    vim.cmd("bprevious")
-  end
-end, { desc = "Previous buffer" })
-map("n", "<leader>Bn", function()
-  local bufferline_ok = pcall(vim.cmd, "BufferLineCycleNext")
-  if not bufferline_ok then
-    vim.cmd("bnext")
-  end
-end, { desc = "Next buffer" })
-map("n", "<leader>Bq", function()
-  local bufferline_ok = pcall(vim.cmd, "BufferLineClose")
-  if not bufferline_ok then
-    vim.cmd("bdelete")
-  end
-end, { desc = "Close buffer" })
+map("n", "<leader>Bf", "<cmd>Telescope buffers<CR>", { desc = "Find buffers (Telescope)" })
+map("n", "<leader>Bj", "<cmd>BufferLinePick<CR>", { desc = "Jump to buffer (BufferLine pick)" })
+map("n", "<leader>Bb", buffer_operation("BufferLineCyclePrev", "bprevious"), { desc = "Previous buffer" })
+map("n", "<leader>Bn", buffer_operation("BufferLineCycleNext", "bnext"), { desc = "Next buffer" })
+map("n", "<leader>Bq", buffer_operation("BufferLineClose", "bdelete"), { desc = "Close buffer" })
 
 -- Clear search highlights
-map("n", "<Esc>", ":nohlsearch<CR>", { desc = "Clear search highlights" })
+map("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 
 -- Better indenting
 map("v", "<", "<gv", { desc = "Indent left" })
@@ -123,10 +153,10 @@ map("v", "p", '"_dP', { desc = "Paste without yanking" })
 
 
 -- Core single-key operations
-map("n", "<leader>w", ":w<CR>", { desc = "Write" })
-map("n", "<C-s>", ":w<CR>", { desc = "Quick save" })
-map("n", "<leader>q", ":q<CR>", { desc = "Close Buffer" })
-map("n", "<leader>h", ":nohlsearch<CR>", { desc = "Hide Highlight" })
+map("n", "<leader>w", "<cmd>w<CR>", { desc = "Write" })
+map("n", "<C-s>", "<cmd>w<CR>", { desc = "Quick save" })
+map("n", "<leader>q", "<cmd>q<CR>", { desc = "Close Buffer" })
+map("n", "<leader>h", "<cmd>nohlsearch<CR>", { desc = "Hide Highlight" })
 
 
 -- Split commands in Split group (using | since S is for Search)
@@ -134,8 +164,8 @@ map("n", "<leader>|v", "<cmd>vsplit<CR>", { desc = "Split Vertical" })
 map("n", "<leader>|h", "<cmd>split<CR>", { desc = "Split Horizontal" })
 
 -- Toggle options (using Y prefix since T is for Terminal)
-map("n", "<leader>Yw", ":set wrap!<CR>", { desc = "Toggle wrap" })
-map("n", "<leader>Yn", ":set number!<CR>", { desc = "Toggle line numbers" })
+map("n", "<leader>Yw", "<cmd>set wrap!<CR>", { desc = "Toggle wrap" })
+map("n", "<leader>Yn", "<cmd>set number!<CR>", { desc = "Toggle line numbers" })
 
 -- Enhanced theme management functions with deferred loading
 local function show_theme_picker()
@@ -556,23 +586,24 @@ end, { desc = "Watch file with typst w" })
 -- These provide various functionality across different plugins
 
 -- File tree
-map("n", "<leader>e", ":NvimTreeToggle<CR>", { desc = "Toggle file tree" })
+map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file tree" })
 
 -- File operations
-map("n", "<leader>f", ":Telescope find_files<CR>", { desc = "Find files" })
-map("n", "<leader>F", ":Telescope frecency<CR>", { desc = "Find files (by frequency/recency)" })
-map("n", "<leader>fr", ":lua require('telescope').extensions.frecency.frecency()<CR>",
-  { desc = "Refresh frecency database" })
-map("n", "<leader>fd", ":lua print('Frecency DB: ' .. vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3')<CR>",
-  { desc = "Show frecency database location" })
-map("n", "<leader>fb",
-  ":lua vim.fn.delete(vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3') or print('Frecency database deleted. Restart Neovim to rebuild.')<CR>",
-  { desc = "Rebuild frecency database" })
+map("n", "<leader>f", "<cmd>Telescope find_files<CR>", { desc = "Find files" })
+map("n", "<leader>F", "<cmd>Telescope frecency<CR>", { desc = "Find files (by frequency/recency)" })
+map("n", "<leader>fr", function()
+  require('telescope').extensions.frecency.frecency()
+end, { desc = "Refresh frecency database" })
+map("n", "<leader>fd", function()
+  print('Frecency DB: ' .. vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3')
+end, { desc = "Show frecency database location" })
+map("n", "<leader>fb", function()
+  vim.fn.delete(vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3')
+  print('Frecency database deleted. Restart Neovim to rebuild.')
+end, { desc = "Rebuild frecency database" })
 
 -- Git operations
-map("n", "<leader>Gs", function()
-  vim.cmd("!git status")
-end, { desc = "Git Status" })
+map("n", "<leader>Gs", safe_cmd("!git status"), { desc = "Git Status" })
 
 -- Grep operations
 map("n", "<leader>g", function()
@@ -614,16 +645,11 @@ map("n", "<leader>gf", function()
   end
 end, { desc = "Grep in current file directory" })
 
-map("n", "<leader>Gp", function()
-  vim.cmd("!git pull")
-end, { desc = "Git Pull" })
+map("n", "<leader>Gp", safe_cmd("!git pull"), { desc = "Git Pull" })
 
 map("n", "<leader>Gg", function()
-  local Terminal = require("toggleterm.terminal").Terminal
-  local lazygit = Terminal:new({
-    cmd = "lazygit",
+  local lazygit = create_terminal("lazygit", {
     dir = "git_dir", -- open in the Git root for correct repo context
-    hidden = true,
     direction = "float",
     float_opts = {
       border = "curved",
@@ -659,41 +685,23 @@ map("n", "<leader>Gg", function()
 end, { desc = "LazyGit" })
 
 -- Obsidian operations
-map("n", "<leader>On", function()
-  pcall(function()
-    require("obsidian").util.new_note()
-  end)
-end, { desc = "New Obsidian note" })
+local function obsidian_operation(operation_name)
+  return function()
+    local ok, obsidian = pcall(require, "obsidian")
+    if ok and obsidian.util[operation_name] then
+      obsidian.util[operation_name]()
+    else
+      vim.notify("Obsidian operation '" .. operation_name .. "' not available", vim.log.levels.WARN)
+    end
+  end
+end
 
-map("n", "<leader>Ol", function()
-  pcall(function()
-    require("obsidian").util.insert_link()
-  end)
-end, { desc = "Insert Obsidian link" })
-
-map("n", "<leader>Of", function()
-  pcall(function()
-    require("obsidian").util.follow_link()
-  end)
-end, { desc = "Follow Obsidian link" })
-
-map("n", "<leader>Oc", function()
-  pcall(function()
-    require("obsidian").util.toggle_checkbox()
-  end)
-end, { desc = "Toggle Obsidian checkbox" })
-
-map("n", "<leader>Ob", function()
-  pcall(function()
-    require("obsidian").util.show_backlinks()
-  end)
-end, { desc = "Show Obsidian backlinks" })
-
-map("n", "<leader>Og", function()
-  pcall(function()
-    require("obsidian").util.show_outgoing_links()
-  end)
-end, { desc = "Show Obsidian outgoing links" })
+map("n", "<leader>On", obsidian_operation("new_note"), { desc = "New Obsidian note" })
+map("n", "<leader>Ol", obsidian_operation("insert_link"), { desc = "Insert Obsidian link" })
+map("n", "<leader>Of", obsidian_operation("follow_link"), { desc = "Follow Obsidian link" })
+map("n", "<leader>Oc", obsidian_operation("toggle_checkbox"), { desc = "Toggle Obsidian checkbox" })
+map("n", "<leader>Ob", obsidian_operation("show_backlinks"), { desc = "Show Obsidian backlinks" })
+map("n", "<leader>Og", obsidian_operation("show_outgoing_links"), { desc = "Show Obsidian outgoing links" })
 
 map("n", "<leader>Oo", function()
   local obsidian_path = "/Users/s_a_b/Library/Mobile Documents/iCloud~md~obsidian/Documents/Notebook"
@@ -703,22 +711,10 @@ map("n", "<leader>Oo", function()
   })
 end, { desc = "Find files in Obsidian vault" })
 
-map("n", "<leader>Ot", function()
-  pcall(function()
-    vim.cmd("ObsidianTemplate")
-  end)
-end, { desc = "Insert Obsidian template" })
-
-map("n", "<leader>ON", function()
-  pcall(function()
-    vim.cmd("ObsidianNewFromTemplate")
-  end)
-end, { desc = "New note from template" })
-
+map("n", "<leader>Ot", safe_cmd("ObsidianTemplate"), { desc = "Insert Obsidian template" })
+map("n", "<leader>ON", safe_cmd("ObsidianNewFromTemplate"), { desc = "New note from template" })
 map("n", "<leader>Op", function()
-  pcall(function()
-    vim.cmd("ObsidianPasteImg")
-  end)
+  pcall(vim.cmd, "ObsidianPasteImg")
   vim.cmd("put =''")
   vim.cmd("put =''")
 end, { desc = "Paste image and add two lines" })
@@ -760,107 +756,53 @@ end, { desc = "Show References" })
 map("n", "<leader>Lm", "<cmd>Mason<CR>", { desc = "Open Mason" })
 
 -- Quarto operations
-map("n", "<leader>Qp", function()
-  pcall(function()
-    require("quarto").quartoPreview()
-  end)
-end, { desc = "Quarto Preview" })
+local function quarto_operation(operation_name)
+  return function()
+    local ok, quarto = pcall(require, "quarto")
+    if ok and quarto[operation_name] then
+      quarto[operation_name]()
+    else
+      vim.notify("Quarto operation '" .. operation_name .. "' not available", vim.log.levels.WARN)
+    end
+  end
+end
 
-map("n", "<leader>Qc", function()
-  pcall(function()
-    require("quarto").quartoClosePreview()
-  end)
-end, { desc = "Close preview" })
-
-map("n", "<leader>Qr", function()
-  pcall(function()
-    vim.cmd("QuartoRender")
-  end)
-end, { desc = "Quarto Render" })
+map("n", "<leader>Qp", quarto_operation("quartoPreview"), { desc = "Quarto Preview" })
+map("n", "<leader>Qc", quarto_operation("quartoClosePreview"), { desc = "Close preview" })
+map("n", "<leader>Qr", safe_cmd("QuartoRender"), { desc = "Quarto Render" })
 
 -- Molten keymaps
-map("n", "<leader>Qmi", function()
-  vim.cmd("MoltenImagePopup")
-end, { desc = "Show Image Popup" })
+local molten_commands = {
+  ["<leader>Qmi"] = { cmd = "MoltenImagePopup", desc = "Show Image Popup" },
+  ["<leader>Qml"] = { cmd = "MoltenEvaluateLine", desc = "Evaluate Line" },
+  ["<leader>Qme"] = { cmd = "MoltenEvaluateOperator", desc = "Evaluate Operator" },
+  ["<leader>Qmn"] = { cmd = "MoltenInit", desc = "Initialise Kernel" },
+  ["<leader>Qmk"] = { cmd = "MoltenDeinit", desc = "Stop Kernel" },
+  ["<leader>Qmr"] = { cmd = "MoltenRestart", desc = "Restart Kernel" },
+  ["<leader>Qmo"] = { cmd = "MoltenEvaluateOperator", desc = "Evaluate Operator" },
+  ["<leader>Qm<CR>"] = { cmd = "MoltenEvaluateLine", desc = "Evaluate Line" },
+  ["<leader>Qmv"] = { cmd = "MoltenEvaluateVisual", desc = "Evaluate Visual" },
+  ["<leader>Qmf"] = { cmd = "MoltenReevaluateCell", desc = "Re-evaluate Cell" },
+  ["<leader>Qmh"] = { cmd = "MoltenHideOutput", desc = "Hide Output" },
+  ["<leader>Qms"] = { cmd = "MoltenShowOutput", desc = "Show Output" },
+  ["<leader>Qmd"] = { cmd = "MoltenDelete", desc = "Delete Cell" },
+  ["<leader>Qmb"] = { cmd = "MoltenOpenInBrowser", desc = "Open in Browser" },
+}
 
-map("n", "<leader>Qml", function()
-  vim.cmd("MoltenEvaluateLine")
-end, { desc = "Evaluate Line" })
-
-map("n", "<leader>Qme", function()
-  vim.cmd("MoltenEvaluateOperator")
-end, { desc = "Evaluate Operator" })
-
-map("n", "<leader>Qmn", function()
-  pcall(function()
-    vim.cmd("MoltenInit")
-  end)
-end, { desc = "Initialise Kernel" })
-
-map("n", "<leader>Qmk", function()
-  pcall(function()
-    vim.cmd("MoltenDeinit")
-  end)
-end, { desc = "Stop Kernel" })
-
-map("n", "<leader>Qmr", function()
-  pcall(function()
-    vim.cmd("MoltenRestart")
-  end)
-end, { desc = "Restart Kernel" })
-
-map("n", "<leader>Qmo", function()
-  pcall(function()
-    vim.cmd("MoltenEvaluateOperator")
-  end)
-end, { desc = "Evaluate Operator" })
-
-map("n", "<leader>Qm<CR>", function()
-  pcall(function()
-    vim.cmd("MoltenEvaluateLine")
-  end)
-end, { desc = "Evaluate Line" })
-
-map("n", "<leader>Qmv", function()
-  pcall(function()
-    vim.cmd("MoltenEvaluateVisual")
-  end)
-end, { desc = "Evaluate Visual" })
-
-map("n", "<leader>Qmf", function()
-  pcall(function()
-    vim.cmd("MoltenReevaluateCell")
-  end)
-end, { desc = "Re-evaluate Cell" })
-
-map("n", "<leader>Qmh", function()
-  pcall(function()
-    vim.cmd("MoltenHideOutput")
-  end)
-end, { desc = "Hide Output" })
-
-map("n", "<leader>Qms", function()
-  pcall(function()
-    vim.cmd("MoltenShowOutput")
-  end)
-end, { desc = "Show Output" })
-
-map("n", "<leader>Qmd", function()
-  pcall(function()
-    vim.cmd("MoltenDelete")
-  end)
-end, { desc = "Delete Cell" })
-
-map("n", "<leader>Qmb", function()
-  pcall(function()
-    vim.cmd("MoltenOpenInBrowser")
-  end)
-end, { desc = "Open in Browser" })
+for key, data in pairs(molten_commands) do
+  map("n", key, safe_cmd(data.cmd), { desc = data.desc })
+end
 
 -- Toggle options (these were missing from the moved keymaps)
-map("n", "<leader>Ys", ":set spell!<CR>", { desc = "Toggle Spell Check" })
-map("n", "<leader>Yse", ":set spelllang=en_gb<CR>:set spell<CR>", { desc = "Set spell language to English (British)" })
-map("n", "<leader>Ysf", ":set spelllang=fr<CR>:set spell<CR>", { desc = "Set spell language to French" })
+map("n", "<leader>Ys", "<cmd>set spell!<CR>", { desc = "Toggle Spell Check" })
+map("n", "<leader>Yse", function()
+  vim.cmd("set spelllang=en_gb")
+  vim.cmd("set spell")
+end, { desc = "Set spell language to English (British)" })
+map("n", "<leader>Ysf", function()
+  vim.cmd("set spelllang=fr")
+  vim.cmd("set spell")
+end, { desc = "Set spell language to French" })
 
 -- Split operations (removing duplicate)
 
@@ -923,18 +865,21 @@ end, { desc = "Grep config files" })
 -- Julia-specific operations
 -- Centralised function to open Julia REPL with specified direction
 local function open_julia_repl(direction)
-  local Terminal = require("toggleterm.terminal").Terminal
   local project_path = vim.fn.shellescape(vim.fn.getcwd())
-  local julia_repl = Terminal:new({
-    cmd = "julia --project=" .. project_path,
-    hidden = true,
+  local julia_repl = create_terminal("julia --project=" .. project_path, {
     direction = direction,
-    close_on_exit = false,
-    on_open = function(_)
-      vim.cmd("startinsert!")
-    end,
   })
   julia_repl:toggle()
+end
+
+-- Julia command execution helper
+local function julia_command(command, desc)
+  return function()
+    local project_path = vim.fn.shellescape(vim.fn.getcwd())
+    local julia_cmd = "julia --project=. --threads=auto" .. project_path .. " -e '" .. command .. "'"
+    local terminal = create_terminal(julia_cmd, { direction = "horizontal" })
+    terminal:toggle()
+  end
 end
 
 map("n", "<leader>Jrh", function()
@@ -949,85 +894,11 @@ map("n", "<leader>Jrf", function()
   open_julia_repl("float")
 end, { desc = "Floating REPL" })
 
-map("n", "<leader>Jp", function()
-  -- Show project status using ToggleTerm
-  local Terminal = require("toggleterm.terminal").Terminal
-  local project_path = vim.fn.shellescape(vim.fn.getcwd())
-  local pkg_status = Terminal:new({
-    cmd = "julia --project=" .. project_path .. " -e 'using Pkg; Pkg.status()'",
-    hidden = true,
-    direction = "horizontal",
-    close_on_exit = false,
-    on_open = function(_)
-      vim.cmd("startinsert!")
-    end,
-  })
-  pkg_status:toggle()
-end, { desc = "Project Status" })
-
-map("n", "<leader>Ji", function()
-  -- Instantiate project using ToggleTerm
-  local Terminal = require("toggleterm.terminal").Terminal
-  local project_path = vim.fn.shellescape(vim.fn.getcwd())
-  local pkg_instantiate = Terminal:new({
-    cmd = "julia --project=" .. project_path .. " -e 'using Pkg; Pkg.instantiate()'",
-    hidden = true,
-    direction = "horizontal",
-    close_on_exit = false,
-    on_open = function(_)
-      vim.cmd("startinsert!")
-    end,
-  })
-  pkg_instantiate:toggle()
-end, { desc = "Instantiate Project" })
-
-map("n", "<leader>Ju", function()
-  -- Update project using ToggleTerm
-  local Terminal = require("toggleterm.terminal").Terminal
-  local project_path = vim.fn.shellescape(vim.fn.getcwd())
-  local pkg_update = Terminal:new({
-    cmd = "julia --project=" .. project_path .. " -e 'using Pkg; Pkg.update()'",
-    hidden = true,
-    direction = "horizontal",
-    close_on_exit = false,
-    on_open = function(_)
-      vim.cmd("startinsert!")
-    end,
-  })
-  pkg_update:toggle()
-end, { desc = "Update Project" })
-
-map("n", "<leader>Jt", function()
-  -- Run tests using ToggleTerm
-  local Terminal = require("toggleterm.terminal").Terminal
-  local project_path = vim.fn.shellescape(vim.fn.getcwd())
-  local pkg_test = Terminal:new({
-    cmd = "julia --project=" .. project_path .. " -e 'using Pkg; Pkg.test()'",
-    hidden = true,
-    direction = "horizontal",
-    close_on_exit = false,
-    on_open = function(_)
-      vim.cmd("startinsert!")
-    end,
-  })
-  pkg_test:toggle()
-end, { desc = "Run Tests" })
-
-map("n", "<leader>Jd", function()
-  -- Generate documentation using ToggleTerm
-  local Terminal = require("toggleterm.terminal").Terminal
-  local project_path = vim.fn.shellescape(vim.fn.getcwd())
-  local pkg_docs = Terminal:new({
-    cmd = "julia --project=" .. project_path .. " -e 'using Pkg; using Documenter; makedocs()'",
-    hidden = true,
-    direction = "horizontal",
-    close_on_exit = false,
-    on_open = function(_)
-      vim.cmd("startinsert!")
-    end,
-  })
-  pkg_docs:toggle()
-end, { desc = "Generate Docs" })
+map("n", "<leader>Jp", julia_command("using Pkg; Pkg.status()", "Project Status"), { desc = "Project Status" })
+map("n", "<leader>Ji", julia_command("using Pkg; Pkg.instantiate()", "Instantiate Project"), { desc = "Instantiate Project" })
+map("n", "<leader>Ju", julia_command("using Pkg; Pkg.update()", "Update Project"), { desc = "Update Project" })
+map("n", "<leader>Jt", julia_command("using Pkg; Pkg.test()", "Run Tests"), { desc = "Run Tests" })
+map("n", "<leader>Jd", julia_command("using Pkg; using Documenter; makedocs()", "Generate Docs"), { desc = "Generate Docs" })
 
 -- =============================================================================
 -- ENHANCED PLUGIN MANAGER KEYBINDINGS
