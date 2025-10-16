@@ -58,18 +58,35 @@ pcall(dofile, project_require)
 require("config")
 require("keymaps")
 
--- Consolidated autocmds
+-- Consolidated autocmds with improved performance
 local function setup_optimized_autocmds()
 	local augroup = vim.api.nvim_create_augroup("OptimizedConfig", { clear = true })
 
-	-- Single autocmd for multiple filetypes
+	-- Filetype-specific configurations
+	local filetype_configs = {
+		tex = function() vim.g.vimtex_enabled = 1 end,
+		julia = function() 
+			-- Julia-specific setup if needed
+		end,
+		python = function()
+			-- Python-specific setup if needed
+		end,
+		r = function()
+			-- R-specific setup if needed
+		end,
+		qmd = function()
+			-- Quarto-specific setup if needed
+		end,
+	}
+
+	-- Single autocmd for multiple filetypes with lookup table
 	vim.api.nvim_create_autocmd("FileType", {
 		group = augroup,
-		pattern = { "tex", "julia", "python", "r", "qmd" },
+		pattern = vim.tbl_keys(filetype_configs),
 		callback = function(args)
-			local ft = args.match
-			if ft == "tex" then
-				vim.g.vimtex_enabled = 1
+			local config = filetype_configs[args.match]
+			if config then
+				config()
 			end
 		end,
 	})

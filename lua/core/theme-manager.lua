@@ -7,13 +7,29 @@ local ThemeManager = {}
 local highlight_cache = {}
 local ThemePicker = nil -- Lazy load to avoid circular dependencies
 
--- Detect system appearance
+-- Detect system appearance with caching
+local system_theme_cache = nil
+local cache_timeout = 5000 -- 5 seconds
+local last_detection_time = 0
+
 function ThemeManager.detect_system_theme()
+	local current_time = vim.loop.hrtime() / 1000000 -- Convert to milliseconds
+	
+	-- Return cached result if still valid
+	if system_theme_cache and (current_time - last_detection_time) < cache_timeout then
+		return system_theme_cache
+	end
+	
 	local ok, result = pcall(vim.fn.system, { "defaults", "read", "-g", "AppleInterfaceStyle" })
 	if ok and result then
-		return result:match("Dark") and "dark" or "light"
+		system_theme_cache = result:match("Dark") and "dark" or "light"
+		last_detection_time = current_time
+		return system_theme_cache
 	end
-	return "dark" -- fallback
+	
+	system_theme_cache = "dark" -- fallback
+	last_detection_time = current_time
+	return system_theme_cache
 end
 
 -- Get theme for current system appearance
