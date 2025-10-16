@@ -155,71 +155,94 @@ vim.api.nvim_create_autocmd('FileType', {
 
 local augroup = vim.api.nvim_create_augroup("Config", { clear = true })
 
--- Highlight yanked text
-vim.api.nvim_create_autocmd("TextYankPost", {
-  group = augroup,
-  callback = function()
-    vim.hl.on_yank({ timeout = 200 })
-  end,
-})
+-- Optimised autocmd patterns for better performance
+local function create_optimised_autocmds()
+  -- Highlight yanked text
+  vim.api.nvim_create_autocmd("TextYankPost", {
+    group = augroup,
+    callback = function()
+      vim.hl.on_yank({ timeout = 200 })
+    end,
+  })
 
--- Remove trailing whitespace on save
-vim.api.nvim_create_autocmd("BufWritePre", {
-  group = augroup,
-  pattern = { "*.lua", "*.py", "*.js", "*.ts", "*.go", "*.rs", "*.tex", "*.md", "*.qmd" },
-  callback = function()
-    local pos = vim.api.nvim_win_get_cursor(0)
-    vim.cmd([[%s/\s\+$//e]])
-    vim.api.nvim_win_set_cursor(0, pos)
-  end,
-})
+  -- Remove trailing whitespace on save with improved performance
+  local whitespace_filetypes = { "*.lua", "*.py", "*.js", "*.ts", "*.go", "*.rs", "*.tex", "*.md", "*.qmd" }
+  vim.api.nvim_create_autocmd("BufWritePre", {
+    group = augroup,
+    pattern = whitespace_filetypes,
+    callback = function()
+      local pos = vim.api.nvim_win_get_cursor(0)
+      -- More efficient: only search if there might be trailing spaces
+      local has_trailing = vim.fn.search('\\s\\+$', 'n') > 0
+      if has_trailing then
+        vim.cmd([[%s/\s\+$//e]])
+      end
+      vim.api.nvim_win_set_cursor(0, pos)
+    end,
+  })
 
--- Auto-save on focus loss/exit
-vim.api.nvim_create_autocmd({ "FocusLost", "VimLeavePre" }, {
-  group = augroup,
-  desc = "Auto-save on focus loss or exit",
-  callback = function()
-    pcall(function() vim.cmd("silent! wa") end)
-  end,
-})
+  -- Auto-save on focus loss/exit
+  vim.api.nvim_create_autocmd({ "FocusLost", "VimLeavePre" }, {
+    group = augroup,
+    desc = "Auto-save on focus loss or exit",
+    callback = function()
+      pcall(function() vim.cmd("silent! wa") end)
+    end,
+  })
 
--- Restore cursor position
-vim.api.nvim_create_autocmd("BufReadPost", {
-  group = augroup,
-  callback = function()
-    local pos = vim.fn.line("'\"")
-    if pos > 1 and pos <= vim.fn.line("$") then
-      vim.api.nvim_win_set_cursor(0, { pos, 0 })
-    end
-  end,
-})
+  -- Restore cursor position
+  vim.api.nvim_create_autocmd("BufReadPost", {
+    group = augroup,
+    callback = function()
+      local pos = vim.fn.line("'\"")
+      if pos > 1 and pos <= vim.fn.line("$") then
+        vim.api.nvim_win_set_cursor(0, { pos, 0 })
+      end
+    end,
+  })
 
--- File-specific settings
-vim.api.nvim_create_autocmd("BufEnter", {
-  group = augroup,
-  pattern = { "*.json", "*.jsonc", "*.md" },
-  desc = "Enable wrap mode for specific files",
-  command = "setlocal wrap",
-})
+  -- File-specific settings with lookup table for better performance
+  local file_settings = {
+    ["*.json"] = function() vim.cmd("setlocal wrap") end,
+    ["*.jsonc"] = function() vim.cmd("setlocal wrap") end,
+    ["*.md"] = function() vim.cmd("setlocal wrap") end,
+  }
 
--- File type specific settings
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup,
-  pattern = { "html", "css", "javascript", "typescript", "json", "yaml" },
-  callback = function()
-    opt.tabstop = 2
-    opt.shiftwidth = 2
-  end,
-})
+  vim.api.nvim_create_autocmd("BufEnter", {
+    group = augroup,
+    pattern = vim.tbl_keys(file_settings),
+    desc = "File-specific settings",
+    callback = function(args)
+      local setting = file_settings[args.match]
+      if setting then
+        setting()
+      end
+    end,
+  })
 
--- Syntax highlighting for zsh files
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup,
-  pattern = "zsh",
-  desc = "Use bash highlighting for zsh",
-  callback = function()
-    pcall(function()
-      require("nvim-treesitter.highlight").attach(0, "bash")
-    end)
-  end,
-})
+  -- File type specific settings with improved performance
+  local filetype_settings = {
+    -- 2-space indentation
+    ["html,css,javascript,typescript,json,yaml"] = function()
+      opt.tabstop = 2
+      opt.shiftwidth = 2
+    end,
+    -- Zsh syntax highlighting
+    ["zsh"] = function()
+      pcall(function()
+        require("nvim-treesitter.highlight").attach(0, "bash")
+      end)
+    end,
+  }
+
+  for pattern, config in pairs(filetype_settings) do
+    vim.api.nvim_create_autocmd("FileType", {
+      group = augroup,
+      pattern = pattern,
+      callback = config,
+    })
+  end
+end
+
+-- Create optimised autocmds
+create_optimised_autocmds()
