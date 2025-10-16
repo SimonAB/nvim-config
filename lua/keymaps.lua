@@ -719,7 +719,9 @@ map("n", "<leader>Op", function()
   pcall(function()
     vim.cmd("ObsidianPasteImg")
   end)
-end, { desc = "Paste image into Obsidian note" })
+  vim.cmd("put =''")
+  vim.cmd("put =''")
+end, { desc = "Paste image and add two lines" })
 
 map("n", "<leader>Ov", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Toggle Obsidian Preview" })
 
