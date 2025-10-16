@@ -165,19 +165,60 @@ local function create_optimised_autocmds()
     end,
   })
 
-  -- Remove trailing whitespace on save with improved performance
+  -- Remove trailing whitespace and enforce single newline at EOF on save
   local whitespace_filetypes = { "*.lua", "*.py", "*.js", "*.ts", "*.go", "*.rs", "*.tex", "*.md", "*.qmd" }
   vim.api.nvim_create_autocmd("BufWritePre", {
     group = augroup,
     pattern = whitespace_filetypes,
     callback = function()
       local pos = vim.api.nvim_win_get_cursor(0)
-      -- More efficient: only search if there might be trailing spaces
+      local bufnr = vim.api.nvim_get_current_buf()
+      
+      -- Remove trailing whitespace (existing functionality)
       local has_trailing = vim.fn.search('\\s\\+$', 'n') > 0
       if has_trailing then
         vim.cmd([[%s/\s\+$//e]])
       end
-      vim.api.nvim_win_set_cursor(0, pos)
+      
+      -- Enforce exactly one newline at end of file
+      local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+      if #lines > 0 then
+        local last_line = lines[#lines]
+        local non_empty_lines = {}
+        
+        -- Find the last non-empty line
+        for i = #lines, 1, -1 do
+          if lines[i]:match("%S") then -- line contains non-whitespace
+            non_empty_lines = { unpack(lines, 1, i) }
+            break
+          end
+        end
+        
+        -- Ensure exactly one empty line at the end
+        if #non_empty_lines > 0 then
+          non_empty_lines[#non_empty_lines + 1] = "" -- Add exactly one empty line
+          vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, non_empty_lines)
+          
+          -- Update cursor position to be within bounds after buffer modification
+          local new_line_count = #non_empty_lines
+          local new_col = math.min(pos[2], #lines[pos[1]] or 0)
+          local new_row = math.min(pos[1], new_line_count)
+          
+          -- Ensure cursor is within valid bounds
+          if new_row > 0 and new_row <= new_line_count then
+            vim.api.nvim_win_set_cursor(0, { new_row, new_col })
+          else
+            -- Fallback: set cursor to end of file
+            vim.api.nvim_win_set_cursor(0, { new_line_count, 0 })
+          end
+        else
+          -- No non-empty lines found, restore original position
+          vim.api.nvim_win_set_cursor(0, pos)
+        end
+      else
+        -- Empty file, restore original position
+        vim.api.nvim_win_set_cursor(0, pos)
+      end
     end,
   })
 
