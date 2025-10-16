@@ -866,7 +866,7 @@ end, { desc = "Grep config files" })
 -- Centralised function to open Julia REPL with specified direction
 local function open_julia_repl(direction)
   local project_path = vim.fn.shellescape(vim.fn.getcwd())
-  local julia_repl = create_terminal("julia --project=" .. project_path, {
+  local julia_repl = create_terminal("julia --project=" .. project_path .. " --threads=auto", {
     direction = direction,
   })
   julia_repl:toggle()
