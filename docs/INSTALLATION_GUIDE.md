@@ -6,7 +6,7 @@ Complete installation instructions for Neovim research configuration on macOS.
 
 - **Operating System**: macOS 10.15+ (tested on macOS 13+)
 - **Neovim**: 0.12 or later (required for vim.pack plugin management)
-- **Terminal**: [iTerm2](https://iterm2.com/), [Warp](https://www.warp.dev/), or [Ghostty](https://github.com/ghostty-org/ghostty) recommended (256-colour support and better font rendering)
+- **Terminal**: [Ghostty](https://github.com/ghostty-org/ghostty), [iTerm2](https://iterm2.com/), or [Warp](https://www.warp.dev/) recommended (256-colour support and better font rendering)
 - **Internet Connection**: Required for initial plugin installation
 
 ## Prerequisites
@@ -499,9 +499,9 @@ brew install --cask font-hack-nerd-font
 ```
 
 **Recommended terminals**:
+- [Ghostty](https://github.com/ghostty-org/ghostty) - Fast, native macOS terminal
 - [iTerm2](https://iterm2.com/) - Feature-rich terminal with extensive customisation
 - [Warp](https://www.warp.dev/) - Modern terminal with AI features
-- [Ghostty](https://github.com/ghostty-org/ghostty) - Fast, native macOS terminal
 
 **Terminal.app**: macOS built-in terminal has 256-colour support but requires configuration:
 1. Terminal → Preferences → Profiles
