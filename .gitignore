@@ -21,3 +21,9 @@ pack/
 debug_*
 *.tmp
 *.bak
+
+# Node.js and VitePress
+node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+package-lock.json
