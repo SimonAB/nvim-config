@@ -180,8 +180,32 @@ local function create_optimised_autocmds()
         vim.cmd([[%s/\s\+$//e]])
       end
       
-      -- Enforce exactly one newline at end of file
+      -- Collapse multiple consecutive empty lines into single empty lines
       local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+      local collapsed_lines = {}
+      local prev_line_empty = false
+      
+      for _, line in ipairs(lines) do
+        local is_empty = line:match("^%s*$") ~= nil
+        if not (is_empty and prev_line_empty) then
+          collapsed_lines[#collapsed_lines + 1] = line
+        end
+        prev_line_empty = is_empty
+      end
+      
+      -- Only update buffer if changes were made
+      if #collapsed_lines ~= #lines then
+        vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, collapsed_lines)
+        
+        -- Adjust cursor position if needed
+        local new_row = math.min(pos[1], #collapsed_lines)
+        local line_length = #(collapsed_lines[new_row] or "")
+        local new_col = math.min(pos[2], line_length)
+        pos = { new_row, new_col }
+      end
+      
+      -- Enforce exactly one newline at end of file
+      lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
       if #lines > 0 then
         local last_line = lines[#lines]
         local non_empty_lines = {}
