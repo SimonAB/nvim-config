@@ -636,13 +636,14 @@ map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file tree" })
 -- File operations
 map("n", "<leader>f", "<cmd>Telescope find_files<CR>", { desc = "Find files" })
 map("n", "<leader>F", "<cmd>Telescope frecency<CR>", { desc = "Find files (by frequency/recency)" })
-map("n", "<leader>fr", function()
+map("n", "<leader>Ff", "<cmd>Telescope frecency<CR>", { desc = "Find files (frecency)" })
+map("n", "<leader>Fr", function()
   require('telescope').extensions.frecency.frecency()
 end, { desc = "Refresh frecency database" })
-map("n", "<leader>fd", function()
+map("n", "<leader>Fd", function()
   print('Frecency DB: ' .. vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3')
 end, { desc = "Show frecency database location" })
-map("n", "<leader>fb", function()
+map("n", "<leader>Fb", function()
   vim.fn.delete(vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3')
   print('Frecency database deleted. Restart Neovim to rebuild.')
 end, { desc = "Rebuild frecency database" })
@@ -650,7 +651,7 @@ end, { desc = "Rebuild frecency database" })
 -- Git operations
 map("n", "<leader>Gs", safe_cmd("!git status"), { desc = "Git Status" })
 
--- Grep operations
+-- Grep operations (direct command)
 map("n", "<leader>g", function()
   local builtin = require('telescope.builtin')
   -- Prefer Git root if available, otherwise fall back to current working directory
@@ -661,25 +662,36 @@ map("n", "<leader>g", function()
   builtin.live_grep({ cwd = cwd })
 end, { desc = "Grep in project" })
 
-map("n", "<leader>gw", function()
+-- Search operations (grep with location options)
+map("n", "<leader>Sp", function()
+  local builtin = require('telescope.builtin')
+  -- Prefer Git root if available, otherwise fall back to current working directory
+  local cwd = vim.fn.systemlist('git rev-parse --show-toplevel')[1]
+  if not cwd or cwd == '' or cwd:match('fatal:') then
+    cwd = vim.loop.cwd() or vim.fn.getcwd()
+  end
+  builtin.live_grep({ cwd = cwd })
+end, { desc = "Search in project" })
+
+map("n", "<leader>Sw", function()
   local builtin = require('telescope.builtin')
   local cwd = vim.loop.cwd() or vim.fn.getcwd()
   builtin.live_grep({ cwd = cwd })
-end, { desc = "Grep in current working directory" })
+end, { desc = "Search in working directory" })
 
-map("n", "<leader>gh", function()
+map("n", "<leader>Sh", function()
   local builtin = require('telescope.builtin')
   local home = vim.loop.os_homedir() or vim.fn.expand("~")
   builtin.live_grep({ search_dirs = { home } })
-end, { desc = "Grep in home directory" })
+end, { desc = "Search in home directory" })
 
-map("n", "<leader>gc", function()
+map("n", "<leader>Sc", function()
   local builtin = require('telescope.builtin')
   local config_path = vim.fn.stdpath("config")
   builtin.live_grep({ cwd = config_path })
-end, { desc = "Grep in config" })
+end, { desc = "Search in config" })
 
-map("n", "<leader>gf", function()
+map("n", "<leader>Sf", function()
   local builtin = require('telescope.builtin')
   local current_file = vim.fn.expand('%:p')
   if current_file ~= '' then
@@ -688,7 +700,7 @@ map("n", "<leader>gf", function()
   else
     builtin.live_grep()
   end
-end, { desc = "Grep in current file directory" })
+end, { desc = "Search in current file directory" })
 
 map("n", "<leader>Gp", safe_cmd("!git pull"), { desc = "Git Pull" })
 
