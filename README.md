@@ -52,7 +52,7 @@ See [Installation Guide](docs/INSTALLATION_GUIDE.md) for complete setup instruct
 
 ```bash
 # Clone configuration
-git clone <repository-url> ~/.config/nvim
+git clone https://github.com/SimonAB/nvim-config.git ~/.config/nvim
 cd ~/.config/nvim
 
 # First launch (plugins auto-install)

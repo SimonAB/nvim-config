@@ -63,7 +63,7 @@ cargo --version  # cargo 1.70.0+
 mv ~/.config/nvim ~/.config/nvim.backup
 
 # Clone this configuration
-git clone <repository-url> ~/.config/nvim
+git clone https://github.com/SimonAB/nvim-config.git ~/.config/nvim
 cd ~/.config/nvim
 ```
 
