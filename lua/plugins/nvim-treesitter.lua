@@ -30,7 +30,15 @@ if ok then
 		},
 		highlight = {
 			enable = true, -- Enable syntax highlighting
-			additional_vim_regex_highlighting = false, -- Disable vim regex highlighting
+			-- Enable additional vim regex highlighting to support spell checking regions
+			-- These filetypes need traditional syntax to define where spell check should look
+			additional_vim_regex_highlighting = { 
+				"latex", "tex", "markdown",  -- Documents
+				"python", "r", "julia",       -- Data science languages
+				"javascript", "typescript",   -- Web languages
+				"html", "css",                -- Web markup
+				"bash", "sh",                 -- Shell scripts
+			},
 		},
 		indent = {
 			enable = true, -- Enable indentation
