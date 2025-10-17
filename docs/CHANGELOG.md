@@ -1,6 +1,41 @@
 # Changelog
 
-## [Latest] - Enhanced Theme Management System
+## [Latest] - Which-Key Convention Enforcement
+
+### 🔧 Keymap Refactoring
+- **Convention Enforcement**: Strict adherence to lowercase/uppercase leader key pattern
+  - Lowercase keys (e.g., `<leader>f`, `<leader>g`) execute immediately without delay
+  - Uppercase keys (e.g., `<leader>F`, `<leader>G`) show which-key menus with sub-commands
+- **Eliminated Delays**: Removed which-key wait time for frequently used commands
+  - `<leader>f` (find files) now executes immediately
+  - `<leader>g` (grep in project) now executes immediately
+
+### ⌨️ Keymap Reorganisation
+- **Frecency Commands**: Moved from `<leader>f*` to `<leader>F*` group
+  - `<leader>Ff` → Find files (frecency)
+  - `<leader>Fr` → Refresh frecency database
+  - `<leader>Fd` → Show database location
+  - `<leader>Fb` → Rebuild database
+- **Search Commands**: Moved grep location variants from `<leader>g*` to `<leader>S*`
+  - `<leader>Sp` → Search in project
+  - `<leader>Sw` → Search in working directory
+  - `<leader>Sh` → Search in home directory
+  - `<leader>Sc` → Search in config
+  - `<leader>Sf` → Search in current file directory
+- **Conflict Resolution**: Disabled OneDark's `<leader>ts` toggle (use `<leader>Yc` instead)
+
+### 🧹 Configuration Cleanup
+- **Which-Key Groups**: Removed incorrect group definitions for direct commands
+- **Unused Groups**: Removed empty groups (`<leader>P`)
+- **Documentation**: Added convention comments to which-key configuration
+
+### 📚 Documentation Updates
+- **Keymap Reference**: Updated `docs/reference/keymaps.md` with correct keybindings
+- **Convention Clarity**: Documented the lowercase/uppercase convention
+
+---
+
+## [Previous] - Enhanced Theme Management System
 
 ### 🎨 New Features
 - **Theme Picker**: Enhanced Telescope interface with nvim-tree style filtering

@@ -44,11 +44,11 @@ Complete reference of all keybindings in StellarVIM, organized by functionality.
 ### File Navigation
 ```vim
 <Leader>f       " Find files (Telescope)
-<Leader>F       " Find files by frequency (Telescope)
-<Leader>g       " Live grep (Telescope)
-<Leader>gw      " Live grep in working directory
-<Leader>gc      " Live grep in config
-<Leader>gf      " Live grep in current file directory
+<Leader>F       " Find files by frequency/recency (Telescope frecency)
+<Leader>Ff      " Find files (frecency)
+<Leader>Fr      " Refresh frecency database
+<Leader>Fd      " Show frecency database location
+<Leader>Fb      " Rebuild frecency database
 <Leader>e       " Toggle file explorer (NvimTree)
 ```
 
@@ -191,15 +191,12 @@ K               " Show hover documentation
 ## Search Operations
 
 ```vim
-<Leader>Sf      " Find files
-<Leader>Sg      " Live grep
-<Leader>Sb      " Git branches
-<Leader>Sc      " Color schemes
-<Leader>Sh      " Help tags
-<Leader>Sr      " Recent files
-<Leader>Sk      " Keymaps
-<Leader>SC      " Commands
-<Leader>Sl      " Resume last search
+<Leader>g       " Grep in project (direct command)
+<Leader>Sp      " Search in project
+<Leader>Sw      " Search in working directory
+<Leader>Sh      " Search in home directory
+<Leader>Sc      " Search in config
+<Leader>Sf      " Search in current file directory
 ```
 
 ## Configuration Management
