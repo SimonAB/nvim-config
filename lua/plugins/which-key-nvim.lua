@@ -18,7 +18,9 @@ if ok then
 				motions = true,
 				text_objects = true,
 				windows = true,
-				nav = true,
+				-- nav preset disabled to prevent which-key from intercepting ]s/[s
+				-- This sacrifices bracket motion hints but preserves spell navigation
+				nav = false,
 				z = true,
 				g = true,
 			},
