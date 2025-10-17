@@ -1,0 +1,16 @@
+{
+  "name": "nvim-research-config-docs",
+  "version": "1.0.0",
+  "description": "Documentation for Neovim Research Configuration",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "keywords": ["neovim", "documentation", "research", "academic"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vitepress": "^1.0.0"
+  }
+}
