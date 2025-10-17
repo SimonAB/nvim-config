@@ -136,6 +136,8 @@ map("n", "<leader>Bq", buffer_operation("BufferLineClose", "bdelete"), { desc = 
 -- Clear search highlights
 map("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 
+-- (Removed custom spell navigation; rely on native [s / ]s)
+
 -- Better indenting
 map("v", "<", "<gv", { desc = "Indent left" })
 map("v", ">", ">gv", { desc = "Indent right" })
@@ -484,10 +486,53 @@ map({ 'n', 't' }, "<M-2>", make_terminal_cmd('vertical', math.floor(vim.o.column
 map({ 'n', 't' }, "<M-3>", make_terminal_cmd('float'), { desc = "Float Terminal (Meta)" })
 
 -- Leader-based alternatives as backup (using T for Terminal group)
-map({ 'n', 't' }, "<leader>T1", make_terminal_cmd('horizontal', 15), { desc = "Terminal Horizontal" })
-map({ 'n', 't' }, "<leader>T2", make_terminal_cmd('vertical', math.floor(vim.o.columns * 0.3)),
+map({ 'n', 't' }, "<leader>Th", make_terminal_cmd('horizontal', 15), { desc = "Terminal Horizontal" })
+map({ 'n', 't' }, "<leader>Tv", make_terminal_cmd('vertical', math.floor(vim.o.columns * 0.3)),
   { desc = "Terminal Vertical" })
-map({ 'n', 't' }, "<leader>T3", make_terminal_cmd('float'), { desc = "Terminal Float" })
+map({ 'n', 't' }, "<leader>Tf", make_terminal_cmd('float'), { desc = "Terminal Float" })
+
+-- Smart toggle: hide visible terminal, otherwise show/create vertical terminal
+local function toggle_terminal_vertical_smart()
+  -- Ensure commands behave predictably from terminal mode
+  if vim.fn.mode() == 't' then
+    vim.cmd('stopinsert')
+  end
+
+  -- If any terminal window is visible, close just one (hide, do not delete)
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
+      pcall(vim.api.nvim_win_close, win, true)
+      return
+    end
+  end
+
+  -- No terminal window visible: if a terminal buffer exists, display it vertically
+  local existing_terminal_buf = nil
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
+      if vim.api.nvim_buf_get_option(buf, 'buftype') == 'terminal' then
+        existing_terminal_buf = buf
+        break
+      end
+    end
+  end
+
+  if existing_terminal_buf then
+    vim.cmd('vsplit')
+    local win = vim.api.nvim_get_current_win()
+    vim.api.nvim_win_set_buf(win, existing_terminal_buf)
+    vim.cmd('startinsert')
+    return
+  end
+
+  -- No terminal buffers at all: create a new vertical terminal (default vertical behaviour)
+  local size = math.floor(vim.o.columns * 0.3)
+  vim.cmd('ToggleTerm direction=vertical size=' .. size)
+end
+
+-- Leader mapping: <leader>Tt → Toggle terminal (vertical default)
+map({ 'n', 't' }, "<leader>Tt", toggle_terminal_vertical_smart, { desc = "Terminal Toggle (vertical default)" })
 
 -- ============================================================================
 -- VIMTEX KEYMAPS

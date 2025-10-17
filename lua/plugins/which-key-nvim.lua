@@ -3,9 +3,9 @@
 
 local ok, wk = pcall(require, "which-key")
 if ok then
-	wk.setup({
-		preset = "classic",
-		delay = 500,
+    wk.setup({
+        preset = "classic",
+        delay = 500,
 		plugins = {
 			marks = true,
 			registers = true,

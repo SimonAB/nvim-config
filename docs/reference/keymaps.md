@@ -161,6 +161,10 @@ K               " Show hover documentation
 ### Terminal Management
 ```vim
 <C-t>           " Toggle terminal
+<Leader>Tt      " Toggle terminal (vertical default)
+<Leader>Th      " Horizontal terminal (15 lines)
+<Leader>Tv      " Vertical terminal (30%)
+<Leader>Tf      " Floating terminal
 <Leader>Tk      " Clear terminal
 <Leader>Td      " Kill terminal
 

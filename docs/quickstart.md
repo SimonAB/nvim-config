@@ -1,24 +1,30 @@
 # Quick Start Guide
 
-Get up and running with StellarVIM in under 5 minutes.
+Complete Neovim setup for research workflows in under 10 minutes.
 
 ## Prerequisites
 
-### Required Tools
+### Essential Tools
+
 ```bash
-# Install Neovim 0.12+ (latest version recommended)
+# Neovim 0.12+ (latest stable recommended)
 brew install neovim
 
-# Install essential tools
-brew install ripgrep fd  # For Telescope fuzzy finding
-brew install lazygit     # Git interface
-brew install node        # For language servers
+# Essential utilities for fuzzy finding
+brew install ripgrep fd
+
+# Git interface
+brew install lazygit
+
+# Node.js (for language servers and markdown preview)
+brew install node
 ```
 
-### Optional Tools (Academic Workflow)
+### Academic Workflow Tools
+
 ```bash
 # LaTeX support
-brew install --cask mactex-no-gui
+brew install --cask mactex-no-gui   # or mactex for full installation
 
 # PDF viewer for LaTeX sync
 brew install --cask skim
@@ -26,158 +32,364 @@ brew install --cask skim
 # Typst typesetting
 brew install typst
 
-# Julia programming
+# Julia programming (optional)
 brew install julia
+
+# R programming (optional)
+brew install r
 ```
 
 ## Installation
 
-### Option 1: Direct Clone (Recommended)
+### Clone Configuration
+
 ```bash
-git clone https://github.com/your-repo/stellarvim ~/.config/nvim
+git clone <repository-url> ~/.config/nvim
 cd ~/.config/nvim
 ```
 
-### Option 2: Manual Setup
-```bash
-mkdir -p ~/.config
-git clone https://github.com/your-repo/stellarvim ~/.config/nvim
-cd ~/.config/nvim
-```
-
-## First Launch
+### First Launch
 
 ```bash
-# Start Neovim - plugins will install automatically
+# Launch Neovim - plugins install automatically
 nvim
-
-# Or use the server script for better LaTeX integration
-./scripts/start_nvim_server.sh
 ```
 
-### What Happens on First Launch
+**What happens on first launch:**
 
-1. **Plugin Installation**: vim-pack will clone and install all plugins
-2. **Theme Setup**: Automatically detects and applies your system theme
-3. **LSP Setup**: Mason installs recommended language servers
-4. **Dashboard**: Mini.starter shows available commands
+1. vim.pack clones and installs all plugins (~2 minutes)
+2. System theme detected and applied automatically
+3. Mason prompts to install recommended language servers
+4. Dashboard displays recent files and startup time
 
-## Basic Usage
+## Essential Keymaps
 
-### Core Navigation
+### Navigation (`<Space>` is leader)
+
 ```vim
-<Space>           # Leader key
-<Ctrl-h/j/k/l>    # Navigate between windows
-<Shift-h/l>       # Navigate between buffers
-<C-t>             # Toggle terminal
+<Space>              " Show all available commands (Which-Key)
+<Space>f             " Find files (Telescope)
+<Space>g             " Live grep in project
+<Space>e             " Toggle file explorer
+<Ctrl-h/j/k/l>       " Navigate between windows
+<Shift-h/l>          " Navigate between buffers
 ```
 
-### File Operations
+### Terminal Integration
+
 ```vim
-<Space>f          # Find files (Telescope)
-<Space>F          # Find files by frequency
-<Space>g          # Live grep in project
-<Space>e          # Toggle file explorer
+<Ctrl-t>             " Toggle terminal
+<Space>Tt            " Smart terminal toggle (vertical)
+<Space>Th            " Horizontal terminal
+<Space>Tv            " Vertical terminal
+<Space>Tf            " Floating terminal
+<Ctrl-i>             " Send line to terminal
+<Ctrl-c>             " Send code block to terminal
+<Ctrl-s>             " Send visual selection to terminal (visual mode)
 ```
 
 ### LSP Operations
+
 ```vim
-gd                # Go to definition
-K                 # Show documentation
-<Space>Lf         # Format document
-<Space>Lr         # Show references
+gd                   " Go to definition
+K                    " Show documentation
+<Space>Lf            " Format document
+<Space>Lr            " Restart LSP
+<Space>LR            " Show references
+<Space>Ll            " List active LSP servers
 ```
 
-### Academic Workflow
+### Document Processing
+
 ```vim
-<Space>Jr         # Julia REPL operations
-<Space>Q          # Quarto operations
-<Space>Kp         # Markdown preview
-<LocalLeader>lv   # LaTeX forward search
+" LaTeX (localleader is \)
+\lv                  " Forward search (LaTeX → PDF)
+\ll                  " Compile document
+\lc                  " Clean auxiliary files
+
+" Markdown
+<Space>Kp            " Start preview
+<Space>Kt            " Toggle preview
+
+" Quarto
+<Space>Qp            " Preview document
+<Space>Qr            " Render document
+
+" Typst
+\tp                  " Toggle preview
+\tc                  " Compile PDF
 ```
+
+### Julia Development
+
+```vim
+<Space>Jrh           " Horizontal Julia REPL
+<Space>Jrv           " Vertical Julia REPL
+<Space>Jrf           " Floating Julia REPL
+<Space>Jp            " Project status
+<Space>Ji            " Instantiate project
+<Space>Jt            " Run tests
+```
+
+Julia REPLs launch with `--threads=auto` for automatic multi-threading support.
 
 ## Configuration
 
-### Theme Switching
+### Theme Management
+
 ```vim
-<Space>Yc         # Cycle through available themes
-<Space>Yse        # Set spell language to English (British)
-<Space>Ysf        # Set spell language to French
+<Space>Ytp           " Open theme picker (Telescope)
+<Space>Yc            " Cycle through themes
+<Space>Yts           " Show current theme
 ```
 
-### Mason LSP Management
+Available themes include Catppuccin, OneDark, Tokyo Night, Nord, and GitHub Dark/Light.
+
+### Language Server Installation
+
 ```vim
-<Space>MA         # Install academic LSP servers
-<Space>MR         # Install all recommended servers
-<Space>MU         # Update all packages
-<Space>MS         # Show Mason status
+<Space>MA            " Install academic LSP servers (LaTeX, Python, R, Julia)
+<Space>MR            " Install all recommended servers
+<Space>MU            " Update all packages
+<Space>MS            " Show Mason status
+:Mason               " Open Mason interface
 ```
 
-## Customization
+Recommended servers for academic workflows:
+- **LaTeX**: texlab
+- **Python**: pyright, ruff-lsp
+- **R**: r-languageserver
+- **Julia**: julials
+- **Lua**: lua-language-server
+- **Markdown**: marksman
 
-### Personal Settings
-Create `~/.config/nvim/lua/user.lua`:
-```lua
--- Your personal overrides
-vim.g.my_setting = "value"
+### Spell Checking
+
+```vim
+<Space>Ys            " Toggle spell check
+<Space>Yse           " Set spell language to English (British)
+<Space>Ysf           " Set spell language to French
 ```
 
-### Keymap Changes
-Add to `~/.config/nvim/lua/user.lua`:
+## LaTeX Workflow Setup
+
+### Configure Skim for SyncTeX
+
+1. Open Skim → Preferences → Sync
+2. Set **Preset** to: Custom
+3. Set **Command** to: `/Users/<username>/.config/nvim/scripts/skim_inverse_search.sh`
+   - Use absolute path, no tilde (~)
+4. Set **Arguments** to: `%line "%file"`
+
+### Test LaTeX Integration
+
+```bash
+cd ~/Documents/your-latex-project
+nvim main.tex
+```
+
+In Neovim:
+```vim
+\ll                  " Compile document
+\lv                  " Open PDF and jump to cursor position
+```
+
+In Skim:
+- Cmd+Shift+Click on PDF to jump to corresponding line in Neovim
+
+## Obsidian Integration
+
+Configure Obsidian vault path in `lua/keymaps.lua` (line ~709):
+
 ```lua
-vim.keymap.set("n", "<leader>mykey", ":MyCommand<CR>", { desc = "My custom command" })
+local obsidian_path = "/Users/<username>/Library/Mobile Documents/iCloud~md~obsidian/Documents/Notebook"
+```
+
+### Obsidian Keymaps
+
+```vim
+<Space>Oo            " Find files in Obsidian vault
+<Space>On            " New note
+<Space>Oc            " Toggle checkbox
+<Space>Op            " Paste image
+<Space>Ol            " Insert link
+<Space>Ob            " Show backlinks
+```
+
+## Julia Setup
+
+### Install Julia Language Server
+
+```julia
+using Pkg
+Pkg.add("LanguageServer")
+```
+
+### Julia REPL Workflow
+
+1. Open Julia file: `nvim script.jl`
+2. Launch REPL: `<Space>Jrv` (vertical split)
+3. Send code:
+   - Current line: `<Ctrl-i>`
+   - Code block: `<Ctrl-c>`
+   - Selection: `<Ctrl-s>` (visual mode)
+
+### Project Management
+
+```vim
+<Space>Jp            " Check project status
+<Space>Ji            " Instantiate dependencies
+<Space>Ju            " Update packages
+<Space>Jt            " Run tests
+```
+
+## Performance Verification
+
+### Check Startup Time
+
+```bash
+nvim --startuptime /tmp/startup.log -c quit
+tail -20 /tmp/startup.log
+```
+
+Expected startup time: 80-100ms
+
+### Profile Slow Operations
+
+```vim
+:profile start profile.log
+:profile func *
+:profile file *
+" Perform operations to profile
+:profile pause
+:noautocmd qall!
 ```
 
 ## Troubleshooting
 
-### Common Issues
+### Plugins Not Loading
 
-**Slow Startup**
-- Check Mason status: `<Space>MS`
-- Run performance test: `:luafile scripts/performance_test.lua`
+```vim
+:checkhealth         " Diagnose issues
+:Mason               " Verify language servers
+:messages            " Check error messages
+```
 
-**LSP Not Working**
-- Install servers: `<Space>MA`
-- Check Mason: `:Mason`
+### LSP Not Working
 
-**Theme Issues**
-- Reload config: `<Space>Cs`
-- Check theme: `:colorscheme`
+```vim
+<Space>Ll            " List active LSP servers
+<Space>Lr            " Restart LSP
+:LspInfo             " Check LSP client status
+```
 
-### Getting Help
+### Terminal Issues
 
-- **Which-Key**: Press `<Space>` to see all available commands
-- **Keymap Search**: `<Space>Sk` to search keymaps
-- **Plugin Help**: `:help <plugin-name>` for documentation
+```bash
+# Verify toggleterm installation
+nvim -c "lua print(pcall(require, 'toggleterm'))"
 
-## Theme Management
+# Test terminal mapping
+<Space>Th            " Try horizontal terminal
+```
 
-The enhanced theme system provides multiple ways to switch themes:
+### LaTeX SyncTeX Not Working
 
-- **Theme Picker**: `<Space>Ytp` - Opens a floating window with all available themes
-- **Quick Cycle**: `<Space>Yc` - Cycles through your favorite themes
-- **Current Theme**: `<Space>Yts` - Shows your current theme
+```bash
+# Check script exists
+ls ~/.config/nvim/scripts/skim_inverse_search.sh
 
-The theme picker features:
-- 🎨 **Visual Categories**: Themes are categorized (dark 🌙, light ☀️, special 🎨)
-- 👁️ **Live Preview Panel**: See theme info and preview in dedicated panel
-- 🔍 **Nvim-tree Style Filtering**: Type to filter themes with live updates
-- 🎯 **Quick Apply**: Apply without closing with `<C-y>`
-- 📜 **Full Navigation**: All Telescope navigation (j/k, arrows, gg/G) + filtering
-- 🖼️ **Responsive Preview**: Theme updates instantly on all selection changes
-- ⌨️ **Smart Input**: Insert mode for filtering, normal mode for navigation
-- 🛡️ **Fallback Support**: Custom scrolling interface if Telescope fails
+# Test script manually
+~/.config/nvim/scripts/skim_inverse_search.sh 10 "/absolute/path/to/test.tex"
 
-Filter controls (fallback picker): press `f` to cycle All → Dark → Light; or `d`, `l`, `a` to directly pick a filter.
+# Check debug log
+tail -f /tmp/inverse_search.log
+```
+
+### Slow Startup
+
+Common causes:
+1. Too many language servers enabled
+2. Large dashboard file history
+3. Heavy plugins loading immediately
+
+Solutions:
+```vim
+<Space>MS            " Check Mason status
+<Space>Cs            " Reload configuration
+```
+
+## Discovering Features
+
+### Which-Key Integration
+
+Press `<Space>` and wait 500ms to see all available commands grouped by functionality:
+
+- **B**: Buffer operations
+- **C**: Configuration management
+- **G**: Git operations
+- **J**: Julia development
+- **L**: LSP operations
+- **M**: Mason package management
+- **Q**: Quarto operations
+- **T**: Terminal operations
+- **Y**: Toggle options
+
+### Search Keymaps
+
+```vim
+<Space>Sk            " Search keymaps (Telescope)
+:WhichKey            " Show all keymaps
+:WhichKey <Space>    " Show leader keymaps
+```
 
 ## Next Steps
 
-1. **Explore Features**: Use Which-Key (`<Space>`) to discover commands
-2. **Configure LSP**: Set up language servers for your projects
-3. **Customize Themes**: Try different themes with `<Space>Ytp`
-4. **Customize**: Add your preferred keymaps and settings
-5. **Learn**: Check [Advanced Usage](advanced/) for power features
+1. **Install Language Servers**: `<Space>MA` for academic servers
+2. **Configure Theme**: `<Space>Ytp` to browse and select theme
+3. **Setup LaTeX**: Configure Skim for bidirectional sync
+4. **Customise**: Add personal keymaps to `lua/keymaps.lua`
+5. **Explore**: Press `<Space>` and explore command groups
+
+## Advanced Usage
+
+### Creating Custom Keymaps
+
+Add to `lua/keymaps.lua`:
+
+```lua
+vim.keymap.set("n", "<leader>custom", function()
+    -- Your custom functionality
+end, { desc = "Custom command" })
+```
+
+### Adding Plugins
+
+Edit `lua/plugins.lua`:
+
+```lua
+local essential_plugins = {
+    { url = "https://github.com/user/plugin", name = "plugin" },
+}
+```
+
+### Performance Tuning
+
+Edit `init.lua` to adjust deferred loading times:
+
+```lua
+vim.defer_fn(function()
+    require("core.theme-manager")
+end, 50)  -- Adjust delay in milliseconds
+```
+
+## Resources
+
+- [Complete Keymaps Reference](reference/keymaps.md)
+- [Installation Guide](INSTALLATION_GUIDE.md)
+- [Troubleshooting Guide](TROUBLESHOOTING_GUIDE.md)
+- [Performance Optimisations](PERFORMANCE_OPTIMISATIONS.md)
 
 ---
 
-🎯 **Tip**: The configuration is designed to be discoverable - press `<Space>` and wait to see all available commands grouped by functionality.
+**Tip**: This configuration is designed for discoverability. Press `<Space>` and explore the command tree to learn available functionality.
