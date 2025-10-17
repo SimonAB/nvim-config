@@ -4,6 +4,17 @@ Complete Neovim setup for research workflows in under 10 minutes.
 
 ## Prerequisites
 
+### Homebrew Package Manager
+
+If you don't have Homebrew installed:
+
+```bash
+# Install Homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+See https://brew.sh/ for more information.
+
 ### Essential Tools
 
 ```bash

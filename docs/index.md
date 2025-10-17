@@ -73,6 +73,7 @@ features:
 ## Requirements
 
 ### Essential
+- **Homebrew**: Package manager for macOS ([install here](https://brew.sh/))
 - Neovim 0.12+ (required for vim.pack)
 - Git
 - Cargo (for blink.cmp compilation)
