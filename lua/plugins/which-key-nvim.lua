@@ -187,30 +187,26 @@ if ok then
 
 	-- Register leader keymap groups for which-key display
 	-- Individual keymaps are defined in keymaps.lua with desc fields
+	-- Convention: Capital letters = groups with sub-commands, lowercase = direct commands
 	wk.add({
 		-- Buffer operations
 		{ "<leader>B", group = "Buffer" },
 		-- Configuration
 		{ "<leader>C", group = "Config" },
-		-- File operations
-		{ "<leader>f", group = "Files" },
+		-- Frecency operations (capital F for group with sub-commands)
 		{ "<leader>F", group = "Frecency" },
 		-- Git operations
 		{ "<leader>G", group = "Git" },
-		-- Grep operations
-		{ "<leader>g", group = "Grep" },
 		-- Obsidian operations
 		{ "<leader>O", group = "Obsidian" },
+		-- Search operations (grep with location options)
+		{ "<leader>S", group = "Search" },
 		-- Toggle options
 		{ "<leader>Y", group = "Toggle" },
 		-- LSP operations
 		{ "<leader>L", group = "LSP" },
-		-- Plugin management
-		{ "<leader>P", group = "Plugin" },
 		-- Quarto operations
 		{ "<leader>Q", group = "Quarto" },
-		-- Search operations
-		{ "<leader>S", group = "Search" },
 		-- Split operations
 		{ "<leader>|", group = "Split" },
 		-- Terminal operations
