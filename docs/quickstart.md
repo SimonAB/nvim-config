@@ -44,7 +44,7 @@ brew install r
 ### Clone Configuration
 
 ```bash
-git clone <repository-url> ~/.config/nvim
+git clone https://github.com/SimonAB/nvim-config.git ~/.config/nvim
 cd ~/.config/nvim
 ```
 
