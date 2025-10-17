@@ -1,112 +1,561 @@
-# Skim SyncTeX — Installation & Configuration
+# Installation Guide
 
-Minimal configuration using VimTeX's native Skim backend for seamless LaTeX bidirectional synchronisation.
+Complete installation instructions for Neovim research configuration on macOS.
 
-## Prerequisites
-- macOS
-- Neovim 0.12+
-- VimTeX plugin (auto-installed by this configuration)
-- Skim PDF viewer
-- LaTeX distribution (MacTeX or BasicTeX)
+## System Requirements
 
-## Installation Steps
+- **Operating System**: macOS 10.15+ (tested on macOS 13+)
+- **Neovim**: 0.12 or later (required for vim.pack plugin management)
+- **Terminal**: iTerm2, Warp, or Terminal.app with 256-colour support
+- **Internet Connection**: Required for initial plugin installation
 
-### 1. Install Required Tools
+## Core Dependencies
+
+### 1. Neovim 0.12+
+
 ```bash
-# Install Neovim 0.12+ via Homebrew
+# Install via Homebrew
 brew install neovim
 
-# Install Skim PDF viewer for LaTeX sync
+# Verify version
+nvim --version  # Must show 0.12.0 or later
+
+# Alternative: Build from source
+git clone https://github.com/neovim/neovim
+cd neovim
+make CMAKE_BUILD_TYPE=Release
+sudo make install
+```
+
+### 2. Essential Command-Line Tools
+
+```bash
+# Ripgrep (for Telescope live grep)
+brew install ripgrep
+
+# fd (for Telescope file finding)
+brew install fd
+
+# Git (for plugin management)
+brew install git
+
+# LazyGit (for Git interface)
+brew install lazygit
+
+# Cargo (for blink.cmp compilation)
+brew install rust
+```
+
+Verify installation:
+```bash
+rg --version     # ripgrep 14.0.0+
+fd --version     # fd 9.0.0+
+git --version    # git 2.40.0+
+cargo --version  # cargo 1.70.0+
+```
+
+## Configuration Installation
+
+### Clone Repository
+
+```bash
+# Backup existing configuration (if any)
+mv ~/.config/nvim ~/.config/nvim.backup
+
+# Clone this configuration
+git clone <repository-url> ~/.config/nvim
+cd ~/.config/nvim
+```
+
+### First Launch
+
+```bash
+# Launch Neovim - plugins install automatically
+nvim
+
+# Expected behaviour:
+# 1. vim.pack clones plugins from GitHub (~2-3 minutes)
+# 2. blink.cmp compiles (~30 seconds)
+# 3. Dashboard appears with startup time
+```
+
+If plugins don't install automatically:
+```vim
+:lua require('core.plugin-manager').install_all_plugins()
+```
+
+## Document Processing Tools
+
+### LaTeX Workflow
+
+```bash
+# Full TeX distribution (3.5 GB)
+brew install --cask mactex
+
+# Lightweight alternative (100 MB, requires manual package installation)
+brew install --cask basictex
+
+# PDF viewer with SyncTeX support
 brew install --cask skim
 
-# Install LaTeX distribution (choose one)
-brew install --cask mactex-no-gui  # Smaller install without GUI apps
-# OR: brew install --cask mactex    # Full install with GUI applications
+# LaTeX language server (optional, can install via Mason)
+brew install texlab
 ```
 
-### 2. Configure Skim for SyncTeX
-1. Open Skim
-2. Go to **Preferences** → **Sync** → **PDF-TeX Sync**
-3. Set **Preset** to: `Custom`
-4. Set **Command** to: `<Full/path/to>/nvim/scripts/skim_inverse_search.sh`
-   - **Important**: Use the full canonical absolute path
-   - **Do not use** tilde (~) or symlinks
-   - Example: `/Users/username/.config/nvim/scripts/skim_inverse_search.sh`
-5. Set **Arguments** to: `%line "%file"`
-
-### 3. Verify Configuration
-Test the setup with a simple LaTeX document:
+Verify LaTeX installation:
 ```bash
-# Navigate to your LaTeX project
-cd /path/to/your/latex/project
-
-# Open main.tex in Neovim
-nvim main.tex
-
-# Compile document (in Neovim)
-\ll
-
-# Forward search to PDF
-\lv
+pdflatex --version
+latexmk --version
 ```
 
-## Usage
+#### Configure Skim for SyncTeX
 
-### Forward Search (LaTeX → PDF)
-- **In Neovim**: `<localleader>lv` or `:VimtexView`
-- **Result**: PDF opens and jumps to corresponding location
+1. Open Skim
+2. Navigate to **Preferences** → **Sync** → **PDF-TeX Sync**
+3. Configure sync settings:
+   - **Preset**: Custom
+   - **Command**: `/Users/<username>/.config/nvim/scripts/skim_inverse_search.sh`
+     - **Important**: Use absolute path, no tilde (~) or symlinks
+     - Replace `<username>` with your actual username
+   - **Arguments**: `%line "%file"`
 
-### Inverse Search (PDF → LaTeX)
-- **In Skim**: Cmd+Shift+Click on any location in the PDF
-- **Result**: Neovim jumps to corresponding line in source file
+Test SyncTeX:
+```bash
+cd ~/Documents/latex-test
+nvim test.tex
+```
 
-### Compilation
-- **Compile**: `<localleader>ll` or `:VimtexCompile`
-- **Clean**: `<localleader>lc` or `:VimtexClean`
-- **Stop**: `<localleader>lS` or `:VimtexStop`
+In Neovim:
+- `\ll` to compile
+- `\lv` for forward search (Neovim → PDF)
+
+In Skim:
+- Cmd+Shift+Click for inverse search (PDF → Neovim)
+
+### Markdown Workflow
+
+```bash
+# Node.js (for markdown-preview plugin)
+brew install node
+
+# Optional: Pandoc for advanced Markdown conversion
+brew install pandoc
+```
+
+Test Markdown preview:
+```bash
+nvim test.md
+```
+
+In Neovim: `<Space>Kp` to start preview
+
+### Typst Workflow
+
+```bash
+# Typst compiler
+brew install typst
+
+# Verify installation
+typst --version
+```
+
+Test Typst:
+```bash
+nvim test.typ
+```
+
+In Neovim: `\tp` to toggle preview
+
+### Quarto Workflow
+
+```bash
+# Quarto publishing system
+brew install --cask quarto
+
+# Verify installation
+quarto check
+```
+
+## Language Support
+
+### Julia
+
+```bash
+# Install Julia
+brew install julia
+
+# Verify installation
+julia --version  # 1.9.0+ recommended
+```
+
+Configure Julia environment:
+```julia
+# Launch Julia
+julia
+
+# Install language server
+using Pkg
+Pkg.add("LanguageServer")
+Pkg.add("SymbolServer")
+
+# For Quarto/Jupyter integration
+Pkg.add("IJulia")
+```
+
+Install Julia LSP via Mason (in Neovim):
+```vim
+:Mason
+" Search for 'julials' and install
+```
+
+### Python
+
+```bash
+# Python 3 (usually pre-installed on macOS)
+python3 --version  # 3.8+ required
+
+# pip for package management
+python3 -m ensurepip --upgrade
+```
+
+Install Python LSP via Mason:
+```vim
+:Mason
+" Install: pyright, ruff-lsp
+```
+
+### R
+
+```bash
+# R programming language
+brew install r
+
+# Verify installation
+R --version
+```
+
+Install R language server:
+```r
+# Launch R
+R
+
+# Install languageserver
+install.packages("languageserver")
+```
+
+Install R LSP via Mason:
+```vim
+:Mason
+" Search for 'r_language_server' and install
+```
+
+## Language Server Installation
+
+### Via Mason (Recommended)
+
+Mason provides a unified interface for installing language servers.
+
+```vim
+# Open Mason
+:Mason
+
+# Or use leader keymaps
+<Space>MA            " Install academic LSP servers (automated)
+<Space>MR            " Install all recommended servers
+<Space>MU            " Update all packages
+```
+
+### Recommended Language Servers
+
+#### Academic Writing
+- **texlab**: LaTeX language server
+- **marksman**: Markdown language server
+- **ltex-ls**: Grammar/spell checking (LanguageTool)
+
+#### Programming
+- **lua-language-server**: Lua/Neovim configuration
+- **pyright**: Python type checking
+- **ruff-lsp**: Python linting
+- **julials**: Julia language server
+- **r-languageserver**: R language server
+
+#### Data/Configuration
+- **yaml-language-server**: YAML
+- **json-lsp**: JSON
+- **taplo**: TOML
+
+### Manual LSP Installation
+
+If Mason installation fails, install manually:
+
+```bash
+# Lua LSP
+brew install lua-language-server
+
+# Python LSP
+npm install -g pyright
+
+# LaTeX LSP
+brew install texlab
+```
+
+## Optional Tools
+
+### Obsidian Integration
+
+```bash
+# Install Obsidian
+brew install --cask obsidian
+```
+
+Configure vault path in `lua/keymaps.lua`:
+```lua
+local obsidian_path = "/path/to/your/vault"
+```
+
+### Database Tools
+
+```bash
+# SQLite (for Telescope frecency)
+brew install sqlite3
+```
+
+### Additional Utilities
+
+```bash
+# Tree-sitter CLI (for parser updates)
+npm install -g tree-sitter-cli
+
+# Neovim remote (for advanced workflows)
+pip3 install neovim-remote
+
+# GitHub CLI (for gh integration)
+brew install gh
+```
+
+## Verification
+
+### Check Neovim Health
+
+```vim
+:checkhealth
+```
+
+Review each section for warnings or errors.
+
+### Verify Plugin Installation
+
+```vim
+:lua print(vim.inspect(vim.fn.glob('~/.local/share/nvim/pack/plugins/*/*', 0, 1)))
+```
+
+Expected: List of installed plugins
+
+### Test LSP Functionality
+
+```vim
+# Open a Python file
+:e test.py
+
+# Check LSP status
+:LspInfo
+
+# Verify LSP is attached
+<Space>Ll          " List active LSP servers
+```
+
+### Performance Check
+
+```bash
+# Measure startup time
+nvim --startuptime /tmp/startup.log -c quit
+tail -20 /tmp/startup.log
+```
+
+Expected startup time: 80-100ms
 
 ## Troubleshooting
 
-### Common Issues
+### Plugins Not Installing
 
-**Inverse search not working:**
-- Verify Skim command path is absolute (no tilde or symlinks)
-- Check `/tmp/inverse_search.log` for debugging information
-- Test script manually: `<Full/path/to>/nvim/scripts/skim_inverse_search.sh 10 "/absolute/path/to/test.tex"`
+**Symptom**: Blank Neovim or plugin errors
 
-**Files not found with relative paths:**
-- For complex project structures, set `INVERSE_SEARCH_PROJECT_ROOT` environment variable
-- Check debug log: `tail -f /tmp/inverse_search.log` whilst testing
-- Verify project structure matches supported patterns
-
-**Skim doesn't focus or steals focus:**
-- VimTeX options are already configured to prevent focus stealing
-- Check `g:vimtex_view_skim_activate = 0` in configuration
-
-### Debugging
-- Use `:VimtexInfo` in Neovim to check VimTeX status
-- Check `:messages` for error information
-- Test Skim's command directly in terminal for path issues
-
-## Advanced Configuration
-
-### Custom Project Roots
-For complex project structures, set the project root:
+**Solution**:
 ```bash
-export INVERSE_SEARCH_PROJECT_ROOT=/path/to/your/project
+# Check plugin directory
+ls ~/.local/share/nvim/pack/plugins/
+
+# Manual installation
+nvim -c "lua require('core.plugin-manager').install_all_plugins()" -c "q"
+
+# Check for errors
+nvim -c "messages" -c "q"
 ```
 
-### Multiple LaTeX Projects
-The script automatically detects project structure and handles multiple LaTeX files within the same project.
+### blink.cmp Compilation Failure
 
-## Benefits
+**Symptom**: Completion not working
 
-- **Seamless Navigation**: Bidirectional sync between LaTeX source and PDF
-- **Real-time Compilation**: Automatic compilation with LuaLaTeX and synctex
-- **Perfect for Large Documents**: Ideal for theses, papers, and complex mathematical content
-- **Minimal Setup**: Uses VimTeX's native Skim integration
-- **Robust Error Handling**: Intelligent path resolution and debugging support
+**Solution**:
+```bash
+# Ensure Cargo is installed
+cargo --version
+
+# Manually compile
+cd ~/.local/share/nvim/pack/plugins/start/blink.cmp
+cargo build --release
+
+# Alternative: Use nvim-cmp instead
+# Edit lua/plugins.lua to disable blink.cmp
+```
+
+### LSP Not Starting
+
+**Symptom**: No code intelligence, diagnostics, or completion
+
+**Solution**:
+```vim
+# Check Mason installation
+:Mason
+
+# Verify language server is installed
+:LspInfo
+
+# Check log file
+:lua print(vim.lsp.get_log_path())
+
+# Manual server installation
+<Space>MA          " Install academic servers
+```
+
+### LaTeX SyncTeX Issues
+
+**Symptom**: Forward/inverse search not working
+
+**Solution**:
+```bash
+# Verify script path in Skim preferences
+# Must be absolute path:
+/Users/<username>/.config/nvim/scripts/skim_inverse_search.sh
+
+# Test script manually
+~/.config/nvim/scripts/skim_inverse_search.sh 10 "/absolute/path/to/test.tex"
+
+# Check debug log
+tail -f /tmp/inverse_search.log
+```
+
+### Performance Issues
+
+**Symptom**: Slow startup or laggy editing
+
+**Solution**:
+```bash
+# Profile startup
+nvim --startuptime /tmp/startup.log -c quit
+cat /tmp/startup.log | grep -v "^---" | sort -k2 -n | tail -20
+
+# Identify slow plugins
+nvim -c "profile start profile.log" -c "profile func *" -c "profile file *"
+# Use Neovim normally, then quit
+# Check profile.log for slow functions
+```
+
+### Terminal Emulator Issues
+
+**Symptom**: Colours wrong, icons not displaying, keymaps not working
+
+**Solution**:
+```bash
+# Verify terminal supports 256 colours
+echo $TERM  # Should be xterm-256color or similar
+
+# Test colours
+curl -s https://gist.githubusercontent.com/lifepillar/09a44b8cf0f9397465614e622979107f/raw/24-bit-color.sh | bash
+
+# Install a Nerd Font for icons
+brew tap homebrew/cask-fonts
+brew install --cask font-hack-nerd-font
+
+# Configure terminal to use Nerd Font
+```
+
+## Updating
+
+### Update Configuration
+
+```bash
+cd ~/.config/nvim
+git pull origin main
+```
+
+### Update Plugins
+
+```vim
+<Space>Cua         " Update all plugins
+:lua require('core.plugin-manager').update_all_plugins()
+```
+
+### Update Language Servers
+
+```vim
+<Space>MU          " Update all Mason packages
+:MasonUpdate
+```
+
+## Uninstallation
+
+### Complete Removal
+
+```bash
+# Remove configuration
+rm -rf ~/.config/nvim
+
+# Remove data (plugins, LSP servers, etc.)
+rm -rf ~/.local/share/nvim
+
+# Remove state (logs, swap files)
+rm -rf ~/.local/state/nvim
+
+# Remove cache
+rm -rf ~/.cache/nvim
+```
+
+### Restore Backup
+
+```bash
+mv ~/.config/nvim.backup ~/.config/nvim
+```
+
+## Platform-Specific Notes
+
+### macOS Apple Silicon (M1/M2/M3)
+
+All tools install natively on Apple Silicon. No Rosetta required.
+
+### macOS Intel
+
+Standard installation. Ensure Homebrew is installed for x86_64 architecture.
+
+### Linux Support
+
+This configuration is optimised for macOS but should work on Linux with modifications:
+- Replace Skim with Zathura or Okular for LaTeX preview
+- Adjust paths in shell scripts
+- Install tools via apt/dnf instead of brew
+
+## Next Steps
+
+After installation:
+
+1. **Configure Language Servers**: `<Space>MA`
+2. **Select Theme**: `<Space>Ytp`
+3. **Test LaTeX Workflow**: Compile a test document
+4. **Customise Keymaps**: Add personal mappings to `lua/keymaps.lua`
+5. **Read Documentation**: Review keymaps reference and troubleshooting guide
 
 ---
 
-*This configuration provides a simple, robust LaTeX workflow optimised for academic writing and research.*
+For detailed usage instructions, see [Quick Start Guide](quickstart.md).
+
+For keymap reference, see [Keymaps Reference](reference/keymaps.md).

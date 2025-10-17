@@ -1,10 +1,10 @@
 # LSP Setup Guide
 
-Complete guide to configuring Language Server Protocol support in StellarVIM.
+Complete guide to configuring Language Server Protocol support for academic workflows.
 
 ## Overview
 
-StellarVIM uses Mason for automatic LSP server management. The configuration includes optimized settings for academic workflows.
+This configuration uses Mason for automatic LSP server management with optimised settings for research and document preparation workflows.
 
 ## Automatic Setup
 

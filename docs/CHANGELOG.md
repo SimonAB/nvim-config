@@ -126,9 +126,10 @@
 
 ### Key Collision Resolution
 - **Terminal Group**: Retained `<leader>T*` for all terminal-related functions
-  - `<leader>T1` - Horizontal terminal
-  - `<leader>T2` - Vertical terminal
-  - `<leader>T3` - Float terminal
+  - `<leader>Th` - Horizontal terminal
+  - `<leader>Tv` - Vertical terminal
+  - `<leader>Tf` - Float terminal
+  - `<leader>Tt` - Toggle terminal (smart vertical default)
   - `<leader>Tk` - Clear terminal
   - `<leader>Td` - Delete terminal
 - **Search Group**: Retained `<leader>S*` for search operations (managed by plugins)

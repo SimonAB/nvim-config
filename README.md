@@ -1,220 +1,255 @@
-# Neovim Configuration
+# Neovim Research Configuration
 
-A modern, feature-rich Neovim configuration optimised for performance and productivity. This configuration includes comprehensive support for development workflows, document processing, and scientific computing.
+A performance-optimised Neovim configuration for academic research, scientific computing, and document preparation. Designed for researchers requiring LaTeX, Markdown, Quarto, and Typst workflows with integrated terminal execution and LSP support.
 
-## 🚀 Performance Optimised
-
-This configuration has been optimised for fast startup times:
-
-- **Startup Time**: 88ms (16% improvement from 105ms)
-- **Plugin Loading**: 63ms (20% improvement from 79ms)
-- **Core Config**: 2ms (92% improvement from 26ms)
-
-See [Performance Optimisations](docs/PERFORMANCE_OPTIMISATIONS.md) for detailed information.
-
-## ✨ Features
-
-### Core Functionality
-- **Modern Completion**: blink.cmp for fast, intelligent code completion
-- **LSP Support**: Comprehensive language server protocol support with Mason
-- **Syntax Highlighting**: Tree-sitter for accurate syntax highlighting
-- **Git Integration**: GitSigns for enhanced Git workflow
-- **File Navigation**: Telescope for fuzzy finding and file navigation
-
-### UI & Themes
-- **Multiple Themes**: Catppuccin, OneDark, Tokyo Night, Nord, and more
-- **Auto Dark Mode**: Automatic theme switching based on system preference
-- **Status Line**: Lualine for informative status line
-- **Buffer Management**: Bufferline for tab-like buffer management
-- **File Explorer**: NvimTree for file system navigation
-
-### Development Tools
-- **Terminal Integration**: ToggleTerm for integrated terminal
-- **Diagnostics**: Trouble for enhanced diagnostic display
-- **Keymaps**: Which-key for discoverable keymaps
-- **Project Management**: Enhanced project navigation and management
+## Features
 
 ### Document Processing
-- **LaTeX Support**: VimTeX for LaTeX document editing with Skim integration
-- **Markdown**: Markdown preview and Obsidian integration
-- **Typst**: Typst preview and compilation support
-- **Quarto**: Quarto document processing with code execution
+- **LaTeX**: VimTeX with bidirectional SyncTeX (Skim integration)
+- **Markdown**: Live preview with Obsidian vault integration
+- **Quarto**: Document processing with code execution (R, Python, Julia)
+- **Typst**: Modern typesetting with live preview
+
+### Scientific Computing
+- **Julia**: Comprehensive REPL integration with multi-threaded execution
+- **Python**: Full LSP support with pyright
+- **R**: Code execution and project management
+
+### Development Environment
+- **LSP**: Language server protocol for 15+ languages via Mason
+- **Completion**: Fast, intelligent completion via blink.cmp
+- **Terminal**: Integrated terminal with smart code block detection
+- **Git**: GitSigns, LazyGit integration
+
+### Performance
+- **Startup**: <100ms typical (88ms measured)
+- **Plugin Loading**: Deferred initialization for non-critical plugins
+- **Caching**: Intelligent caching for dashboard and recent files
+
+## Requirements
+
+### Essential
+- Neovim 0.12+ (required for vim.pack plugin management)
+- Git
+- Cargo (for blink.cmp compilation)
+- ripgrep, fd (for Telescope fuzzy finding)
+
+### Document Processing
+- **LaTeX**: MacTeX or BasicTeX, Skim PDF viewer (macOS)
+- **Typst**: `brew install typst`
+- **Markdown**: Node.js (for preview plugin)
 
 ### Language Support
-- **Julia**: Comprehensive Julia language support
-- **Python**: Python development with LSP
-- **R**: R language support for data science
-- **Multiple Languages**: Support for many programming languages
+- **Julia**: Julia 1.9+ with LanguageServer.jl
+- **Python**: Python 3.8+ with pyright LSP
+- **R**: R 4.0+ with languageserver package
 
-## 🛠️ Installation
+See [Installation Guide](docs/INSTALLATION_GUIDE.md) for complete setup instructions.
 
-1. **Clone the repository**:
-   ```bash
-   git clone <repository-url> ~/.config/nvim
-   cd ~/.config/nvim
-   ```
+## Installation
 
-2. **Install dependencies**:
-   - Neovim 0.12+ (required for vim.pack)
-   - Git (for plugin management)
-   - Cargo (for blink.cmp compilation)
+```bash
+# Clone configuration
+git clone <repository-url> ~/.config/nvim
+cd ~/.config/nvim
 
-3. **First run**:
-   ```bash
-   nvim
-   ```
-   Plugins will be automatically installed on first run.
+# First launch (plugins auto-install)
+nvim
 
-## 📁 Configuration Structure
-
-```
-~/.config/nvim/
-├── init.lua                 # Main entry point (optimised)
-├── lua/
-│   ├── config.lua          # Core editor settings
-│   ├── keymaps.lua         # Key mappings (optimised)
-│   ├── plugins.lua         # Plugin management (optimised)
-│   ├── core/               # Core functionality
-│   │   ├── theme-manager.lua
-│   │   ├── plugin-manager.lua
-│   │   └── theme-picker.lua
-│   └── plugins/            # Plugin configurations
-│       ├── blink-cmp.lua
-│       ├── telescope.lua
-│       ├── nvim-lspconfig.lua
-│       └── ...
-├── docs/                   # Documentation
-│   ├── PERFORMANCE_OPTIMISATIONS.md
-│   └── ...
-└── scripts/                # Utility scripts
-    └── performance_test.lua
+# Verify installation
+nvim --startuptime /tmp/startup.log -c quit
 ```
 
-## ⚡ Performance Features
+On first launch, plugins install automatically via vim.pack. Mason will prompt to install recommended language servers.
 
-### Deferred Loading
-Non-critical operations are deferred to avoid blocking startup:
-- Theme manager initialisation
-- Plugin manager setup
-- Dashboard configuration
-
-### Intelligent Caching
-- Dashboard content cached for 5 minutes
-- Recent files and projects cached efficiently
-- Limited file system operations
-
-### Optimised Plugin Loading
-- Critical plugins loaded immediately
-- Heavy plugins loaded asynchronously
-- Graceful error handling with pcall
-
-## 🎯 Key Mappings
+## Quick Reference
 
 ### Leader Key: `<Space>`
 
-| Key | Description |
-|-----|-------------|
+| Key | Action |
+|-----|--------|
 | `<leader>f` | Find files (Telescope) |
 | `<leader>g` | Live grep in project |
-| `<leader>e` | Toggle file tree |
+| `<leader>e` | Toggle file explorer |
 | `<leader>w` | Save file |
-| `<leader>q` | Close buffer |
 
 ### Terminal Integration
 
-| Key | Description |
-|-----|-------------|
+| Key | Action |
+|-----|--------|
 | `<C-t>` | Toggle terminal |
-| `<C-i>` | Send current line to terminal |
+| `<leader>Tt` | Smart terminal toggle (vertical) |
+| `<leader>Th/Tv/Tf` | Horizontal/Vertical/Float terminal |
+| `<C-i>` | Send line to terminal |
 | `<C-c>` | Send code block to terminal |
+
+### Document Workflows
+
+| Key | Action |
+|-----|--------|
+| `<localleader>lv` | LaTeX forward search |
+| `<localleader>ll` | Compile LaTeX |
+| `<leader>Kp` | Markdown preview |
+| `<leader>Qp` | Quarto preview |
+
+### Julia Development
+
+| Key | Action |
+|-----|--------|
+| `<leader>Jrh/v/f` | Julia REPL (horizontal/vertical/float) |
+| `<leader>Jp` | Project status |
+| `<leader>Ji` | Instantiate project |
+
+Julia REPLs launch with `--threads=auto` for optimal parallel performance.
 
 ### Theme Management
 
-| Key | Description |
-|-----|-------------|
+| Key | Action |
+|-----|--------|
 | `<leader>Yc` | Cycle themes |
-| `<leader>Ytp` | Theme picker |
+| `<leader>Ytp` | Theme picker (Telescope) |
 | `<leader>Yts` | Show current theme |
 
-## 🔧 Customisation
+See [Keymaps Reference](docs/reference/keymaps.md) for complete keymap documentation.
+
+## Configuration Structure
+
+```
+~/.config/nvim/
+├── init.lua              # Entry point
+├── lua/
+│   ├── config.lua        # Editor settings
+│   ├── keymaps.lua       # Keymaps
+│   ├── plugins.lua       # Plugin definitions
+│   ├── core/             # Core functionality
+│   │   ├── theme-manager.lua
+│   │   ├── plugin-manager.lua
+│   │   └── theme-picker.lua
+│   └── plugins/          # Plugin configurations
+│       ├── blink-cmp.lua
+│       ├── nvim-lspconfig.lua
+│       ├── telescope.lua
+│       ├── toggleterm-nvim.lua
+│       └── vimtex.lua
+├── docs/                 # Documentation
+└── scripts/              # Utility scripts
+```
+
+## Customisation
 
 ### Adding Plugins
-Edit `lua/plugins.lua` to add new plugins:
+
+Edit `lua/plugins.lua`:
 
 ```lua
 local essential_plugins = {
-    -- Add your plugin here
     { url = "https://github.com/user/plugin", name = "plugin" },
 }
 ```
 
 ### Custom Keymaps
-Add custom keymaps in `lua/keymaps.lua`:
+
+Add to `lua/keymaps.lua`:
 
 ```lua
--- Your custom keymaps
-vim.keymap.set("n", "<leader>custom", ":CustomCommand<CR>", { desc = "Custom command" })
+vim.keymap.set("n", "<leader>custom", ":CustomCommand<CR>", 
+    { desc = "Custom command" })
 ```
 
-### Theme Configuration
-Configure themes in `lua/core/theme-manager.lua`:
+### LSP Configuration
 
-```lua
-local themes = {
-    "catppuccin",
-    "onedark",
-    "tokyonight",
-    -- Add your themes
-}
+Install language servers via Mason:
+
+```vim
+:Mason                    " Open Mason interface
+<leader>MA               " Install academic LSP servers
+<leader>MR               " Install all recommended servers
 ```
 
-## 📊 Performance Monitoring
+## Performance Optimisation
 
 ### Startup Time Analysis
+
 ```bash
-nvim --headless --startuptime /tmp/startup.log -c "quit"
-cat /tmp/startup.log
+nvim --startuptime /tmp/startup.log -c quit
+cat /tmp/startup.log | tail -20
 ```
 
-### Performance Report
-```lua
--- In Neovim
-:lua require('scripts.performance_test').generate_report()
+### Plugin Load Deferral
+
+Non-critical plugins defer initialization by 50-100ms:
+- Theme manager
+- Plugin update notifications
+- Dashboard configuration
+
+### Caching Strategy
+
+- Dashboard content: 5-minute cache
+- Recent files: Loaded immediately on startup
+- File system operations: Minimal, cached where possible
+
+See [Performance Optimisations](docs/PERFORMANCE_OPTIMISATIONS.md) for detailed analysis.
+
+## Documentation
+
+- [Installation Guide](docs/INSTALLATION_GUIDE.md) - Complete setup instructions
+- [Quick Start](docs/quickstart.md) - Get started in 5 minutes
+- [Keymaps Reference](docs/reference/keymaps.md) - Complete keymap documentation
+- [Troubleshooting](docs/TROUBLESHOOTING_GUIDE.md) - Common issues and solutions
+- [Performance](docs/PERFORMANCE_OPTIMISATIONS.md) - Performance analysis and optimisation
+
+## Troubleshooting
+
+### LSP Issues
+
+```vim
+:checkhealth          " Diagnose Neovim health
+:Mason                " Check installed language servers
+<leader>Ll            " List active LSP servers
+<leader>Lr            " Restart LSP
 ```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Slow startup**: Check the performance report for slow modules
-2. **Plugin errors**: Use `:checkhealth` to diagnose issues
-3. **Missing features**: Ensure all dependencies are installed
 
 ### Performance Issues
 
-1. **Identify slow plugins**: Use the performance test script
-2. **Check cache**: Clear dashboard cache if needed
-3. **Update plugins**: Use `<leader>Cua` to update all plugins
+```bash
+# Profile startup
+nvim --startuptime /tmp/startup.log -c quit
 
-## 📚 Documentation
+# Check slow plugins
+:profile start profile.log
+:profile func *
+:profile file *
+```
 
-- [Performance Optimisations](docs/PERFORMANCE_OPTIMISATIONS.md)
-- [Installation Guide](docs/INSTALLATION_GUIDE.md)
-- [Keymaps Reference](docs/reference/keymaps.md)
-- [Troubleshooting Guide](docs/TROUBLESHOOTING_GUIDE.md)
+### LaTeX SyncTeX
 
-## 🤝 Contributing
+- Verify Skim preferences: Sync → Custom command
+- Check script path: Use absolute path, no tilde (~)
+- Debug log: `tail -f /tmp/inverse_search.log`
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test performance impact
-5. Submit a pull request
+## Recent Changes
 
-## 📄 License
+- **Terminal Mappings**: Changed from `<leader>T[1,2,3]` to `<leader>T[h,v,f]` for consistency with Julia REPL patterns
+- **Julia REPL**: Added `--threads=auto` for automatic multi-threading
+- **File Formatting**: Enforces single newline at end of file on save
+- **Obsidian**: `<leader>Op` pastes image and adds two newlines
+
+See [CHANGELOG](docs/CHANGELOG.md) for complete version history.
+
+## Philosophy
+
+This configuration prioritises:
+
+1. **Performance**: Fast startup, efficient plugin loading
+2. **Discoverability**: Which-key integration for keymap discovery
+3. **Consistency**: British spelling, logical keymap organisation
+4. **Research Workflows**: Optimised for academic document preparation and scientific computing
+5. **Maintainability**: Clean, documented code with modular architecture
+
+## License
 
 This configuration is provided as-is for educational and personal use.
 
 ---
 
-**Note**: This configuration is optimised for Neovim 0.12+ and uses vim.pack for plugin management. For older Neovim versions, consider using a plugin manager like lazy.nvim or packer.nvim.
+**Note**: Optimised for Neovim 0.12+ with vim.pack. For older versions, consider lazy.nvim or packer.nvim instead.

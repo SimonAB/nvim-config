@@ -60,7 +60,7 @@
 
 #### Terminal not opening
 - Check if toggleterm plugin is loaded
-- Try `<leader>T1` for horizontal terminal
+- Try `<leader>Th` for horizontal terminal or `<leader>Tv` for vertical
 - Verify terminal emulator is properly configured
 
 #### Code block execution not working

@@ -53,7 +53,7 @@ opt.exrc = false -- Disable exrc file
 
 -- Language and spell checking
 opt.spelllang = "en_gb" -- Set British English spelling
-opt.spell = false -- Disable spell checking by default
+opt.spell = true -- Enable spell checking by default
 
 -- Terminal colours (enables true colour support)
 opt.termguicolors = true
