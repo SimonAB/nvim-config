@@ -9,6 +9,24 @@ Complete installation instructions for Neovim research configuration on macOS.
 - **Terminal**: iTerm2, Warp, or Terminal.app with 256-colour support
 - **Internet Connection**: Required for initial plugin installation
 
+## Prerequisites
+
+### Homebrew Package Manager
+
+This guide uses Homebrew to install dependencies. If you don't have Homebrew installed:
+
+```bash
+# Install Homebrew (if not already installed)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Verify installation
+brew --version
+```
+
+**Homebrew website**: https://brew.sh/
+
+After installation, follow the on-screen instructions to add Homebrew to your PATH.
+
 ## Core Dependencies
 
 ### 1. Neovim 0.12+

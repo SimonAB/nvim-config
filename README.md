@@ -31,6 +31,7 @@ A performance-optimised Neovim configuration for academic research, scientific c
 ## Requirements
 
 ### Essential
+- **Homebrew**: Package manager for macOS ([install here](https://brew.sh/))
 - Neovim 0.12+ (required for vim.pack plugin management)
 - Git
 - Cargo (for blink.cmp compilation)
