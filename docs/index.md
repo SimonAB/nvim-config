@@ -95,7 +95,7 @@ features:
 git clone https://github.com/SimonAB/nvim-config.git ~/.config/nvim
 cd ~/.config/nvim
 
-# First launch (plugins auto-install)
+# First launch - plugins install automatically
 nvim
 
 # Verify installation
