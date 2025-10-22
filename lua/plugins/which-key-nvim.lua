@@ -205,6 +205,16 @@ if ok then
 		{ "<leader>Y", group = "Toggle" },
 		-- LSP operations
 		{ "<leader>L", group = "LSP" },
+		{ "<leader>Lu", function()
+			vim.notify("Updating all LSP servers...", vim.log.levels.INFO)
+			-- Update Mason LSP servers
+			local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
+			if ok then
+				MasonUI.update_all_packages()
+			end
+			-- Update Julia LanguageServer.jl
+			vim.cmd("JuliaLspUpdate")
+		end, desc = "Update All LSP Servers" },
 		-- Quarto operations
 		{ "<leader>Q", group = "Quarto" },
 		-- Split operations
@@ -217,7 +227,8 @@ if ok then
 		{ "<leader>X", group = "Trouble" },
 		-- Julia-specific operations
 		{ "<leader>J", group = "Julia" },
-			-- Mason operations (enhanced with batch operations)
+		{ "<leader>Jl", "<cmd>JuliaLspUpdate<cr>", desc = "Update LanguageServer.jl" },
+		-- Mason operations (enhanced with batch operations)
 	{ "<leader>M", group = "Mason" },
 	{ "<leader>MA", function()
 		local ok, MasonUI = pcall(require, "plugins.mason-enhanced")

@@ -94,6 +94,34 @@ end)
 if not julia_ok then
   vim.notify("Julia LSP config failed: " .. tostring(julia_err), vim.log.levels.ERROR)
 else
+  -- Create user command to update Julia LSP
+  vim.api.nvim_create_user_command('JuliaLspUpdate', function()
+    vim.notify("Updating LanguageServer.jl...", vim.log.levels.INFO)
+    vim.fn.jobstart({
+      'julia',
+      '--project=@nvim-lspconfig',
+      '-e',
+      'using Pkg; Pkg.update()'
+    }, {
+      on_exit = function(_, exit_code)
+        if exit_code == 0 then
+          vim.notify("LanguageServer.jl updated successfully! Restart Neovim to use the new version.", vim.log.levels.INFO)
+        else
+          vim.notify("Failed to update LanguageServer.jl", vim.log.levels.ERROR)
+        end
+      end,
+      on_stdout = function(_, data)
+        if data then
+          for _, line in ipairs(data) do
+            if line ~= "" then
+              print(line)
+            end
+          end
+        end
+      end,
+    })
+  end, { desc = "Update Julia LanguageServer.jl" })
+
   -- Create autocommand to manually start julials for Julia files
   vim.api.nvim_create_autocmd("FileType", {
     pattern = "julia",
