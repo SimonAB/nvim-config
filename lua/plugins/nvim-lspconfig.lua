@@ -47,37 +47,95 @@ end
 -- or servers that need custom configuration beyond the defaults
 
 -- Julia LSP setup (bypass Mason due to current instability)
-pcall(function()
+-- Load immediately since Mason's handler is disabled
+local julia_ok, julia_err = pcall(function()
   vim.lsp.config('julials', {
-    cmd = {
-      "julia",
-      "--project=@nvim-lspconfig",
-      "--startup-file=no",
-      "--history-file=no",
-      "-e",
-      [[
-        try
-          using LanguageServer, Pkg
-          project_path = try
-            Base.current_project() |> dirname
-          catch
-            dirname(Pkg.Types.Context().env.project_file)
+      cmd = {
+        "julia",
+        "--project=@nvim-lspconfig",
+        "--startup-file=no",
+        "--history-file=no",
+        "-e",
+        [[
+          try
+            using LanguageServer, Pkg
+            project_path = try
+              Base.current_project() |> dirname
+            catch
+              dirname(Pkg.Types.Context().env.project_file)
+            end
+            server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, "")
+            run(server)
+          catch err
+            Base.println(stderr, err)
+            Base.println(stderr, sprint(showerror, err, catch_backtrace()))
+            flush(stderr)
+            exit(1)
           end
-          server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, "")
-          run(server)
-        catch err
-          Base.println(stderr, err)
-          Base.println(stderr, sprint(showerror, err, catch_backtrace()))
-          flush(stderr)
-          exit(1)
-        end
-      ]],
-    },
-    on_attach = on_attach,
+        ]],
+      },
+    filetypes = { 'julia' },
+    root_dir = function(fname)
+      -- Try to find project root, otherwise use file's directory
+      local util = require('lspconfig.util')
+      local found_root = util.root_pattern('Project.toml', 'JuliaProject.toml', '.git')(fname)
+      if found_root then
+        return found_root
+      end
+      -- Fallback to file's directory for standalone files
+      return vim.fn.fnamemodify(fname, ':p:h')
+    end,
+      on_attach = on_attach,
     capabilities = _G.enhanced_lsp_capabilities or capabilities,
   })
   vim.lsp.enable('julials')
 end)
+
+if not julia_ok then
+  vim.notify("Julia LSP config failed: " .. tostring(julia_err), vim.log.levels.ERROR)
+else
+  -- Create autocommand to manually start julials for Julia files
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = "julia",
+    callback = function(args)
+      local bufname = vim.api.nvim_buf_get_name(args.buf)
+      local util = require('lspconfig.util')
+      local found_root = util.root_pattern('Project.toml', 'JuliaProject.toml', '.git')(bufname)
+      local root_dir = found_root or vim.fn.fnamemodify(bufname, ':p:h')
+      
+      vim.lsp.start({
+        name = 'julials',
+        cmd = {
+          "julia",
+          "--project=@nvim-lspconfig",
+          "--startup-file=no",
+          "--history-file=no",
+          "-e",
+          [[
+            try
+              using LanguageServer, Pkg
+              project_path = try
+                Base.current_project() |> dirname
+              catch
+                dirname(Pkg.Types.Context().env.project_file)
+              end
+              server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, "")
+              run(server)
+            catch err
+              Base.println(stderr, err)
+              Base.println(stderr, sprint(showerror, err, catch_backtrace()))
+              flush(stderr)
+              exit(1)
+            end
+          ]],
+        },
+        root_dir = root_dir,
+        on_attach = on_attach,
+        capabilities = _G.enhanced_lsp_capabilities or capabilities,
+      })
+    end,
+  })
+end
 
 -- Lua LSP setup (if not handled by Mason)
 vim.lsp.config('lua_ls', {

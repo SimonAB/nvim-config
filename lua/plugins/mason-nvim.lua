@@ -119,7 +119,9 @@ vim.defer_fn(function()
 
 
 			-- Do not let Mason configure Julia; handled manually in nvim-lspconfig
-			["julials"] = function() end,
+			["julials"] = function()
+				-- Explicitly do nothing - custom config in nvim-lspconfig.lua will handle it
+			end,
 
 			-- Custom handler for Python LSP
 			["pyright"] = function()
