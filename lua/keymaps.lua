@@ -900,12 +900,20 @@ end
 -- Toggle options (these were missing from the moved keymaps)
 map("n", "<leader>Ys", "<cmd>set spell!<CR>", { desc = "Toggle Spell Check" })
 map("n", "<leader>Yse", function()
+  local config_dir = vim.fn.stdpath('config')
+  vim.cmd("set nospell")  -- Disable first to clear spell cache
+  vim.opt.spellfile = config_dir .. '/private/spell/en.utf-8.add'
   vim.cmd("set spelllang=en_gb")
-  vim.cmd("set spell")
+  vim.cmd("set spell")  -- Re-enable with new language
+  vim.notify("Spell language: English (British)", vim.log.levels.INFO)
 end, { desc = "Set spell language to English (British)" })
 map("n", "<leader>Ysf", function()
+  local config_dir = vim.fn.stdpath('config')
+  vim.cmd("set nospell")  -- Disable first to clear spell cache
+  vim.opt.spellfile = config_dir .. '/private/spell/fr.utf-8.add'
   vim.cmd("set spelllang=fr")
-  vim.cmd("set spell")
+  vim.cmd("set spell")  -- Re-enable with new language
+  vim.notify("Spell language: French", vim.log.levels.INFO)
 end, { desc = "Set spell language to French" })
 
 -- Split operations (removing duplicate)

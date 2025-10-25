@@ -52,12 +52,14 @@ opt.modeline = false -- Disable modeline
 opt.exrc = false -- Disable exrc file
 
 -- Language and spell checking
+-- Configure spell directories FIRST (before enabling spell checking)
+local config_dir = vim.fn.stdpath('config')
+-- Add private directory to runtimepath so Neovim can find base spell files
+vim.opt.runtimepath:prepend(config_dir .. '/private')
+opt.spellfile = config_dir .. '/private/spell/en.utf-8.add' -- Default to English, switches with language
+-- NOW enable spell checking after paths are configured
 opt.spelllang = "en_gb" -- Set British English spelling
 opt.spell = true -- Enable spell checking by default
-
--- Configure spell directories (private location for privacy)
-local config_dir = vim.fn.stdpath('config')
-opt.spellfile = config_dir .. '/private/spell/en.utf-8.add,' .. config_dir .. '/private/spell/fr.utf-8.add'
 
 -- Terminal colours (enables true colour support)
 opt.termguicolors = true
