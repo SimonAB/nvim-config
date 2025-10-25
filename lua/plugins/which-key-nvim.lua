@@ -217,6 +217,8 @@ if ok then
 		end, desc = "Update All LSP Servers" },
 		-- Quarto operations
 		{ "<leader>Q", group = "Quarto" },
+		{ "<leader>QR", group = "Render" },
+		{ "<leader>QM", group = "Molten" },
 		-- Split operations
 		{ "<leader>|", group = "Split" },
 		-- Terminal operations
@@ -266,10 +268,10 @@ if ok then
 		{ "<leader>K", group = "Markdown" },
 
 		-- Theme management (enhanced with floating picker)
-		{ "<leader>Yt", group = "Themes" },
+		{ "<leader>YT", group = "Themes" },
 
 		-- Plugin management (enhanced with progress feedback)
-		{ "<leader>Cu", group = "Update" },
+		{ "<leader>CU", group = "Update" },
 	})
 
 	-- All individual keymaps are now defined in keymaps.lua with desc fields

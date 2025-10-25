@@ -108,23 +108,25 @@ K               " Show hover documentation
 
 <Leader>Qp      " Quarto preview
 <Leader>Qc      " Close Quarto preview
-<Leader>Qr      " Quarto render
+<Leader>QRh     " Render to HTML
+<Leader>QRp     " Render to PDF
+<Leader>QRw     " Render to Word
 ```
 
 ### Molten (Jupyter)
 ```vim
-<Leader>Qmi     " Show image popup
-<Leader>Qml     " Evaluate line
-<Leader>Qme     " Evaluate operator
-<Leader>Qmn     " Initialize kernel
-<Leader>Qmk     " Stop kernel
-<Leader>Qmr     " Restart kernel
-<Leader>Qmv     " Evaluate visual selection
-<Leader>Qmf     " Re-evaluate cell
-<Leader>Qmh     " Hide output
-<Leader>Qms     " Show output
-<Leader>Qmd     " Delete cell
-<Leader>Qmb     " Open in browser
+<Leader>QMi     " Show image popup
+<Leader>QMl     " Evaluate line
+<Leader>QMe     " Evaluate operator
+<Leader>QMn     " Initialize kernel
+<Leader>QMk     " Stop kernel
+<Leader>QMr     " Restart kernel
+<Leader>QMv     " Evaluate visual selection
+<Leader>QMf     " Re-evaluate cell
+<Leader>QMh     " Hide output
+<Leader>QMs     " Show output
+<Leader>QMd     " Delete cell
+<Leader>QMb     " Open in browser
 ```
 
 ## Academic Workflow

@@ -214,8 +214,8 @@ end
 
 -- Theme management keybindings
 map("n", "<leader>Yc", cycle_colorscheme, { desc = "Cycle themes" })
-map("n", "<leader>Ytp", show_theme_picker, { desc = "Theme picker" })
-map("n", "<leader>Yts", function()
+map("n", "<leader>YTp", show_theme_picker, { desc = "Theme picker" })
+map("n", "<leader>YTs", function()
   local current = vim.g.colors_name or "default"
   vim.notify("Current theme: " .. current, vim.log.levels.INFO)
 end, { desc = "Show current theme" })
@@ -824,26 +824,60 @@ local function quarto_operation(operation_name)
   end
 end
 
+-- Helper function to render Quarto documents to specific formats
+local function quarto_render_to_format(format, format_name)
+  return function()
+    local file = vim.fn.expand("%:p")
+    if file == "" then
+      vim.notify("No file to render", vim.log.levels.WARN)
+      return
+    end
+    vim.notify("Rendering " .. vim.fn.expand("%:t") .. " to " .. format_name .. "...", vim.log.levels.INFO)
+    vim.fn.jobstart({"quarto", "render", file, "--to", format}, {
+      on_exit = function(_, exit_code)
+        if exit_code == 0 then
+          vim.notify("✓ " .. format_name .. " render complete: " .. vim.fn.expand("%:t"), vim.log.levels.INFO)
+        else
+          vim.notify("✗ " .. format_name .. " render failed with exit code " .. exit_code, vim.log.levels.ERROR)
+        end
+      end,
+      on_stderr = function(_, data)
+        if data and #data > 0 then
+          for _, line in ipairs(data) do
+            if line ~= "" then
+              print(line)
+            end
+          end
+        end
+      end,
+    })
+  end
+end
+
 map("n", "<leader>Qp", quarto_operation("quartoPreview"), { desc = "Quarto Preview" })
 map("n", "<leader>Qc", quarto_operation("quartoClosePreview"), { desc = "Close preview" })
-map("n", "<leader>Qr", safe_cmd("QuartoRender"), { desc = "Quarto Render" })
+
+-- Format-specific render commands
+map("n", "<leader>QRh", quarto_render_to_format("html", "HTML"), { desc = "Render to HTML" })
+map("n", "<leader>QRp", quarto_render_to_format("pdf", "PDF"), { desc = "Render to PDF" })
+map("n", "<leader>QRw", quarto_render_to_format("docx", "Word"), { desc = "Render to Word" })
 
 -- Molten keymaps
 local molten_commands = {
-  ["<leader>Qmi"] = { cmd = "MoltenImagePopup", desc = "Show Image Popup" },
-  ["<leader>Qml"] = { cmd = "MoltenEvaluateLine", desc = "Evaluate Line" },
-  ["<leader>Qme"] = { cmd = "MoltenEvaluateOperator", desc = "Evaluate Operator" },
-  ["<leader>Qmn"] = { cmd = "MoltenInit", desc = "Initialise Kernel" },
-  ["<leader>Qmk"] = { cmd = "MoltenDeinit", desc = "Stop Kernel" },
-  ["<leader>Qmr"] = { cmd = "MoltenRestart", desc = "Restart Kernel" },
-  ["<leader>Qmo"] = { cmd = "MoltenEvaluateOperator", desc = "Evaluate Operator" },
-  ["<leader>Qm<CR>"] = { cmd = "MoltenEvaluateLine", desc = "Evaluate Line" },
-  ["<leader>Qmv"] = { cmd = "MoltenEvaluateVisual", desc = "Evaluate Visual" },
-  ["<leader>Qmf"] = { cmd = "MoltenReevaluateCell", desc = "Re-evaluate Cell" },
-  ["<leader>Qmh"] = { cmd = "MoltenHideOutput", desc = "Hide Output" },
-  ["<leader>Qms"] = { cmd = "MoltenShowOutput", desc = "Show Output" },
-  ["<leader>Qmd"] = { cmd = "MoltenDelete", desc = "Delete Cell" },
-  ["<leader>Qmb"] = { cmd = "MoltenOpenInBrowser", desc = "Open in Browser" },
+  ["<leader>QMi"] = { cmd = "MoltenImagePopup", desc = "Show Image Popup" },
+  ["<leader>QMl"] = { cmd = "MoltenEvaluateLine", desc = "Evaluate Line" },
+  ["<leader>QMe"] = { cmd = "MoltenEvaluateOperator", desc = "Evaluate Operator" },
+  ["<leader>QMn"] = { cmd = "MoltenInit", desc = "Initialise Kernel" },
+  ["<leader>QMk"] = { cmd = "MoltenDeinit", desc = "Stop Kernel" },
+  ["<leader>QMr"] = { cmd = "MoltenRestart", desc = "Restart Kernel" },
+  ["<leader>QMo"] = { cmd = "MoltenEvaluateOperator", desc = "Evaluate Operator" },
+  ["<leader>QM<CR>"] = { cmd = "MoltenEvaluateLine", desc = "Evaluate Line" },
+  ["<leader>QMv"] = { cmd = "MoltenEvaluateVisual", desc = "Evaluate Visual" },
+  ["<leader>QMf"] = { cmd = "MoltenReevaluateCell", desc = "Re-evaluate Cell" },
+  ["<leader>QMh"] = { cmd = "MoltenHideOutput", desc = "Hide Output" },
+  ["<leader>QMs"] = { cmd = "MoltenShowOutput", desc = "Show Output" },
+  ["<leader>QMd"] = { cmd = "MoltenDelete", desc = "Delete Cell" },
+  ["<leader>QMb"] = { cmd = "MoltenOpenInBrowser", desc = "Open in Browser" },
 }
 
 for key, data in pairs(molten_commands) do
@@ -972,6 +1006,6 @@ local function call_plugin_manager(func_name)
 end
 
 -- Plugin management keybindings with progress feedback
-map("n", "<leader>Cua", function() call_plugin_manager("update_all_plugins") end, { desc = "Update All Plugins" })
-map("n", "<leader>Cus", function() call_plugin_manager("show_status") end, { desc = "Plugin Status" })
-map("n", "<leader>Cuc", function() call_plugin_manager("cleanup_orphaned") end, { desc = "Cleanup Orphaned Plugins" })
+map("n", "<leader>CUa", function() call_plugin_manager("update_all_plugins") end, { desc = "Update All Plugins" })
+map("n", "<leader>CUs", function() call_plugin_manager("show_status") end, { desc = "Plugin Status" })
+map("n", "<leader>CUc", function() call_plugin_manager("cleanup_orphaned") end, { desc = "Cleanup Orphaned Plugins" })
