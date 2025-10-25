@@ -108,6 +108,22 @@ end
 vim.g.vimtex_mappings_enabled = 0 -- Disable VimTeX default mappings (we define our own in keymaps.lua)
 vim.g.vimtex_imaps_enabled = 1    -- Enable insert mode mappings
 
+-- Disable spell checking in citation arguments
+vim.g.vimtex_syntax_custom_cmds = {
+  { name = 'cite', argspell = false },
+  { name = 'supercite', argspell = false },
+  { name = 'citep', argspell = false },
+  { name = 'citet', argspell = false },
+  { name = 'citealp', argspell = false },
+  { name = 'citealt', argspell = false },
+  { name = 'citeauthor', argspell = false },
+  { name = 'citeyear', argspell = false },
+  { name = 'parencite', argspell = false },
+  { name = 'footcite', argspell = false },
+  { name = 'textcite', argspell = false },
+  { name = 'autocite', argspell = false },
+}
+
 -- Compiler configuration with synctex enabled for reverse sync
 vim.g.vimtex_compiler_latexmk = {
   options = {
