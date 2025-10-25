@@ -98,25 +98,6 @@ function M.create_shortcuts()
 
 	return {
 		{
-			name = "Update plugins",
-			action = function()
-				-- Defer plugin manager call to avoid blocking
-				vim.defer_fn(function()
-					if plugin_manager and plugin_manager.update_plugins then
-						plugin_manager.update_plugins()
-					else
-						vim.notify("Plugin manager not available", vim.log.levels.WARN)
-					end
-				end, 100)
-			end,
-			section = "Shortcuts",
-		},
-		{
-			name = "Explore files",
-			action = "NvimTreeToggle",
-			section = "Shortcuts"
-		},
-		{
 			name = "Find files",
 			action = "Telescope find_files",
 			section = "Shortcuts",
@@ -132,8 +113,17 @@ function M.create_shortcuts()
 			section = "Shortcuts",
 		},
 		{
-			name = "Quit",
-			action = "q",
+			name = "Update plugins",
+			action = function()
+				-- Defer plugin manager call to avoid blocking
+				vim.defer_fn(function()
+					if plugin_manager and plugin_manager.update_plugins then
+						plugin_manager.update_plugins()
+					else
+						vim.notify("Plugin manager not available", vim.log.levels.WARN)
+					end
+				end, 100)
+			end,
 			section = "Shortcuts",
 		},
 	}
@@ -197,7 +187,7 @@ function M.create_all_items()
 	end
 
 	-- Load recent files and projects immediately but with optimizations
-	-- Add projects immediately 
+	-- Add projects immediately
 	for _, item in ipairs(M.create_projects()) do
 		table.insert(items, item)
 	end
@@ -218,3 +208,4 @@ function M.clear_cache()
 end
 
 return M
+
