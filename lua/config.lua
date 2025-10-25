@@ -166,10 +166,9 @@ local function create_optimised_autocmds()
   })
 
   -- Remove trailing whitespace and enforce single newline at EOF on save
-  local whitespace_filetypes = { "*.lua", "*.py", "*.js", "*.ts", "*.go", "*.rs", "*.tex", "*.md", "*.qmd", "*.typ", "*.bib" }
   vim.api.nvim_create_autocmd("BufWritePre", {
     group = augroup,
-    pattern = whitespace_filetypes,
+    pattern = "*",
     callback = function()
       local pos = vim.api.nvim_win_get_cursor(0)
       local bufnr = vim.api.nvim_get_current_buf()
