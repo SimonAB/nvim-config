@@ -105,7 +105,7 @@ do
 end
 
 -- Ensure VimTeX uses the correct local leader (must match init.lua setting)
-vim.g.vimtex_mappings_enabled = 1 -- Enable VimTeX mappings
+vim.g.vimtex_mappings_enabled = 0 -- Disable VimTeX default mappings (we define our own in keymaps.lua)
 vim.g.vimtex_imaps_enabled = 1    -- Enable insert mode mappings
 
 -- Compiler configuration with synctex enabled for reverse sync

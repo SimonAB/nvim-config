@@ -537,16 +537,29 @@ map({ 'n', 't' }, "<leader>Tt", toggle_terminal_vertical_smart, { desc = "Termin
 -- ============================================================================
 -- VIMTEX KEYMAPS
 -- ============================================================================
--- VimTeX integration keymaps for LaTeX document processing
--- These provide forward/inverse search and compilation control
--- Using LocalLeader prefix to avoid conflicts with main leader bindings
+-- VimTeX provides comprehensive default keymaps, but we override them here
+-- with cleaner which-key descriptions (VimTeX's plug names include brackets)
+-- These map to VimTeX's plug mappings to preserve full functionality
 
--- VimTeX keymaps (simple commands)
-map("n", "<localleader>lv", ":VimtexView<CR>", { noremap = true, silent = true, desc = "View (forward sync)" })
-map("n", "<localleader>li", ":VimtexInverseSearch<CR>", { noremap = true, silent = true, desc = "Inverse search" })
-map("n", "<localleader>ll", ":VimtexCompile<CR>", { noremap = true, silent = true, desc = "Compile (latexmk)" })
-map("n", "<localleader>lc", ":VimtexClean<CR>", { noremap = true, silent = true, desc = "Clean aux files" })
-map("n", "<localleader>ls", ":VimtexStop<CR>", { noremap = true, silent = true, desc = "Stop compiler" })
+map("n", "<localleader>ll", "<Plug>(vimtex-compile)", { desc = "Compile" })
+map("n", "<localleader>lv", "<Plug>(vimtex-view)", { desc = "View PDF" })
+map("n", "<localleader>lk", "<Plug>(vimtex-stop)", { desc = "Stop" })
+map("n", "<localleader>lK", "<Plug>(vimtex-stop-all)", { desc = "Stop all" })
+map("n", "<localleader>lc", "<Plug>(vimtex-clean)", { desc = "Clean aux" })
+map("n", "<localleader>lC", "<Plug>(vimtex-clean-full)", { desc = "Clean full" })
+map("n", "<localleader>le", "<Plug>(vimtex-errors)", { desc = "Errors" })
+map("n", "<localleader>lo", "<Plug>(vimtex-compile-output)", { desc = "Output" })
+map("n", "<localleader>lg", "<Plug>(vimtex-status)", { desc = "Status" })
+map("n", "<localleader>lG", "<Plug>(vimtex-status-all)", { desc = "Status all" })
+map("n", "<localleader>lt", "<Plug>(vimtex-toc-open)", { desc = "TOC" })
+map("n", "<localleader>lT", "<Plug>(vimtex-toc-toggle)", { desc = "TOC toggle" })
+map("n", "<localleader>lq", "<Plug>(vimtex-log)", { desc = "Log" })
+map("n", "<localleader>li", "<Plug>(vimtex-info)", { desc = "Info" })
+map("n", "<localleader>lI", "<Plug>(vimtex-info-full)", { desc = "Info full" })
+map("n", "<localleader>lx", "<Plug>(vimtex-reload)", { desc = "Reload" })
+map("n", "<localleader>lX", "<Plug>(vimtex-reload-state)", { desc = "Reload state" })
+map("n", "<localleader>la", "<Plug>(vimtex-context-menu)", { desc = "Context menu" })
+map("n", "<localleader>lm", "<Plug>(vimtex-imaps-list)", { desc = "Insert mode maps" })
 
 -- ============================================================================
 -- TYPST KEYMAPS

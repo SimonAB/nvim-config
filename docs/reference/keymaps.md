@@ -84,12 +84,15 @@ K               " Show hover documentation
 ## Document Processing
 
 ### LaTeX/VimTeX
+VimTeX provides comprehensive default keymaps (see `:help vimtex-default-mappings`):
 ```vim
-\LocalLeader\lv  " View PDF (forward search)
-\LocalLeader\li  " Inverse search
 \LocalLeader\ll  " Compile LaTeX
+\LocalLeader\lv  " View PDF (forward search)
+\LocalLeader\lk  " Stop compilation
 \LocalLeader\lc  " Clean auxiliary files
-\LocalLeader\ls  " Stop compilation
+\LocalLeader\lt  " Open table of contents
+\LocalLeader\le  " Show errors
+" And many more - see :help vimtex-default-mappings
 ```
 
 ### Typst
