@@ -108,21 +108,8 @@ end
 vim.g.vimtex_mappings_enabled = 0 -- Disable VimTeX default mappings (we define our own in keymaps.lua)
 vim.g.vimtex_imaps_enabled = 1    -- Enable insert mode mappings
 
--- Disable spell checking in citation arguments
-vim.g.vimtex_syntax_custom_cmds = {
-  { name = 'cite', argspell = false },
-  { name = 'supercite', argspell = false },
-  { name = 'citep', argspell = false },
-  { name = 'citet', argspell = false },
-  { name = 'citealp', argspell = false },
-  { name = 'citealt', argspell = false },
-  { name = 'citeauthor', argspell = false },
-  { name = 'citeyear', argspell = false },
-  { name = 'parencite', argspell = false },
-  { name = 'footcite', argspell = false },
-  { name = 'textcite', argspell = false },
-  { name = 'autocite', argspell = false },
-}
+-- Note: VimTeX spell configuration moved to lua/plugins/vimtex.lua
+-- to ensure proper initialization timing
 
 -- Compiler configuration with synctex enabled for reverse sync
 vim.g.vimtex_compiler_latexmk = {
@@ -154,8 +141,24 @@ local vimtex_auto_group = vim.api.nvim_create_augroup('VimTeXAutoInit', { clear 
 vim.api.nvim_create_autocmd('FileType', {
   group = vimtex_auto_group,
   pattern = 'tex',
-  desc = 'Automatically initialise VimTeX on TeX buffers',
+  desc = 'Automatically initialise VimTeX on TeX buffers and ensure spell configuration',
   callback = function()
+    -- Ensure spell configuration is applied (defensive programming)
+    vim.g.vimtex_syntax_custom_cmds = vim.g.vimtex_syntax_custom_cmds or {
+      { name = 'cite', argspell = false },
+      { name = 'supercite', argspell = false },
+      { name = 'citep', argspell = false },
+      { name = 'citet', argspell = false },
+      { name = 'citealp', argspell = false },
+      { name = 'citealt', argspell = false },
+      { name = 'citeauthor', argspell = false },
+      { name = 'citeyear', argspell = false },
+      { name = 'parencite', argspell = false },
+      { name = 'footcite', argspell = false },
+      { name = 'textcite', argspell = false },
+      { name = 'autocite', argspell = false },
+    }
+
     -- If VimTeX has not attached a buffer-local state yet, trigger initialisation
     if vim.b.vimtex == nil then
       vim.defer_fn(function()
@@ -188,18 +191,18 @@ local function create_optimised_autocmds()
     callback = function()
       local pos = vim.api.nvim_win_get_cursor(0)
       local bufnr = vim.api.nvim_get_current_buf()
-      
+
       -- Remove trailing whitespace (existing functionality)
       local has_trailing = vim.fn.search('\\s\\+$', 'n') > 0
       if has_trailing then
         vim.cmd([[%s/\s\+$//e]])
       end
-      
+
       -- Collapse multiple consecutive empty lines into single empty lines
       local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
       local collapsed_lines = {}
       local prev_line_empty = false
-      
+
       for _, line in ipairs(lines) do
         local is_empty = line:match("^%s*$") ~= nil
         if not (is_empty and prev_line_empty) then
@@ -207,24 +210,24 @@ local function create_optimised_autocmds()
         end
         prev_line_empty = is_empty
       end
-      
+
       -- Only update buffer if changes were made
       if #collapsed_lines ~= #lines then
         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, collapsed_lines)
-        
+
         -- Adjust cursor position if needed
         local new_row = math.min(pos[1], #collapsed_lines)
         local line_length = #(collapsed_lines[new_row] or "")
         local new_col = math.min(pos[2], line_length)
         pos = { new_row, new_col }
       end
-      
+
       -- Enforce exactly one newline at end of file
       lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
       if #lines > 0 then
         local last_line = lines[#lines]
         local non_empty_lines = {}
-        
+
         -- Find the last non-empty line
         for i = #lines, 1, -1 do
           if lines[i]:match("%S") then -- line contains non-whitespace
@@ -232,17 +235,17 @@ local function create_optimised_autocmds()
             break
           end
         end
-        
+
         -- Ensure exactly one empty line at the end
         if #non_empty_lines > 0 then
           non_empty_lines[#non_empty_lines + 1] = "" -- Add exactly one empty line
           vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, non_empty_lines)
-          
+
           -- Update cursor position to be within bounds after buffer modification
           local new_line_count = #non_empty_lines
           local new_col = math.min(pos[2], #lines[pos[1]] or 0)
           local new_row = math.min(pos[1], new_line_count)
-          
+
           -- Ensure cursor is within valid bounds
           if new_row > 0 and new_row <= new_line_count then
             vim.api.nvim_win_set_cursor(0, { new_row, new_col })
