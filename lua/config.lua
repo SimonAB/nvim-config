@@ -55,6 +55,10 @@ opt.exrc = false -- Disable exrc file
 opt.spelllang = "en_gb" -- Set British English spelling
 opt.spell = true -- Enable spell checking by default
 
+-- Configure spell directories (private location for privacy)
+local config_dir = vim.fn.stdpath('config')
+opt.spellfile = config_dir .. '/private/spell/en.utf-8.add,' .. config_dir .. '/private/spell/fr.utf-8.add'
+
 -- Terminal colours (enables true colour support)
 opt.termguicolors = true
 

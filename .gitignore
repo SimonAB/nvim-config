@@ -1,6 +1,4 @@
-# Compiled spell files (but allow custom dictionaries to sync)
-spell/*.spl
-spell/*.sug
+# Personal spell dictionaries (moved to private/ for privacy)
 
 # Private keys and sensitive data
 private/
