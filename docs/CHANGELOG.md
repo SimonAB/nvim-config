@@ -60,8 +60,8 @@
 - **Fallback Support**: Works with vim.ui.select when Telescope unavailable
 
 ### ⌨️ New Keybindings
-- **`<Space>Ytp`**: Open theme picker (floating window)
-- **`<Space>Yts`**: Show current theme
+- **`<Space>YTp`**: Open theme picker (floating window)
+- **`<Space>YTs`**: Show current theme
 - **`<Space>Yc`**: Cycle through themes (enhanced with better fallback)
 
 ### 🏗️ Architecture Improvements

@@ -523,7 +523,7 @@ git pull origin main
 ### Update Plugins
 
 ```vim
-<Space>Cua         " Update all plugins
+<Space>CUa         " Update all plugins
 :lua require('core.plugin-manager').update_all_plugins()
 ```
 
@@ -580,7 +580,7 @@ This configuration is optimised for macOS but should work on Linux with modifica
 After installation:
 
 1. **Configure Language Servers**: `<Space>MA`
-2. **Select Theme**: `<Space>Ytp`
+2. **Select Theme**: `<Space>YTp`
 3. **Test LaTeX Workflow**: Compile a test document
 4. **Customise Keymaps**: Add personal mappings to `lua/keymaps.lua`
 5. **Read Documentation**: Review keymaps reference and troubleshooting guide

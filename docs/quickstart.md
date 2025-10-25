@@ -149,9 +149,9 @@ Julia REPLs launch with `--threads=auto` for automatic multi-threading support.
 ### Theme Management
 
 ```vim
-<Space>Ytp           " Open theme picker (Telescope)
+<Space>YTp           " Open theme picker (Telescope)
 <Space>Yc            " Cycle through themes
-<Space>Yts           " Show current theme
+<Space>YTs           " Show current theme
 ```
 
 Available themes include Catppuccin, OneDark, Tokyo Night, Nord, and GitHub Dark/Light.
@@ -357,7 +357,7 @@ Press `<Space>` and wait 500ms to see all available commands grouped by function
 ## Next Steps
 
 1. **Install Language Servers**: `<Space>MA` for academic servers
-2. **Configure Theme**: `<Space>Ytp` to browse and select theme
+2. **Configure Theme**: `<Space>YTp` to browse and select theme
 3. **Setup LaTeX**: Configure Skim for bidirectional sync
 4. **Customise**: Add personal keymaps to `lua/keymaps.lua`
 5. **Explore**: Press `<Space>` and explore command groups

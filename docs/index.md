@@ -131,7 +131,7 @@ Quarto integration for reproducible research:
 ### Theme Management
 
 Beautiful theme system with live preview:
-- `<Leader>Ytp` - Theme picker with Telescope
+- `<Leader>YTp` - Theme picker with Telescope
 - `<Leader>Yc` - Cycle through themes
 - Auto dark mode based on system preference
 - Themes: Catppuccin, OneDark, Tokyo Night, Nord, GitHub

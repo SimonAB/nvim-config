@@ -110,8 +110,8 @@ Julia REPLs launch with `--threads=auto` for optimal parallel performance.
 | Key | Action |
 |-----|--------|
 | `<leader>Yc` | Cycle themes |
-| `<leader>Ytp` | Theme picker (Telescope) |
-| `<leader>Yts` | Show current theme |
+| `<leader>YTp` | Theme picker (Telescope) |
+| `<leader>YTs` | Show current theme |
 
 See [Keymaps Reference](docs/reference/keymaps.md) for complete keymap documentation.
 
