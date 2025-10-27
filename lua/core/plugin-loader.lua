@@ -28,6 +28,7 @@ local LOAD_PHASES = {
 		"trouble-nvim",       -- Diagnostics viewer
 		"gitsigns-nvim",      -- Git integration
 		"toggleterm-nvim",    -- Terminal management
+		"markdown-preview-nvim", -- Markdown preview
 	},
 
 	-- Phase 3: LAZY (500ms) - Non-essentials and themes

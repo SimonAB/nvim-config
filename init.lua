@@ -50,6 +50,9 @@ if not ok then
 	vim.notify("Failed to load project plugins.lua: " .. tostring(err), vim.log.levels.ERROR)
 end
 
+-- Load markdown preview configuration early (before plugin loads)
+pcall(dofile, config_path .. "/lua/plugins/markdown-preview-nvim.lua")
+
 -- Load plugin orchestration system
 local project_require = config_path .. "/lua/require.lua"
 pcall(dofile, project_require)
