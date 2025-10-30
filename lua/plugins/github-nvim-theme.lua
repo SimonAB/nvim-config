@@ -13,7 +13,8 @@ if ok then
 		styles = {
 			-- Style to be applied to different syntax groups
 			comments = { italic = true },
-			keywords = { italic = true },
+			-- Match Gruvbox: do not italicise keywords
+			keywords = {},
 			functions = {},
 			variables = {},
 			sidebars = "dark", -- style for sidebars, see below

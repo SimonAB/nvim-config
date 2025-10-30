@@ -5,6 +5,7 @@
 
 local ThemeManager = {}
 local highlight_cache = {}
+local formatting_cache = {}
 local ThemePicker = nil -- Lazy load to avoid circular dependencies
 
 -- Detect system appearance with caching
@@ -32,10 +33,59 @@ function ThemeManager.detect_system_theme()
 	return system_theme_cache
 end
 
+-- Apply red squiggly underline only for misspelled words
+function ThemeManager.apply_spell_undercurl()
+  -- Prefer undercurl when supported; fall back to solid underline (Warp)
+  local is_warp = (vim.env.TERM_PROGRAM == "WarpTerminal")
+  if is_warp then
+    pcall(vim.api.nvim_set_hl, 0, "SpellBad", { underline = true, undercurl = false, fg = "#ff4d4d" })
+  else
+    pcall(vim.api.nvim_set_hl, 0, "SpellBad", { undercurl = true, sp = "#ff4d4d" })
+  end
+end
+
+-- Apply formatting parity with Gruvbox (italics/neutral choices)
+function ThemeManager.apply_formatting_parity()
+  local theme = vim.g.colors_name or "default"
+
+  -- Only apply for GitHub light variants to match Gruvbox formatting
+  if not theme:match("^github") then
+    return
+  end
+
+  if formatting_cache[theme] then
+    return
+  end
+
+  -- Match Gruvbox defaults:
+  -- - Comments: italic
+  -- - Strings: not italic
+  -- - Operators: not italic
+  -- - Folds: italic
+  local groups_to_set = {
+    { name = "Comment", opts = { italic = true } },
+    { name = "@comment", opts = { italic = true } },
+
+    { name = "String", opts = { italic = false } },
+    { name = "@string", opts = { italic = false } },
+
+    { name = "Operator", opts = { italic = false } },
+    { name = "@operator", opts = { italic = false } },
+
+    { name = "Folded", opts = { italic = true } },
+  }
+
+  for _, group in ipairs(groups_to_set) do
+    pcall(vim.api.nvim_set_hl, 0, group.name, group.opts)
+  end
+
+  formatting_cache[theme] = true
+end
+
 -- Get theme for current system appearance
 function ThemeManager.get_active_theme()
     local appearance = ThemeManager.detect_system_theme()
-    return appearance == "dark" and "gruvbox" or "catppuccin"
+    return appearance == "dark" and "gruvbox" or "github_light_default"
 end
 
 -- Load and apply theme immediately (no defer)
@@ -122,6 +172,7 @@ end
 -- Clear highlight cache (useful when reloading config)
 function ThemeManager.clear_highlight_cache()
 	highlight_cache = {}
+  formatting_cache = {}
 end
 
 -- Theme picker integration
@@ -188,13 +239,15 @@ end
 
 -- Setup auto-updating highlights when theme changes
 function ThemeManager.setup_highlight_autocmd()
-	vim.api.nvim_create_autocmd("ColorScheme", {
-		callback = function()
-			vim.defer_fn(function()
-				ThemeManager.update_which_key_highlights()
-			end, 50)
-		end,
-	})
+  vim.api.nvim_create_autocmd("ColorScheme", {
+    callback = function()
+      vim.defer_fn(function()
+        ThemeManager.update_which_key_highlights()
+        ThemeManager.apply_formatting_parity()
+        ThemeManager.apply_spell_undercurl()
+      end, 50)
+    end,
+  })
 end
 
 -- Main initialization function
@@ -208,6 +261,8 @@ function ThemeManager.init()
 	-- Setup highlight management
 	ThemeManager.setup_highlight_autocmd()
 	ThemeManager.update_which_key_highlights()
+  ThemeManager.apply_formatting_parity()
+  ThemeManager.apply_spell_undercurl()
 
 	vim.notify("Theme system initialized: " .. active_theme, vim.log.levels.INFO)
 end

@@ -12,8 +12,8 @@ if ok then
 		end,
 		set_light_mode = function()
 			vim.api.nvim_set_option("background", "light")
-			vim.cmd.colorscheme("onehalflight")
-			-- vim.cmd.colorscheme("catppuccin-latte")
+			-- Use GitHub Light Default for neutral light theme
+			vim.cmd.colorscheme("github_light_default")
 		end,
 	})
 end

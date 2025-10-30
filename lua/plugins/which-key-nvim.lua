@@ -86,6 +86,11 @@ if ok then
 		{ "<localleader>t", group = "Typst" },
 	})
 
+	-- Clarify descriptor for built-in gx without changing its mapping
+	wk.add({
+		{ "gx", desc = "Open URL/URI/file path under cursor", mode = "n" },
+	})
+
 	-- Centralised function to open Julia REPL with specified direction
 	local function open_julia_repl(direction)
 		local Terminal = require("toggleterm.terminal").Terminal
