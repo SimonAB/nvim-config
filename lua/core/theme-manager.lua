@@ -34,8 +34,8 @@ end
 
 -- Get theme for current system appearance
 function ThemeManager.get_active_theme()
-	local appearance = ThemeManager.detect_system_theme()
-	return appearance == "dark" and "onedark" or "catppuccin"
+    local appearance = ThemeManager.detect_system_theme()
+    return appearance == "dark" and "gruvbox" or "catppuccin"
 end
 
 -- Load and apply theme immediately (no defer)

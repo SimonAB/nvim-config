@@ -55,7 +55,8 @@ local function classify_theme(name)
 		if n:find("light") then return "light" end
 		return "dark"
 	end
-	if n:find("tokyonight") then return "dark" end
+    if n:find("tokyonight") then return "dark" end
+    if n:find("gruvbox") then return "dark" end
 	if n == "catppuccin" then return "dark" end
 	return "special"
 end

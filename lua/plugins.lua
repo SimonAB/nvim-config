@@ -16,6 +16,7 @@ local essential_plugins = {
 	-- UI and themes - Visual enhancements and colourschemes
 	{ url = "https://github.com/catppuccin/nvim",                 name = "catppuccin" },            -- Modern pastel theme
 	{ url = "https://github.com/navarasu/onedark.nvim",           name = "onedark.nvim" },          -- OneDark theme
+	{ url = "https://github.com/ellisonleao/gruvbox.nvim",        name = "gruvbox.nvim" },          -- Gruvbox theme
 	{ url = "https://github.com/folke/tokyonight.nvim",           name = "tokyonight.nvim" },       -- Tokyo Night theme
 	{ url = "https://github.com/arcticicestudio/nord-vim",        name = "nord-vim" },              -- Nord theme
 	{ url = "https://github.com/rafi/awesome-vim-colorschemes",   name = "awesome-vim-colorschemes" }, -- Collection of themes
@@ -126,6 +127,7 @@ vim.defer_fn(function()
 			"plugins.quarto-nvim",
 			"plugins.trouble-nvim",
 			"plugins.auto-dark-mode-nvim",
+			"plugins.gruvbox-nvim",
 			"plugins.github-nvim-theme",
 			"plugins.nord-vim",
 			"plugins.awesome-vim-colorschemes",

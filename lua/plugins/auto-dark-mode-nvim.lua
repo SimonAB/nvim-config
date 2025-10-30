@@ -8,7 +8,7 @@ if ok then
 		set_dark_mode = function()
 			vim.api.nvim_set_option("background", "dark")
 			-- vim.cmd.colorscheme("onedark")
-			vim.cmd.colorscheme("catppuccin-mocha")
+			vim.cmd.colorscheme("gruvbox")
 		end,
 		set_light_mode = function()
 			vim.api.nvim_set_option("background", "light")
