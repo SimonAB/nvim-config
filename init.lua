@@ -68,7 +68,7 @@ local function setup_optimized_autocmds()
 	-- Filetype-specific configurations
 	local filetype_configs = {
 		tex = function() vim.g.vimtex_enabled = 1 end,
-		julia = function() 
+		julia = function()
 			-- Julia-specific setup if needed
 		end,
 		python = function()
@@ -130,3 +130,4 @@ vim.defer_fn(function()
 		dashboard.setup_autocommands()
 	end
 end, 300)
+

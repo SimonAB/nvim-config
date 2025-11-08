@@ -14,7 +14,6 @@
 -- • Key Collision Resolution: Terminal (<leader>T*), Toggle (<leader>Y*),
 --
 
-
 local map = vim.keymap.set
 
 -- ============================================================================
@@ -128,15 +127,13 @@ map("n", "<S-h>", buffer_operation("BufferLineCyclePrev", "bprevious"), { desc =
 
 -- Buffer Operations (<leader>B)
 map("n", "<leader>Bf", "<cmd>Telescope buffers<CR>", { desc = "Find buffers (Telescope)" })
-map("n", "<leader>Bj", "<cmd>BufferLinePick<CR>", { desc = "Jump to buffer (BufferLine pick)" })
+map("n", "<leader>Bp", "<cmd>BufferLinePick<CR>", { desc = "Pick buffer" })
 map("n", "<leader>Bb", buffer_operation("BufferLineCyclePrev", "bprevious"), { desc = "Previous buffer" })
 map("n", "<leader>Bn", buffer_operation("BufferLineCycleNext", "bnext"), { desc = "Next buffer" })
 map("n", "<leader>Bq", buffer_operation("BufferLineClose", "bdelete"), { desc = "Close buffer" })
 
 -- Clear search highlights
 map("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
-
--- (Removed custom spell navigation; rely on native [s / ]s)
 
 -- Better indenting
 map("v", "<", "<gv", { desc = "Indent left" })
@@ -153,13 +150,11 @@ map("v", "p", '"_dP', { desc = "Paste without yanking" })
 -- LEADER KEYMAPS
 -- ============================================================================
 
-
 -- Core single-key operations
 map("n", "<leader>w", "<cmd>w<CR>", { desc = "Write" })
 map("n", "<C-s>", "<cmd>w<CR>", { desc = "Quick save" })
-map("n", "<leader>q", "<cmd>q<CR>", { desc = "Close Buffer" })
+map("n", "<leader>q", "<cmd>bdelete<CR>", { desc = "Close Buffer" })
 map("n", "<leader>h", "<cmd>nohlsearch<CR>", { desc = "Hide Highlight" })
-
 
 -- Split commands in Split group (using | since S is for Search)
 map("n", "<leader>|v", "<cmd>vsplit<CR>", { desc = "Split Vertical" })
@@ -219,8 +214,6 @@ map("n", "<leader>YTs", function()
   local current = vim.g.colors_name or "default"
   vim.notify("Current theme: " .. current, vim.log.levels.INFO)
 end, { desc = "Show current theme" })
-
-
 
 -- ============================================================================
 -- TERMINAL INTEGRATION
@@ -1030,3 +1023,4 @@ end
 map("n", "<leader>CUa", function() call_plugin_manager("update_all_plugins") end, { desc = "Update All Plugins" })
 map("n", "<leader>CUs", function() call_plugin_manager("show_status") end, { desc = "Plugin Status" })
 map("n", "<leader>CUc", function() call_plugin_manager("cleanup_orphaned") end, { desc = "Cleanup Orphaned Plugins" })
+

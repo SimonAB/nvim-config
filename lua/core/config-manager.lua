@@ -1,11 +1,11 @@
 -- =============================================================================
 -- CENTRALIZED CONFIGURATION MANAGER
--- PURPOSE: Unified configuration system for all plugins and settings
+-- PURPOSE: Shared/global configurations (themes, LSP, UI, performance)
+-- NOTE: Detailed plugin configurations are in their respective plugin files
 -- =============================================================================
 
 local ConfigManager = {
 	themes = {},
-	plugins = {},
 	lsp = {},
 	ui = {},
 	performance = {}
@@ -104,192 +104,6 @@ ConfigManager.themes.tokyonight = {
 	hide_inactive_statusline = false,
 	dim_inactive = false,
 	lualine_bold = false,
-}
-
--- =============================================================================
--- PLUGIN CONFIGURATIONS
--- =============================================================================
-
-ConfigManager.plugins.telescope = {
-	defaults = {
-		debounce = 50,
-		path_display = { "truncate" },
-		file_sorter = require("telescope.sorters").fuzzy_with_index_bias,
-		layout_strategy = "horizontal",
-		layout_config = {
-			horizontal = {
-				prompt_position = "bottom",
-				preview_width = 0.55,
-				results_width = 0.8,
-			},
-		},
-		preview = {
-			treesitter = false,
-		},
-	},
-	pickers = {
-		find_files = {
-			hidden = false,
-			file_ignore_patterns = {
-				"%.git/",
-				"node_modules/",
-				"%.DS_Store",
-				"%.cache/",
-				"%.local/",
-				"%.pdf$",
-				"%.jpg$", "%.jpeg$", "%.png$", "%.gif$", "%.bmp$", "%.tiff$", "%.svg$", "%.ico$", "%.webp$",
-				"%.mp3$", "%.mp4$", "%.avi$", "%.mov$", "%.wmv$", "%.flv$", "%.mkv$", "%.webm$",
-				"%.zip$", "%.tar$", "%.gz$", "%.rar$", "%.7z$", "%.bz2$",
-				"%.exe$", "%.dmg$", "%.pkg$", "%.deb$", "%.rpm$",
-				"%.doc$", "%.docx$", "%.xls$", "%.xlsx$", "%.ppt$", "%.pptx$",
-				"%.odt$", "%.ods$", "%.odp$",
-				"%.class$", "%.o$", "%.so$", "%.dll$", "%.dylib$",
-				"%.pyc$", "%.pyo$", "%.pyd$",
-				"%.log$", "%.tmp$", "%.temp$",
-			},
-		},
-		live_grep = {
-			additional_args = function()
-				return { "--hidden" }
-			end,
-		},
-	},
-	extensions = {
-		fzf = {
-			fuzzy = true,
-			override_generic_sorter = true,
-			override_file_sorter = true,
-			case_mode = "smart_case",
-		},
-		frecency = {
-			show_scores = false,
-			show_unindexed = true,
-			ignore_patterns = {"*.git/*", "*/tmp/*"},
-		},
-	},
-}
-
-ConfigManager.plugins.treesitter = {
-	ensure_installed = {
-		"lua", "vim", "vimdoc", "javascript", "typescript",
-		"python", "julia", "r", "bash", "json", "yaml",
-		"markdown", "html", "css", "scss", "latex", "bibtex",
-		"toml", "dockerfile", "gitignore", "comment", "regex"
-	},
-	highlight = {
-		enable = true,
-		additional_vim_regex_highlighting = false,
-	},
-	indent = { enable = true },
-	incremental_selection = {
-		enable = true,
-		keymaps = {
-			init_selection = "<CR>",
-			node_incremental = "<CR>",
-			node_decremental = "<BS>",
-			scope_incremental = "<TAB>",
-		},
-	},
-	textobjects = {
-		enable = true,
-		select = {
-			enable = true,
-			lookahead = true,
-			keymaps = {
-				["af"] = "@function.outer",
-				["if"] = "@function.inner",
-				["ac"] = "@class.outer",
-				["ic"] = "@class.inner",
-			},
-		},
-		move = {
-			enable = true,
-			set_jumps = true,
-			goto_next_start = {
-				["]m"] = "@function.outer",
-				["]]"] = "@class.outer",
-			},
-			goto_next_end = {
-				["]M"] = "@function.outer",
-				["]["] = "@class.outer",
-			},
-			goto_previous_start = {
-				["[m"] = "@function.outer",
-				["[["] = "@class.outer",
-			},
-			goto_previous_end = {
-				["[M"] = "@function.outer",
-				["[]"] = "@class.outer",
-			},
-		},
-	},
-}
-
-ConfigManager.plugins.bufferline = {
-	options = {
-		diagnostics = "nvim_lsp",
-		separator_style = "slant",
-		show_buffer_icons = true,
-		show_buffer_close_icons = true,
-		show_close_icon = true,
-		show_tab_indicators = true,
-	},
-}
-
-ConfigManager.plugins.lualine = {
-	options = {
-		theme = "auto",
-		component_separators = "|",
-		section_separators = "",
-	},
-	sections = {
-		lualine_a = { "mode" },
-		lualine_b = { "branch", "diff", "diagnostics" },
-		lualine_c = { "filename" },
-		lualine_x = { "encoding", "fileformat", "filetype" },
-		lualine_y = { "progress" },
-		lualine_z = { "location" },
-	},
-}
-
-ConfigManager.plugins.gitsigns = {
-	signs = {
-		add = { text = "+" },
-		change = { text = "~" },
-		delete = { text = "_" },
-		topdelete = { text = "‾" },
-		changedelete = { text = "~" },
-		untracked = { text = "┆" },
-	},
-	signcolumn = true,
-	numhl = false,
-	linehl = false,
-	word_diff = false,
-	watch_gitdir = { interval = 1000, follow_files = true },
-	attach_to_untracked = true,
-	current_line_blame = false,
-	current_line_blame_opts = {
-		virt_text = true,
-		virt_text_pos = "eol",
-		delay = 1000,
-		ignore_whitespace = false,
-	},
-	current_line_blame_formatter = "<author>, <author_time:%Y-%m-%d> - <summary>",
-	sign_priority = 6,
-	update_debounce = 100,
-	status_formatter = nil,
-	max_file_length = 40000,
-	preview_config = {
-		border = "single",
-		style = "minimal",
-		relative = "cursor",
-		row = 0,
-		col = 1,
-	},
-}
-
-ConfigManager.plugins.trouble = {
-	-- Default configuration with enhanced diagnostics
 }
 
 -- =============================================================================
@@ -430,9 +244,6 @@ function ConfigManager.load_theme_config(theme_name)
 	return ConfigManager.themes[theme_name] or {}
 end
 
-function ConfigManager.load_plugin_config(plugin_name)
-	return ConfigManager.plugins[plugin_name] or {}
-end
 
 function ConfigManager.load_lsp_config(server_name)
 	return ConfigManager.lsp.servers[server_name] or {}
@@ -460,7 +271,6 @@ function ConfigManager.validate_config()
 
 	local valid = true
 	valid = valid and validate_section("themes", ConfigManager.themes)
-	valid = valid and validate_section("plugins", ConfigManager.plugins)
 	valid = valid and validate_section("lsp", ConfigManager.lsp)
 	valid = valid and validate_section("ui", ConfigManager.ui)
 	valid = valid and validate_section("performance", ConfigManager.performance)
@@ -480,3 +290,4 @@ vim.defer_fn(function()
 end, 100)
 
 return ConfigManager
+

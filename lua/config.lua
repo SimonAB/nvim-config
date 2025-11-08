@@ -64,6 +64,9 @@ opt.spell = true -- Enable spell checking by default
 -- Terminal colours (enables true colour support)
 opt.termguicolors = true
 
+-- Enable mouse move events for bufferline hover functionality
+opt.mousemoveevent = true
+
 -- Font configuration
 opt.guifont = "LigaSFMonoNerdFont-Regular:h10" -- Set font
 

@@ -5,34 +5,16 @@ local ok, treesitter = pcall(require, "nvim-treesitter.configs")
 if ok then
 	treesitter.setup({
 		ensure_installed = {
-			"lua",
-			"vim",
-			"vimdoc",
-			"javascript",
-			"typescript",
-			"python",
-			"julia",
-			"r",
-			"bash",
-			"json",
-			"yaml",
-			"markdown",
-			"html",
-			"css",
-			"scss",
-			"latex",
-			"bibtex",
-			"toml",
-			"dockerfile",
-			"gitignore",
-			"comment",
-			"regex",
+			"lua", "vim", "vimdoc", "javascript", "typescript",
+			"python", "julia", "r", "bash", "json", "yaml",
+			"markdown", "html", "css", "scss", "latex", "bibtex",
+			"toml", "dockerfile", "gitignore", "comment", "regex"
 		},
 		highlight = {
-			enable = true, -- Enable syntax highlighting
+			enable = true,
 			-- Enable additional vim regex highlighting to support spell checking regions
 			-- These filetypes need traditional syntax to define where spell check should look
-			additional_vim_regex_highlighting = { 
+			additional_vim_regex_highlighting = {
 				"latex", "tex", "markdown",  -- Documents
 				"python", "r", "julia",       -- Data science languages
 				"javascript", "typescript",   -- Web languages
@@ -40,11 +22,9 @@ if ok then
 				"bash", "sh",                 -- Shell scripts
 			},
 		},
-		indent = {
-			enable = true, -- Enable indentation
-		},
+		indent = { enable = true },
 		incremental_selection = {
-			enable = true, -- Enable incremental selection
+			enable = true,
 			keymaps = {
 				init_selection = "<CR>",
 				node_incremental = "<CR>",
@@ -53,7 +33,7 @@ if ok then
 			},
 		},
 		textobjects = {
-			enable = true, -- Enable text objects
+			enable = true,
 			select = {
 				enable = true,
 				lookahead = true,
