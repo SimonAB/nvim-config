@@ -37,7 +37,9 @@ Complete reference of all keybindings in StellarVIM, organized by functionality.
 
 <Leader>Bb      " Previous buffer (BufferLine)
 <Leader>Bn      " Next buffer (BufferLine)
-<Leader>Bj      " Jump to buffer (BufferLine pick)
+<Leader>Bp      " Pick buffer (BufferLine)
+<Leader>Bf      " Find buffers (Telescope)
+<Leader>Bl      " List all buffers (including unlisted)
 <Leader>Bq      " Close buffer
 ```
 
