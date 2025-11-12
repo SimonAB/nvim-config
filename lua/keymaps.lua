@@ -595,10 +595,11 @@ local function compile_lualatex_with_biber()
 end
 
 map("n", "<localleader>ll", "<Plug>(vimtex-compile)", { desc = "Compile" })
+map("n", "<localleader>lb", compile_lualatex_with_biber, { desc = "Compile LuaLaTeX+Biber" })
 map("n", "<localleader>lv", "<Plug>(vimtex-view)", { desc = "View PDF" })
 map("n", "<localleader>lk", "<Plug>(vimtex-stop)", { desc = "Stop" })
 map("n", "<localleader>lK", "<Plug>(vimtex-stop-all)", { desc = "Stop all" })
-map("n", "<localleader>lc", compile_lualatex_with_biber, { desc = "Compile LuaLaTeX+Biber" })
+map("n", "<localleader>lc", "<Plug>(vimtex-clean)", { desc = "Clean aux" })
 map("n", "<localleader>lC", "<Plug>(vimtex-clean-full)", { desc = "Clean full" })
 map("n", "<localleader>le", "<Plug>(vimtex-errors)", { desc = "Errors" })
 map("n", "<localleader>lo", "<Plug>(vimtex-compile-output)", { desc = "Output" })
@@ -613,7 +614,6 @@ map("n", "<localleader>lx", "<Plug>(vimtex-reload)", { desc = "Reload" })
 map("n", "<localleader>lX", "<Plug>(vimtex-reload-state)", { desc = "Reload state" })
 map("n", "<localleader>la", "<Plug>(vimtex-context-menu)", { desc = "Context menu" })
 map("n", "<localleader>lm", "<Plug>(vimtex-imaps-list)", { desc = "Insert mode maps" })
-map("n", "<localleader>ld", "<Plug>(vimtex-clean)", { desc = "Clean aux" })
 
 -- ============================================================================
 -- TYPST KEYMAPS

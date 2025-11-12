@@ -87,11 +87,11 @@ K               " Show hover documentation
 VimTeX provides comprehensive default keymaps (see `:help vimtex-default-mappings`):
 ```vim
 \LocalLeader\ll  " Compile LaTeX (standard)
-\LocalLeader\lc  " Compile with LuaLaTeX+Biber (latexmk → biber → latexmk × 2)
+\LocalLeader\lb  " Compile with LuaLaTeX+Biber (latexmk → biber → latexmk × 2)
 \LocalLeader\lv  " View PDF (forward search)
 \LocalLeader\lk  " Stop compilation
 \LocalLeader\lK  " Stop all compilations
-\LocalLeader\ld  " Clean auxiliary files
+\LocalLeader\lc  " Clean auxiliary files
 \LocalLeader\lC  " Clean all files (including PDF)
 \LocalLeader\lt  " Open table of contents
 \LocalLeader\lT  " Toggle table of contents
@@ -109,7 +109,7 @@ VimTeX provides comprehensive default keymaps (see `:help vimtex-default-mapping
 " And many more - see :help vimtex-default-mappings
 ```
 
-**Note**: The custom LuaLaTeX+Biber compilation (`\lc`) opens a terminal window in normal mode, 
+**Note**: The custom LuaLaTeX+Biber compilation (`\lb`) opens a terminal window in normal mode, 
 allowing you to scroll through output, yank error messages, and dismiss with `q` when done.
 
 ### Typst
