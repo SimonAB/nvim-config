@@ -569,7 +569,6 @@ local function compile_lualatex_with_biber()
 	if latex_compile_terminal == nil then
 		local Terminal = require("toggleterm.terminal").Terminal
 		latex_compile_terminal = Terminal:new({
-			cmd = cmd,
 			hidden = true,
 			direction = "horizontal",
 			size = 15,
@@ -595,13 +594,15 @@ local function compile_lualatex_with_biber()
 				end
 			end,
 		})
-	else
-		-- Terminal exists, update its command for the current file
-		latex_compile_terminal.cmd = cmd
 	end
 
-	-- Toggle the terminal (opens if hidden, or brings to focus if already open)
-	latex_compile_terminal:toggle()
+	-- Open the terminal if it's not visible
+	if not latex_compile_terminal:is_open() then
+		latex_compile_terminal:open()
+	end
+
+	-- Send the command to the terminal
+	latex_compile_terminal:send(cmd)
 end
 
 map("n", "<localleader>ll", "<Plug>(vimtex-compile)", { desc = "Compile" })
