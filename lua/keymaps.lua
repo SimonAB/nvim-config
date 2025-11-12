@@ -536,6 +536,9 @@ map({ 'n', 't' }, "<leader>Tt", toggle_terminal_vertical_smart, { desc = "Termin
 
 -- Custom LuaLaTeX compilation function with biber
 -- Executes: latexmk → biber → latexmk × 2
+-- Reuses the same terminal instance for all compilations
+local latex_compile_terminal = nil
+
 local function compile_lualatex_with_biber()
 	local current_file = vim.fn.expand('%:p')
 	if current_file == '' then
@@ -562,36 +565,43 @@ local function compile_lualatex_with_biber()
 
 	vim.notify("Starting LuaLaTeX compilation: latexmk → biber → latexmk × 2", vim.log.levels.INFO)
 
-	-- Execute the command in a terminal
-	local Terminal = require("toggleterm.terminal").Terminal
-	local latex_compile = Terminal:new({
-		cmd = cmd,
-		hidden = true,
-		direction = "horizontal",
-		size = 15,
-		close_on_exit = false,
-		on_open = function(term)
-			-- Exit insert mode immediately so terminal acts like a normal buffer
-			vim.cmd("stopinsert")
-			-- Set buffer-local keymaps for convenient terminal management
-			local opts = { buffer = term.bufnr, noremap = true, silent = true }
-			-- q to close the terminal buffer
-			vim.keymap.set('n', 'q', '<cmd>close<CR>', opts)
-			-- Ensure normal terminal navigation works
-			vim.keymap.set('n', '<C-h>', '<C-w>h', opts)
-			vim.keymap.set('n', '<C-j>', '<C-w>j', opts)
-			vim.keymap.set('n', '<C-k>', '<C-w>k', opts)
-			vim.keymap.set('n', '<C-l>', '<C-w>l', opts)
-		end,
-		on_exit = function(_, exit_code)
-			if exit_code == 0 then
-				vim.notify("✓ LuaLaTeX compilation complete", vim.log.levels.INFO)
-			else
-				vim.notify("✗ LuaLaTeX compilation failed with exit code " .. exit_code, vim.log.levels.ERROR)
-			end
-		end,
-	})
-	latex_compile:toggle()
+	-- Create terminal only once, reuse for subsequent compilations
+	if latex_compile_terminal == nil then
+		local Terminal = require("toggleterm.terminal").Terminal
+		latex_compile_terminal = Terminal:new({
+			cmd = cmd,
+			hidden = true,
+			direction = "horizontal",
+			size = 15,
+			close_on_exit = false,
+			on_open = function(term)
+				-- Exit insert mode immediately so terminal acts like a normal buffer
+				vim.cmd("stopinsert")
+				-- Set buffer-local keymaps for convenient terminal management
+				local opts = { buffer = term.bufnr, noremap = true, silent = true }
+				-- q to close the terminal buffer
+				vim.keymap.set('n', 'q', '<cmd>close<CR>', opts)
+				-- Ensure normal terminal navigation works
+				vim.keymap.set('n', '<C-h>', '<C-w>h', opts)
+				vim.keymap.set('n', '<C-j>', '<C-w>j', opts)
+				vim.keymap.set('n', '<C-k>', '<C-w>k', opts)
+				vim.keymap.set('n', '<C-l>', '<C-w>l', opts)
+			end,
+			on_exit = function(_, exit_code)
+				if exit_code == 0 then
+					vim.notify("✓ LuaLaTeX compilation complete", vim.log.levels.INFO)
+				else
+					vim.notify("✗ LuaLaTeX compilation failed with exit code " .. exit_code, vim.log.levels.ERROR)
+				end
+			end,
+		})
+	else
+		-- Terminal exists, update its command for the current file
+		latex_compile_terminal.cmd = cmd
+	end
+
+	-- Toggle the terminal (opens if hidden, or brings to focus if already open)
+	latex_compile_terminal:toggle()
 end
 
 map("n", "<localleader>ll", "<Plug>(vimtex-compile)", { desc = "Compile" })
