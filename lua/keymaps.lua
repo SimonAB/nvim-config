@@ -534,11 +534,71 @@ map({ 'n', 't' }, "<leader>Tt", toggle_terminal_vertical_smart, { desc = "Termin
 -- with cleaner which-key descriptions (VimTeX's plug names include brackets)
 -- These map to VimTeX's plug mappings to preserve full functionality
 
+-- Custom LuaLaTeX compilation function with biber
+-- Executes: latexmk → biber → latexmk × 2
+local function compile_lualatex_with_biber()
+	local current_file = vim.fn.expand('%:p')
+	if current_file == '' then
+		vim.notify("No file is currently open", vim.log.levels.ERROR)
+		return
+	end
+
+	-- Check if file has .tex extension
+	if vim.fn.fnamemodify(current_file, ':e') ~= 'tex' then
+		vim.notify("Current file is not a LaTeX file (.tex)", vim.log.levels.ERROR)
+		return
+	end
+
+	-- Get the directory and basename
+	local file_dir = vim.fn.fnamemodify(current_file, ':h')
+	local file_base = vim.fn.fnamemodify(current_file, ':t:r')
+
+	-- Build the compilation sequence command
+	-- Using && to chain commands so they stop on error
+	local cmd = string.format(
+		'cd "%s" && latexmk -pdf -pdflatex=lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex" && biber "%s" && latexmk -pdf -pdflatex=lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex" && latexmk -pdf -pdflatex=lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"',
+		file_dir, file_base, file_base, file_base, file_base
+	)
+
+	vim.notify("Starting LuaLaTeX compilation: latexmk → biber → latexmk × 2", vim.log.levels.INFO)
+
+	-- Execute the command in a terminal
+	local Terminal = require("toggleterm.terminal").Terminal
+	local latex_compile = Terminal:new({
+		cmd = cmd,
+		hidden = true,
+		direction = "horizontal",
+		size = 15,
+		close_on_exit = false,
+		on_open = function(term)
+			-- Exit insert mode immediately so terminal acts like a normal buffer
+			vim.cmd("stopinsert")
+			-- Set buffer-local keymaps for convenient terminal management
+			local opts = { buffer = term.bufnr, noremap = true, silent = true }
+			-- q to close the terminal buffer
+			vim.keymap.set('n', 'q', '<cmd>close<CR>', opts)
+			-- Ensure normal terminal navigation works
+			vim.keymap.set('n', '<C-h>', '<C-w>h', opts)
+			vim.keymap.set('n', '<C-j>', '<C-w>j', opts)
+			vim.keymap.set('n', '<C-k>', '<C-w>k', opts)
+			vim.keymap.set('n', '<C-l>', '<C-w>l', opts)
+		end,
+		on_exit = function(_, exit_code)
+			if exit_code == 0 then
+				vim.notify("✓ LuaLaTeX compilation complete", vim.log.levels.INFO)
+			else
+				vim.notify("✗ LuaLaTeX compilation failed with exit code " .. exit_code, vim.log.levels.ERROR)
+			end
+		end,
+	})
+	latex_compile:toggle()
+end
+
 map("n", "<localleader>ll", "<Plug>(vimtex-compile)", { desc = "Compile" })
 map("n", "<localleader>lv", "<Plug>(vimtex-view)", { desc = "View PDF" })
 map("n", "<localleader>lk", "<Plug>(vimtex-stop)", { desc = "Stop" })
 map("n", "<localleader>lK", "<Plug>(vimtex-stop-all)", { desc = "Stop all" })
-map("n", "<localleader>lc", "<Plug>(vimtex-clean)", { desc = "Clean aux" })
+map("n", "<localleader>lc", compile_lualatex_with_biber, { desc = "Compile LuaLaTeX+Biber" })
 map("n", "<localleader>lC", "<Plug>(vimtex-clean-full)", { desc = "Clean full" })
 map("n", "<localleader>le", "<Plug>(vimtex-errors)", { desc = "Errors" })
 map("n", "<localleader>lo", "<Plug>(vimtex-compile-output)", { desc = "Output" })
@@ -553,6 +613,7 @@ map("n", "<localleader>lx", "<Plug>(vimtex-reload)", { desc = "Reload" })
 map("n", "<localleader>lX", "<Plug>(vimtex-reload-state)", { desc = "Reload state" })
 map("n", "<localleader>la", "<Plug>(vimtex-context-menu)", { desc = "Context menu" })
 map("n", "<localleader>lm", "<Plug>(vimtex-imaps-list)", { desc = "Insert mode maps" })
+map("n", "<localleader>ld", "<Plug>(vimtex-clean)", { desc = "Clean aux" })
 
 -- ============================================================================
 -- TYPST KEYMAPS

@@ -86,14 +86,31 @@ K               " Show hover documentation
 ### LaTeX/VimTeX
 VimTeX provides comprehensive default keymaps (see `:help vimtex-default-mappings`):
 ```vim
-\LocalLeader\ll  " Compile LaTeX
+\LocalLeader\ll  " Compile LaTeX (standard)
+\LocalLeader\lc  " Compile with LuaLaTeX+Biber (latexmk → biber → latexmk × 2)
 \LocalLeader\lv  " View PDF (forward search)
 \LocalLeader\lk  " Stop compilation
-\LocalLeader\lc  " Clean auxiliary files
+\LocalLeader\lK  " Stop all compilations
+\LocalLeader\ld  " Clean auxiliary files
+\LocalLeader\lC  " Clean all files (including PDF)
 \LocalLeader\lt  " Open table of contents
+\LocalLeader\lT  " Toggle table of contents
 \LocalLeader\le  " Show errors
+\LocalLeader\lo  " Show compilation output
+\LocalLeader\lg  " Show status
+\LocalLeader\lG  " Show status (all)
+\LocalLeader\lq  " Show log
+\LocalLeader\li  " Show info
+\LocalLeader\lI  " Show info (full)
+\LocalLeader\lx  " Reload VimTeX
+\LocalLeader\lX  " Reload VimTeX state
+\LocalLeader\la  " Context menu
+\LocalLeader\lm  " List insert mode maps
 " And many more - see :help vimtex-default-mappings
 ```
+
+**Note**: The custom LuaLaTeX+Biber compilation (`\lc`) opens a terminal window in normal mode, 
+allowing you to scroll through output, yank error messages, and dismiss with `q` when done.
 
 ### Typst
 ```vim
