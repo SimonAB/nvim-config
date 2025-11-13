@@ -2,7 +2,7 @@
 
 [![Documentation](https://img.shields.io/badge/docs-vitepress-blue?style=flat&logo=readthedocs)](https://simonab.github.io/nvim-config/)
 
-A performance-optimised Neovim configuration for academic research, scientific computing, and document preparation. Designed for researchers requiring LaTeX, Markdown, Quarto, and Typst workflows with integrated terminal execution and LSP support.
+A Neovim configuration for academic research, scientific computing, and document preparation. Designed for researchers requiring LaTeX, Markdown, Quarto, and Typst workflows with integrated terminal execution and LSP support.
 
 ## Features
 
@@ -19,14 +19,9 @@ A performance-optimised Neovim configuration for academic research, scientific c
 
 ### Development Environment
 - **LSP**: Language server protocol for 15+ languages via Mason
-- **Completion**: Fast, intelligent completion via blink.cmp
+- **Completion**: Intelligent completion via blink.cmp
 - **Terminal**: Integrated terminal with smart code block detection
 - **Git**: GitSigns, LazyGit integration
-
-### Performance
-- **Startup**: <100ms typical (88ms measured)
-- **Plugin Loading**: Deferred initialization for non-critical plugins
-- **Caching**: Intelligent caching for dashboard and recent files
 
 ## Requirements
 
@@ -60,7 +55,7 @@ cd ~/.config/nvim
 nvim
 
 # Verify installation
-nvim --startuptime /tmp/startup.log -c quit
+nvim
 ```
 
 On first launch, plugins install automatically via vim.pack. Mason will prompt to install recommended language servers.
@@ -103,7 +98,7 @@ On first launch, plugins install automatically via vim.pack. Mason will prompt t
 | `<leader>Jp` | Project status |
 | `<leader>Ji` | Instantiate project |
 
-Julia REPLs launch with `--threads=auto` for optimal parallel performance.
+Julia REPLs launch with `--threads=auto` for parallel computing.
 
 ### Theme Management
 
@@ -169,37 +164,12 @@ Install language servers via Mason:
 <leader>MR               " Install all recommended servers
 ```
 
-## Performance Optimisation
-
-### Startup Time Analysis
-
-```bash
-nvim --startuptime /tmp/startup.log -c quit
-cat /tmp/startup.log | tail -20
-```
-
-### Plugin Load Deferral
-
-Non-critical plugins defer initialization by 50-100ms:
-- Theme manager
-- Plugin update notifications
-- Dashboard configuration
-
-### Caching Strategy
-
-- Dashboard content: 5-minute cache
-- Recent files: Loaded immediately on startup
-- File system operations: Minimal, cached where possible
-
-See [Performance Optimisations](docs/PERFORMANCE_OPTIMISATIONS.md) for detailed analysis.
-
 ## Documentation
 
 - [Installation Guide](docs/INSTALLATION_GUIDE.md) - Complete setup instructions
 - [Quick Start](docs/quickstart.md) - Get started in 5 minutes
 - [Keymaps Reference](docs/reference/keymaps.md) - Complete keymap documentation
 - [Troubleshooting](docs/TROUBLESHOOTING_GUIDE.md) - Common issues and solutions
-- [Performance](docs/PERFORMANCE_OPTIMISATIONS.md) - Performance analysis and optimisation
 
 ## Troubleshooting
 
@@ -212,17 +182,6 @@ See [Performance Optimisations](docs/PERFORMANCE_OPTIMISATIONS.md) for detailed 
 <leader>Lr            " Restart LSP
 ```
 
-### Performance Issues
-
-```bash
-# Profile startup
-nvim --startuptime /tmp/startup.log -c quit
-
-# Check slow plugins
-:profile start profile.log
-:profile func *
-:profile file *
-```
 
 ### LaTeX SyncTeX
 
@@ -243,11 +202,10 @@ See [CHANGELOG](docs/CHANGELOG.md) for complete version history.
 
 This configuration prioritises:
 
-1. **Performance**: Fast startup, efficient plugin loading
-2. **Discoverability**: Which-key integration for keymap discovery
-3. **Consistency**: British spelling, logical keymap organisation
-4. **Research Workflows**: Optimised for academic document preparation and scientific computing
-5. **Maintainability**: Clean, documented code with modular architecture
+1. **Discoverability**: Which-key integration for keymap discovery
+2. **Consistency**: British spelling, logical keymap organisation
+3. **Research Workflows**: Configured for academic document preparation and scientific computing
+4. **Maintainability**: Clean, documented code with modular architecture
 
 ## License
 
@@ -255,4 +213,4 @@ This configuration is provided as-is for educational and personal use.
 
 ---
 
-**Note**: Optimised for Neovim 0.12+ with vim.pack. For older versions, consider lazy.nvim or packer.nvim instead.
+**Note**: Configured for Neovim 0.12+ with vim.pack. For older versions, consider lazy.nvim or packer.nvim instead.

@@ -94,7 +94,7 @@ nvim
 # Expected behaviour:
 # 1. vim.pack clones plugins from GitHub (~2-3 minutes)
 # 2. blink.cmp compiles (~30 seconds)
-# 3. Dashboard appears with startup time
+# 3. Dashboard appears
 ```
 
 If plugins don't install automatically:
@@ -382,16 +382,6 @@ Expected: List of installed plugins
 <Space>Ll          " List active LSP servers
 ```
 
-### Performance Check
-
-```bash
-# Measure startup time
-nvim --startuptime /tmp/startup.log -c quit
-tail -20 /tmp/startup.log
-```
-
-Expected startup time: 80-100ms
-
 ## Troubleshooting
 
 ### Plugins Not Installing
@@ -461,22 +451,6 @@ cargo build --release
 
 # Check debug log
 tail -f /tmp/inverse_search.log
-```
-
-### Performance Issues
-
-**Symptom**: Slow startup or laggy editing
-
-**Solution**:
-```bash
-# Profile startup
-nvim --startuptime /tmp/startup.log -c quit
-cat /tmp/startup.log | grep -v "^---" | sort -k2 -n | tail -20
-
-# Identify slow plugins
-nvim -c "profile start profile.log" -c "profile func *" -c "profile file *"
-# Use Neovim normally, then quit
-# Check profile.log for slow functions
 ```
 
 ### Terminal Emulator Issues
@@ -570,7 +544,7 @@ Standard installation. Ensure Homebrew is installed for x86_64 architecture.
 
 ### Linux Support
 
-This configuration is optimised for macOS but should work on Linux with modifications:
+This configuration is configured for macOS but should work on Linux with modifications:
 - Replace Skim with Zathura or Okular for LaTeX preview
 - Adjust paths in shell scripts
 - Install tools via apt/dnf instead of brew

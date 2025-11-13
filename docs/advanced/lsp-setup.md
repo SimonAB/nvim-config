@@ -4,7 +4,7 @@ Complete guide to configuring Language Server Protocol support for academic work
 
 ## Overview
 
-This configuration uses Mason for automatic LSP server management with optimised settings for research and document preparation workflows.
+This configuration uses Mason for automatic LSP server management with settings configured for research and document preparation workflows.
 
 ## Automatic Setup
 
@@ -140,28 +140,23 @@ settings = {
 
 ## LSP Keybindings
 
-### Navigation
+### Navigation (Built-in Neovim LSP)
 ```vim
 gd          " Go to definition
 gD          " Go to declaration
-gi          " Go to implementation
-gr          " Show references
+K           " Show hover documentation
 ```
 
-### Actions
+### Custom LSP Actions
 ```vim
 <Space>Lf   " Format document
-<Space>Lr   " Show references
-<Space>Lca  " Code actions
-<Space>Lrn  " Rename symbol
+<Space>LR   " Show references
+<Space>Lr   " Restart LSP
+<Space>Ll   " List active LSP servers
+<Space>Lm   " Open Mason
 ```
 
-### Information
-```vim
-K           " Show hover information
-<Space>Ls   " Show signature help
-<Space>Ld   " Show diagnostics
-```
+**Note**: Additional LSP keymaps (code actions, rename, signature help, etc.) are available through Neovim's built-in LSP functionality. Use `:help lsp` for complete LSP keymap reference.
 
 ## Troubleshooting
 
@@ -181,23 +176,6 @@ K           " Show hover information
 3. **Check Logs:**
    ```vim
    :LspLog
-   ```
-
-### Performance Issues
-
-1. **Disable Heavy Features:**
-   ```lua
-   -- In server config
-   settings = {
-     -- Disable expensive features
-     diagnosticsDelay = 1000,  -- Increase delay
-   }
-   ```
-
-2. **Limit File Types:**
-   ```lua
-   -- Only enable for specific filetypes
-   filetypes = { "python", "lua" }
    ```
 
 ### Manual Configuration
@@ -256,13 +234,6 @@ lspconfig.pyright.setup({
   end,
 })
 ```
-
-## Performance Tips
-
-1. **Use Appropriate Servers**: Choose lightweight servers for large projects
-2. **Configure Debouncing**: Increase diagnostic delays for slow systems
-3. **Limit File Types**: Only enable LSP for relevant file types
-4. **Use Workspace Mode**: Prefer workspace diagnostics over file diagnostics
 
 ## Integration with Other Tools
 

@@ -1,6 +1,6 @@
 # Keymaps Reference
 
-Complete reference of all keybindings in StellarVIM, organized by functionality.
+Complete reference of all keybindings in Neovim Research Configuration, organized by functionality.
 
 ## Leader Keys
 
@@ -177,7 +177,7 @@ allowing you to scroll through output, yank error messages, and dismiss with `q`
 <Leader>Ot      " Insert Obsidian template
 <Leader>ON      " New note from template
 <Leader>Op      " Paste image into note
-<Leader>Ox      " Toggle checkbox (quick access)
+<Leader>Ov      " Toggle Obsidian preview
 ```
 
 ## Terminal Integration
@@ -264,10 +264,9 @@ allowing you to scroll through output, yank error messages, and dismiss with `q`
 ## Plugin Management
 
 ```vim
-<Leader>Pi      " Install plugins
-<Leader>Pu      " Update plugins
-<Leader>Pc      " Compile plugins
-<Leader>Ps      " Sync plugins (install + update + compile)
+<Leader>CUa     " Update all plugins
+<Leader>CUs     " Show plugin status
+<Leader>CUc     " Cleanup orphaned plugins
 ```
 
 ## Editor Basics
@@ -310,7 +309,6 @@ N               " Previous match
 ## Quick Access
 
 ```vim
-<Leader>x       " Toggle checkbox (Obsidian quick access)
 <Leader>q       " Close buffer (quick access)
 ```
 

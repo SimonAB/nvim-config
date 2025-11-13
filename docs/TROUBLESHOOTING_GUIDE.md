@@ -80,18 +80,6 @@
 - Check if your terminal supports icons
 - Verify font supports the required glyphs
 
-### Performance Issues
-
-#### Slow startup
-- Check which plugins are loading: `:profile start profile.log` then `:profile func *` and `:profile file *`
-- Use `<leader>Cs` to reload configuration
-- Check for plugin conflicts in `:messages`
-
-#### High memory usage
-- Monitor plugin memory usage with `:lua print(vim.inspect(vim.lsp.get_active_clients()))`
-- Check for memory leaks in long-running sessions
-- Restart Neovim periodically for long editing sessions
-
 ### Debugging Commands
 
 #### General Debugging

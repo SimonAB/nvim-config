@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: Neovim Research Configuration
-  text: Performance-Optimised for Academic Workflows
+  text: Configured for Academic Workflows
   tagline: LaTeX, Markdown, Quarto, Typst with integrated terminal and LSP support
   actions:
     - theme: brand
@@ -26,8 +26,8 @@ features:
     details: Julia REPL with multi-threading, Python with pyright LSP, R support, and integrated terminal with smart code execution.
 
   - icon: ⚡
-    title: High Performance
-    details: 88ms startup time, deferred plugin loading, intelligent caching, and optimised for research workflows.
+    title: Efficient Workflow
+    details: Deferred plugin loading, intelligent caching, and configured for research workflows.
 
   - icon: 🔧
     title: LSP Support
@@ -38,7 +38,7 @@ features:
     details: Multiple themes with auto dark mode, Telescope fuzzy finding, WhichKey for discoverability, and NvimTree file explorer.
 
   - icon: 📚
-    title: Research Optimised
+    title: Research Focused
     details: Obsidian vault integration, bibliography management, code block detection, and academic workflow keymaps.
 ---
 
@@ -63,12 +63,6 @@ features:
 <Leader>Jp        # Project status
 <Leader>Ji        # Instantiate project
 ```
-
-## Performance Metrics
-
-- **Startup Time**: 88ms (16% improvement from 105ms)
-- **Plugin Loading**: 63ms (20% improvement from 79ms)
-- **Core Configuration**: 2ms (92% improvement from 26ms)
 
 ## Requirements
 
@@ -100,7 +94,7 @@ cd ~/.config/nvim
 nvim
 
 # Verify installation
-nvim --startuptime /tmp/startup.log -c quit
+nvim
 ```
 
 See the [Installation Guide](/INSTALLATION_GUIDE) for complete setup instructions.
@@ -140,11 +134,10 @@ Beautiful theme system with live preview:
 
 This configuration prioritises:
 
-1. **Performance**: Fast startup, efficient plugin loading
-2. **Discoverability**: WhichKey integration for keymap discovery
-3. **Consistency**: British spelling, logical keymap organisation
-4. **Research Workflows**: Optimised for academic document preparation
-5. **Maintainability**: Clean, documented code with modular architecture
+1. **Discoverability**: WhichKey integration for keymap discovery
+2. **Consistency**: British spelling, logical keymap organisation
+3. **Research Workflows**: Configured for academic document preparation
+4. **Maintainability**: Clean, documented code with modular architecture
 
 ## Next Steps
 

@@ -71,7 +71,7 @@ nvim
 1. vim.pack clones and installs all plugins (~2 minutes)
 2. System theme detected and applied automatically
 3. Mason prompts to install recommended language servers
-4. Dashboard displays recent files and startup time
+4. Dashboard displays recent files
 
 ## Essential Keymaps
 
@@ -254,28 +254,6 @@ Pkg.add("LanguageServer")
 <Space>Jt            " Run tests
 ```
 
-## Performance Verification
-
-### Check Startup Time
-
-```bash
-nvim --startuptime /tmp/startup.log -c quit
-tail -20 /tmp/startup.log
-```
-
-Expected startup time: 80-100ms
-
-### Profile Slow Operations
-
-```vim
-:profile start profile.log
-:profile func *
-:profile file *
-" Perform operations to profile
-:profile pause
-:noautocmd qall!
-```
-
 ## Troubleshooting
 
 ### Plugins Not Loading
@@ -317,19 +295,6 @@ ls ~/.config/nvim/scripts/skim_inverse_search.sh
 tail -f /tmp/inverse_search.log
 ```
 
-### Slow Startup
-
-Common causes:
-1. Too many language servers enabled
-2. Large dashboard file history
-3. Heavy plugins loading immediately
-
-Solutions:
-```vim
-<Space>MS            " Check Mason status
-<Space>Cs            " Reload configuration
-```
-
 ## Discovering Features
 
 ### Which-Key Integration
@@ -349,7 +314,6 @@ Press `<Space>` and wait 500ms to see all available commands grouped by function
 ### Search Keymaps
 
 ```vim
-<Space>Sk            " Search keymaps (Telescope)
 :WhichKey            " Show all keymaps
 :WhichKey <Space>    " Show leader keymaps
 ```
@@ -384,22 +348,11 @@ local essential_plugins = {
 }
 ```
 
-### Performance Tuning
-
-Edit `init.lua` to adjust deferred loading times:
-
-```lua
-vim.defer_fn(function()
-    require("core.theme-manager")
-end, 50)  -- Adjust delay in milliseconds
-```
-
 ## Resources
 
 - [Complete Keymaps Reference](reference/keymaps.md)
 - [Installation Guide](INSTALLATION_GUIDE.md)
 - [Troubleshooting Guide](TROUBLESHOOTING_GUIDE.md)
-- [Performance Optimisations](PERFORMANCE_OPTIMISATIONS.md)
 
 ---
 
