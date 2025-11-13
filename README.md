@@ -1,27 +1,27 @@
-# Neovim Research Configuration
+# BabaVim
 
 [![Documentation](https://img.shields.io/badge/docs-vitepress-blue?style=flat&logo=readthedocs)](https://simonab.github.io/nvim-config/)
 
-A Neovim configuration for academic research, scientific computing, and document preparation. Designed for researchers requiring LaTeX, Markdown, Quarto, and Typst workflows with integrated terminal execution and LSP support.
+Neovim configuration optimised for academic research and scientific computing. Document processing: LaTeX (VimTeX, SyncTeX), Markdown (preview, Obsidian), Quarto (R/Python/Julia execution), Typst (preview). Scientific computing: Julia REPL (multi-threaded), Python LSP (pyright), R execution. Development: LSP (15+ languages via Mason), completion (blink.cmp), terminal integration, Git integration. Modular architecture. vim.pack plugin management. Neovim 0.12+ required.
 
 ## Features
 
 ### Document Processing
-- **LaTeX**: VimTeX with bidirectional SyncTeX (Skim integration)
-- **Markdown**: Live preview with Obsidian vault integration
-- **Quarto**: Document processing with code execution (R, Python, Julia)
-- **Typst**: Modern typesetting with live preview
+- LaTeX: VimTeX, bidirectional SyncTeX (Skim)
+- Markdown: Live preview, Obsidian integration
+- Quarto: Code execution (R, Python, Julia)
+- Typst: Live preview
 
 ### Scientific Computing
-- **Julia**: Comprehensive REPL integration with multi-threaded execution
-- **Python**: Full LSP support with pyright
-- **R**: Code execution and project management
+- Julia: REPL integration, multi-threaded execution
+- Python: LSP (pyright)
+- R: Code execution, project management
 
 ### Development Environment
-- **LSP**: Language server protocol for 15+ languages via Mason
-- **Completion**: Intelligent completion via blink.cmp
-- **Terminal**: Integrated terminal with smart code block detection
-- **Git**: GitSigns, LazyGit integration
+- LSP: 15+ languages (Mason)
+- Completion: blink.cmp
+- Terminal: Code block detection
+- Git: GitSigns, LazyGit
 
 ## Requirements
 
@@ -42,7 +42,7 @@ A Neovim configuration for academic research, scientific computing, and document
 - **Python**: Python 3.8+ with pyright LSP
 - **R**: R 4.0+ with languageserver package
 
-See [Installation Guide](docs/INSTALLATION_GUIDE.md) for complete setup instructions.
+See [Installation Guide](docs/INSTALLATION_GUIDE.md).
 
 ## Installation
 
@@ -58,11 +58,11 @@ nvim
 nvim
 ```
 
-On first launch, plugins install automatically via vim.pack. Mason will prompt to install recommended language servers.
+Plugins install automatically on first launch (vim.pack). Mason prompts for language server installation.
 
 ## Quick Reference
 
-### Leader Key: `<Space>`
+### Leader: `<Space>`
 
 | Key | Action |
 |-----|--------|
@@ -76,7 +76,7 @@ On first launch, plugins install automatically via vim.pack. Mason will prompt t
 | Key | Action |
 |-----|--------|
 | `<C-t>` | Toggle terminal |
-| `<leader>Tt` | Smart terminal toggle (vertical) |
+| `<leader>Tt` | Terminal toggle (vertical) |
 | `<leader>Th/Tv/Tf` | Horizontal/Vertical/Float terminal |
 | `<C-i>` | Send line to terminal |
 | `<C-c>` | Send code block to terminal |
@@ -108,7 +108,7 @@ Julia REPLs launch with `--threads=auto` for parallel computing.
 | `<leader>YTp` | Theme picker (Telescope) |
 | `<leader>YTs` | Show current theme |
 
-See [Keymaps Reference](docs/reference/keymaps.md) for complete keymap documentation.
+See [Keymaps Reference](docs/reference/keymaps.md).
 
 ## Configuration Structure
 
@@ -166,10 +166,10 @@ Install language servers via Mason:
 
 ## Documentation
 
-- [Installation Guide](docs/INSTALLATION_GUIDE.md) - Complete setup instructions
-- [Quick Start](docs/quickstart.md) - Get started in 5 minutes
-- [Keymaps Reference](docs/reference/keymaps.md) - Complete keymap documentation
-- [Troubleshooting](docs/TROUBLESHOOTING_GUIDE.md) - Common issues and solutions
+- [Installation Guide](docs/INSTALLATION_GUIDE.md)
+- [Quick Start](docs/quickstart.md)
+- [Keymaps Reference](docs/reference/keymaps.md)
+- [Troubleshooting](docs/TROUBLESHOOTING_GUIDE.md)
 
 ## Troubleshooting
 
@@ -191,26 +191,22 @@ Install language servers via Mason:
 
 ## Recent Changes
 
-- **Terminal Mappings**: Changed from `<leader>T[1,2,3]` to `<leader>T[h,v,f]` for consistency with Julia REPL patterns
-- **Julia REPL**: Added `--threads=auto` for automatic multi-threading
-- **File Formatting**: Enforces single newline at end of file on save
-- **Obsidian**: `<leader>Op` pastes image and adds two newlines
+- Terminal mappings: `<leader>T[1,2,3]` → `<leader>T[h,v,f]` (consistency with Julia REPL)
+- Julia REPL: `--threads=auto` enabled
+- File formatting: Single newline at end of file on save
+- Obsidian: `<leader>Op` pastes image, adds two newlines
 
 See [CHANGELOG](docs/CHANGELOG.md) for complete version history.
 
-## Philosophy
+## Design Principles
 
-This configuration prioritises:
-
-1. **Discoverability**: Which-key integration for keymap discovery
-2. **Consistency**: British spelling, logical keymap organisation
-3. **Research Workflows**: Configured for academic document preparation and scientific computing
-4. **Maintainability**: Clean, documented code with modular architecture
+1. Discoverability: Which-key integration
+2. Consistency: British spelling, logical keymap organisation
+3. Research workflows: Academic document preparation, scientific computing
+4. Maintainability: Modular architecture, documented code
 
 ## License
 
-This configuration is provided as-is for educational and personal use.
+Provided as-is for educational and personal use.
 
----
-
-**Note**: Configured for Neovim 0.12+ with vim.pack. For older versions, consider lazy.nvim or packer.nvim instead.
+**Note**: Requires Neovim 0.12+ (vim.pack). Older versions: use lazy.nvim or packer.nvim.
