@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'Neovim Research Configuration',
+  title: 'BabaVim',
   description: 'Neovim configuration for academic research, scientific computing, and document preparation',
   base: '/nvim-config/',
   
@@ -41,7 +41,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Neovim Research Configuration'
+      copyright: 'BabaVim'
     }
   },
 

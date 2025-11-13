@@ -1,11 +1,11 @@
 # Keymaps Reference
 
-Complete reference of all keybindings in Neovim Research Configuration, organized by functionality.
+Complete keybinding reference for BabaVim, organised by functionality.
 
 ## Leader Keys
 
-- **Primary Leader**: `<Space>`
-- **Local Leader**: `\` (for document-specific commands)
+- Primary Leader: `<Space>`
+- Local Leader: `\` (document-specific commands)
 
 ## Navigation
 
@@ -374,4 +374,4 @@ vim.keymap.set("n", "<leader>f", ":MyCustomFinder<CR>", {
 
 ---
 
-💡 **Tip**: Use Which-Key's discoverability features! Press `<Space>` and explore the command tree to learn available keymaps.
+Press `<Space>` to view available keymaps via Which-Key.

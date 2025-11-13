@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Complete Neovim setup for research workflows in under 10 minutes.
+BabaVim: Neovim setup for research workflows.
 
 ## Prerequisites
 
@@ -18,16 +18,16 @@ See https://brew.sh/ for more information.
 ### Essential Tools
 
 ```bash
-# Neovim 0.12+ (latest stable recommended)
+# Neovim 0.12+
 brew install neovim
 
-# Essential utilities for fuzzy finding
+# Fuzzy finding utilities
 brew install ripgrep fd
 
 # Git interface
 brew install lazygit
 
-# Node.js (for language servers and markdown preview)
+# Node.js (language servers, markdown preview)
 brew install node
 ```
 
@@ -66,11 +66,11 @@ cd ~/.config/nvim
 nvim
 ```
 
-**What happens on first launch:**
+**First launch sequence:**
 
-1. vim.pack clones and installs all plugins (~2 minutes)
-2. System theme detected and applied automatically
-3. Mason prompts to install recommended language servers
+1. vim.pack installs plugins (~2 minutes)
+2. System theme detected and applied
+3. Mason prompts for language server installation
 4. Dashboard displays recent files
 
 ## Essential Keymaps
@@ -90,7 +90,7 @@ nvim
 
 ```vim
 <Ctrl-t>             " Toggle terminal
-<Space>Tt            " Smart terminal toggle (vertical)
+<Space>Tt            " Terminal toggle (vertical)
 <Space>Th            " Horizontal terminal
 <Space>Tv            " Vertical terminal
 <Space>Tf            " Floating terminal
@@ -142,7 +142,7 @@ K                    " Show documentation
 <Space>Jt            " Run tests
 ```
 
-Julia REPLs launch with `--threads=auto` for automatic multi-threading support.
+Julia REPLs: `--threads=auto`
 
 ## Configuration
 
@@ -154,7 +154,7 @@ Julia REPLs launch with `--threads=auto` for automatic multi-threading support.
 <Space>YTs           " Show current theme
 ```
 
-Available themes include Catppuccin, OneDark, Tokyo Night, Nord, and GitHub Dark/Light.
+Themes: Catppuccin, OneDark, Tokyo Night, Nord, GitHub Dark/Light.
 
 ### Language Server Installation
 
@@ -166,7 +166,7 @@ Available themes include Catppuccin, OneDark, Tokyo Night, Nord, and GitHub Dark
 :Mason               " Open Mason interface
 ```
 
-Recommended servers for academic workflows:
+Academic workflow servers:
 - **LaTeX**: texlab
 - **Python**: pyright, ruff-lsp
 - **R**: r-languageserver
@@ -295,11 +295,11 @@ ls ~/.config/nvim/scripts/skim_inverse_search.sh
 tail -f /tmp/inverse_search.log
 ```
 
-## Discovering Features
+## Feature Discovery
 
 ### Which-Key Integration
 
-Press `<Space>` and wait 500ms to see all available commands grouped by functionality:
+Press `<Space>` (500ms delay) to view commands grouped by functionality:
 
 - **B**: Buffer operations
 - **C**: Configuration management
@@ -320,15 +320,15 @@ Press `<Space>` and wait 500ms to see all available commands grouped by function
 
 ## Next Steps
 
-1. **Install Language Servers**: `<Space>MA` for academic servers
-2. **Configure Theme**: `<Space>YTp` to browse and select theme
-3. **Setup LaTeX**: Configure Skim for bidirectional sync
-4. **Customise**: Add personal keymaps to `lua/keymaps.lua`
-5. **Explore**: Press `<Space>` and explore command groups
+1. Install language servers: `<Space>MA`
+2. Configure theme: `<Space>YTp`
+3. Setup LaTeX: Configure Skim for bidirectional sync
+4. Customise: Add keymaps to `lua/keymaps.lua`
+5. Explore: Press `<Space>` to view command groups
 
 ## Advanced Usage
 
-### Creating Custom Keymaps
+### Custom Keymaps
 
 Add to `lua/keymaps.lua`:
 
@@ -356,4 +356,4 @@ local essential_plugins = {
 
 ---
 
-**Tip**: This configuration is designed for discoverability. Press `<Space>` and explore the command tree to learn available functionality.
+Press `<Space>` to view available commands.

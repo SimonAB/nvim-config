@@ -1,6 +1,6 @@
-# Troubleshooting Guide for Neovim Configuration
+# Troubleshooting Guide
 
-## Common Issues and Solutions
+Common issues and solutions.
 
 ### LaTeX Inverse Search Issues
 

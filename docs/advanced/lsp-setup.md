@@ -1,14 +1,14 @@
 # LSP Setup Guide
 
-Complete guide to configuring Language Server Protocol support for academic workflows.
+Language Server Protocol configuration for academic workflows.
 
 ## Overview
 
-This configuration uses Mason for automatic LSP server management with settings configured for research and document preparation workflows.
+Mason manages LSP servers. Settings configured for research and document preparation workflows.
 
 ## Automatic Setup
 
-### Quick Install Commands
+### Installation Commands
 
 ```vim
 :lua require("plugins.mason-enhanced").install_academic_servers()

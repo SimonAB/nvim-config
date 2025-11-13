@@ -1,19 +1,19 @@
 # Installation Guide
 
-Complete installation instructions for Neovim research configuration on macOS.
+Installation instructions for BabaVim on macOS.
 
 ## System Requirements
 
 - **Operating System**: macOS 10.15+ (tested on macOS 13+)
 - **Neovim**: 0.12 or later (required for vim.pack plugin management)
-- **Terminal**: [Ghostty](https://github.com/ghostty-org/ghostty), [iTerm2](https://iterm2.com/), or [Warp](https://www.warp.dev/) recommended (256-colour support and better font rendering)
-- **Internet Connection**: Required for initial plugin installation
+- **Terminal**: [Ghostty](https://github.com/ghostty-org/ghostty), [iTerm2](https://iterm2.com/), or [Warp](https://www.warp.dev/) (256-colour support)
+- **Internet Connection**: Required for plugin installation
 
 ## Prerequisites
 
 ### Homebrew Package Manager
 
-This guide uses Homebrew to install dependencies. If you don't have Homebrew installed:
+Install dependencies via Homebrew. If Homebrew is not installed:
 
 ```bash
 # Install Homebrew (if not already installed)
@@ -23,9 +23,9 @@ This guide uses Homebrew to install dependencies. If you don't have Homebrew ins
 brew --version
 ```
 
-**Homebrew website**: https://brew.sh/
+Homebrew: https://brew.sh/
 
-After installation, follow the on-screen instructions to add Homebrew to your PATH.
+Add Homebrew to PATH per installation instructions.
 
 ## Core Dependencies
 
@@ -38,7 +38,7 @@ brew install neovim
 # Verify version
 nvim --version  # Must show 0.12.0 or later
 
-# Alternative: Build from source
+# Build from source (alternative)
 git clone https://github.com/neovim/neovim
 cd neovim
 make CMAKE_BUILD_TYPE=Release
@@ -110,7 +110,7 @@ If plugins don't install automatically:
 # Full TeX distribution (3.5 GB)
 brew install --cask mactex
 
-# Lightweight alternative (100 MB, requires manual package installation)
+# BasicTeX (100 MB, manual package installation required)
 brew install --cask basictex
 
 # PDF viewer with SyncTeX support
@@ -483,7 +483,7 @@ brew install --cask font-hack-nerd-font
 3. Advanced tab → Set "Declare terminal as:" to `xterm-256color`
 4. Text tab → Install a Nerd Font for proper icon display
 
-Note: iTerm2, Warp, or Ghostty are strongly recommended for better font rendering and icon support.
+Recommended terminals: iTerm2, Warp, Ghostty (better font rendering, icon support).
 
 ## Updating
 
@@ -553,14 +553,12 @@ This configuration is configured for macOS but should work on Linux with modific
 
 After installation:
 
-1. **Configure Language Servers**: `<Space>MA`
-2. **Select Theme**: `<Space>YTp`
-3. **Test LaTeX Workflow**: Compile a test document
-4. **Customise Keymaps**: Add personal mappings to `lua/keymaps.lua`
-5. **Read Documentation**: Review keymaps reference and troubleshooting guide
+1. Configure language servers: `<Space>MA`
+2. Select theme: `<Space>YTp`
+3. Test LaTeX workflow: Compile test document
+4. Customise keymaps: Add mappings to `lua/keymaps.lua`
+5. Review documentation: Keymaps reference, troubleshooting guide
 
 ---
 
-For detailed usage instructions, see [Quick Start Guide](quickstart.md).
-
-For keymap reference, see [Keymaps Reference](reference/keymaps.md).
+See [Quick Start Guide](quickstart.md) and [Keymaps Reference](reference/keymaps.md).

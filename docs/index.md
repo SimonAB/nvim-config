@@ -2,9 +2,9 @@
 layout: home
 
 hero:
-  name: Neovim Research Configuration
-  text: Configured for Academic Workflows
-  tagline: LaTeX, Markdown, Quarto, Typst with integrated terminal and LSP support
+  name: BabaVim
+  text: Neovim Configuration for Academic Workflows
+  tagline: LaTeX, Markdown, Quarto, Typst. Terminal integration. LSP support.
   actions:
     - theme: brand
       text: Quick Start
@@ -19,35 +19,35 @@ hero:
 features:
   - icon: 📄
     title: Document Processing
-    details: LaTeX with VimTeX and SyncTeX, Markdown with live preview, Quarto for reproducible research, and Typst for modern typesetting.
+    details: LaTeX (VimTeX, SyncTeX), Markdown (live preview), Quarto, Typst.
 
   - icon: 🧪
     title: Scientific Computing
-    details: Julia REPL with multi-threading, Python with pyright LSP, R support, and integrated terminal with smart code execution.
+    details: Julia REPL (multi-threaded), Python (pyright LSP), R. Terminal code execution.
 
   - icon: ⚡
-    title: Efficient Workflow
-    details: Deferred plugin loading, intelligent caching, and configured for research workflows.
+    title: Architecture
+    details: Deferred plugin loading. Caching. Research workflow configuration.
 
   - icon: 🔧
     title: LSP Support
-    details: Language servers for 15+ languages via Mason, intelligent completion with blink.cmp, and comprehensive diagnostics.
+    details: 15+ languages via Mason. Completion (blink.cmp). Diagnostics.
 
   - icon: 🎨
-    title: Modern Interface
-    details: Multiple themes with auto dark mode, Telescope fuzzy finding, WhichKey for discoverability, and NvimTree file explorer.
+    title: Interface
+    details: Multiple themes. Auto dark mode. Telescope. WhichKey. NvimTree.
 
   - icon: 📚
-    title: Research Focused
-    details: Obsidian vault integration, bibliography management, code block detection, and academic workflow keymaps.
+    title: Research Tools
+    details: Obsidian integration. Bibliography management. Code block detection. Academic keymaps.
 ---
 
-## Quick Example
+## Keymap Examples
 
 ```vim
 # Terminal Integration
 <C-t>             # Toggle terminal
-<Leader>Tt        # Smart terminal toggle (vertical)
+<Leader>Tt        # Terminal toggle (vertical)
 <Leader>Th/Tv/Tf  # Horizontal/Vertical/Float terminal
 <C-i>             # Send line to terminal
 <C-c>             # Send code block to terminal
@@ -97,55 +97,48 @@ nvim
 nvim
 ```
 
-See the [Installation Guide](/INSTALLATION_GUIDE) for complete setup instructions.
+See [Installation Guide](/INSTALLATION_GUIDE).
 
-## Key Features
+## Components
 
 ### Terminal Integration
 
-Smart terminal with code block detection and execution:
-- Toggle terminal with `<C-t>` or `<Leader>Tt`
-- Send lines, blocks, or selections to terminal
-- Multiple terminal layouts (horizontal, vertical, float)
-- Julia REPL with `--threads=auto` for parallel computing
+Terminal with code block detection:
+- Toggle: `<C-t>`, `<Leader>Tt`
+- Send line/block/selection to terminal
+- Layouts: horizontal, vertical, float
+- Julia REPL: `--threads=auto`
 
 ### Document Workflows
 
-Complete LaTeX workflow with bidirectional SyncTeX:
+LaTeX: bidirectional SyncTeX
 - Forward search: Neovim → PDF (`\lv`)
-- Inverse search: PDF → Neovim (Cmd+Shift+Click in Skim)
-- Automatic compilation with latexmk
+- Inverse search: PDF → Neovim (Skim: Cmd+Shift+Click)
+- Compilation: latexmk
 - Bibliography management
 
-Quarto integration for reproducible research:
-- Live preview with code execution
-- Support for R, Python, Julia code blocks
-- Render to PDF, HTML, or Word
+Quarto: code execution, preview
+- R, Python, Julia code blocks
+- Output: PDF, HTML, Word
 
 ### Theme Management
 
-Beautiful theme system with live preview:
-- `<Leader>YTp` - Theme picker with Telescope
-- `<Leader>Yc` - Cycle through themes
-- Auto dark mode based on system preference
+Theme selection and preview:
+- `<Leader>YTp`: Theme picker (Telescope)
+- `<Leader>Yc`: Cycle themes
+- Auto dark mode (system preference)
 - Themes: Catppuccin, OneDark, Tokyo Night, Nord, GitHub
 
-## Philosophy
+## Design Principles
 
-This configuration prioritises:
+1. Discoverability: WhichKey integration
+2. Consistency: British spelling, logical keymap organisation
+3. Research workflows: Academic document preparation
+4. Maintainability: Modular architecture, documented code
 
-1. **Discoverability**: WhichKey integration for keymap discovery
-2. **Consistency**: British spelling, logical keymap organisation
-3. **Research Workflows**: Configured for academic document preparation
-4. **Maintainability**: Clean, documented code with modular architecture
+## Documentation
 
-## Next Steps
-
-<div class="vp-doc">
-
-1. **[Quick Start](/quickstart)** - Get started in 10 minutes
-2. **[Installation Guide](/INSTALLATION_GUIDE)** - Complete setup instructions
-3. **[Keymaps Reference](/reference/keymaps)** - All available keymaps
-4. **[LSP Setup](/advanced/lsp-setup)** - Language server configuration
-
-</div>
+1. [Quick Start](/quickstart)
+2. [Installation Guide](/INSTALLATION_GUIDE)
+3. [Keymaps Reference](/reference/keymaps)
+4. [LSP Setup](/advanced/lsp-setup)
