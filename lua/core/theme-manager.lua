@@ -7,6 +7,14 @@ local ThemeManager = {}
 local highlight_cache = {}
 local formatting_cache = {}
 local ThemePicker = nil -- Lazy load to avoid circular dependencies
+local ThemeSettings = require("core.theme-settings")
+
+---Ensure floating highlight groups stay transparent after theme changes.
+local function ensure_transparent_highlights()
+	for _, group in ipairs(ThemeSettings.get_float_highlight_groups()) do
+		pcall(vim.api.nvim_set_hl, 0, group, { bg = "none" })
+	end
+end
 
 -- Detect system appearance with caching
 local system_theme_cache = nil
@@ -82,10 +90,19 @@ function ThemeManager.apply_formatting_parity()
   formatting_cache[theme] = true
 end
 
+---Apply the configured UI opacity across Neovim.
+function ThemeManager.apply_global_opacity()
+	local blend = ThemeSettings.get_winblend()
+	vim.o.winblend = blend
+	vim.o.pumblend = blend
+	ensure_transparent_highlights()
+	ThemeSettings.apply_all_window_blends()
+end
+
 -- Get theme for current system appearance
 function ThemeManager.get_active_theme()
     local appearance = ThemeManager.detect_system_theme()
-    return appearance == "dark" and "gruvbox" or "github_light_default"
+    return ThemeSettings.get_default_theme(appearance)
 end
 
 -- Load and apply theme immediately (no defer)
@@ -245,9 +262,25 @@ function ThemeManager.setup_highlight_autocmd()
         ThemeManager.update_which_key_highlights()
         ThemeManager.apply_formatting_parity()
         ThemeManager.apply_spell_undercurl()
+        ThemeManager.apply_global_opacity()
       end, 50)
     end,
   })
+end
+
+---Keep opacity synced when new windows appear.
+function ThemeManager.setup_opacity_autocmds()
+	local group = vim.api.nvim_create_augroup("ThemeManagerOpacity", { clear = true })
+	vim.api.nvim_create_autocmd({ "WinNew", "WinEnter", "BufWinEnter", "TermOpen" }, {
+		group = group,
+		callback = function(event)
+			if event and event.win and vim.api.nvim_win_is_valid(event.win) then
+				ThemeSettings.apply_window_blend(event.win)
+			else
+				ThemeSettings.apply_all_window_blends()
+			end
+		end,
+	})
 end
 
 -- Main initialization function
@@ -260,9 +293,11 @@ function ThemeManager.init()
 
 	-- Setup highlight management
 	ThemeManager.setup_highlight_autocmd()
+  ThemeManager.setup_opacity_autocmds()
 	ThemeManager.update_which_key_highlights()
   ThemeManager.apply_formatting_parity()
   ThemeManager.apply_spell_undercurl()
+  ThemeManager.apply_global_opacity()
 
 	vim.notify("Theme system initialized: " .. active_theme, vim.log.levels.INFO)
 end

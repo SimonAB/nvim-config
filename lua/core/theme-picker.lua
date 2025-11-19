@@ -4,6 +4,7 @@
 -- =============================================================================
 
 local ThemePicker = {}
+local ThemeSettings = require("core.theme-settings")
 
 -- Filter modes for the picker
 local FilterMode = { ALL = "all", DARK = "dark", LIGHT = "light" }
@@ -204,7 +205,9 @@ function ThemePicker.show_fallback_picker(themes)
 		border = "rounded",
 		title = title_for_filter(),
 		title_pos = "center",
+		winblend = ThemeSettings.get_winblend(),
 	})
+	ThemeSettings.apply_window_blend(win)
 
 	-- Set buffer content helpers
 	local function update_buffer_lines()
@@ -386,6 +389,7 @@ function ThemePicker.select_theme(theme_name)
 		local ThemeManager = require("core.theme-manager")
 		ThemeManager.clear_highlight_cache()
 		ThemeManager.update_which_key_highlights()
+		ThemeManager.apply_global_opacity()
 	else
 		notify("Failed to apply theme: " .. theme_name, vim.log.levels.ERROR)
 	end

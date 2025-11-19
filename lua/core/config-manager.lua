@@ -15,6 +15,15 @@ local ConfigManager = {
 -- THEME CONFIGURATIONS
 -- =============================================================================
 
+-- Shared defaults consumed by ThemeManager/ThemePicker for system appearance + UI opacity.
+ConfigManager.themes.active = {
+	defaults = {
+		dark = "gruvbox",
+		light = "github_light_default",
+	},
+	opacity = 0.8,
+}
+
 ConfigManager.themes.catppuccin = {
 	flavour = "mocha",
 	background = {
