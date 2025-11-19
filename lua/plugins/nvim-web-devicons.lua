@@ -14,7 +14,7 @@ if ok then
 			["docker-compose.yml"] = { icon = "", color = "#2496ED", name = "DockerCompose" },
 		},
 		override_by_extension = {
-			["jl"] = { icon = "", color = "#9558B2", name = "Julia" },
+			["jl"] = { icon = "", color = "#9558B2", name = "Julia" },
 			["qmd"] = { icon = "", color = "#75AADB", name = "Quarto" },
 			["ipynb"] = { icon = "", color = "#F37626", name = "Jupyter" },
 		},
