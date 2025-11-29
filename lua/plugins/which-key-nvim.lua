@@ -29,7 +29,7 @@ if ok then
 			border = "rounded",
 			padding = { 1, 2 },
 			wo = {
-				winblend = 0,
+				winblend = 10,
 			},
 		},
 		layout = {

@@ -91,10 +91,12 @@ function ThemeManager.apply_formatting_parity()
 end
 
 ---Apply the configured UI opacity across Neovim.
+---Note: Blur effects are handled by the terminal emulator/window manager when transparency is enabled.
+---On macOS, the window manager automatically applies blur to transparent windows.
 function ThemeManager.apply_global_opacity()
 	local blend = ThemeSettings.get_winblend()
-	vim.o.winblend = blend
-	vim.o.pumblend = blend
+	vim.o.winblend = blend  -- Transparency for floating windows (enables blur if terminal supports it)
+	vim.o.pumblend = blend  -- Transparency for popup menus/completion (enables blur if terminal supports it)
 	ensure_transparent_highlights()
 	ThemeSettings.apply_all_window_blends()
 end

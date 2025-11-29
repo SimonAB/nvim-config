@@ -21,7 +21,7 @@ ConfigManager.themes.active = {
 		dark = "gruvbox",
 		light = "github_light_default",
 	},
-	opacity = 0.8,
+	opacity = 0.9,
 }
 
 ConfigManager.themes.catppuccin = {
