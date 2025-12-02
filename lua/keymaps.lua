@@ -840,7 +840,8 @@ map("n", "<leader>Ob", obsidian_operation("show_backlinks"), { desc = "Show Obsi
 map("n", "<leader>Og", obsidian_operation("show_outgoing_links"), { desc = "Show Obsidian outgoing links" })
 
 map("n", "<leader>Oo", function()
-  local obsidian_path = "/Users/s_a_b/Library/Mobile Documents/iCloud~md~obsidian/Documents/Notebook"
+  -- Match obsidian.nvim workspace path so file picking uses the same vault
+  local obsidian_path = "/Users/s_a_b/Notebook"
   require("telescope.builtin").find_files({
     cwd = obsidian_path,
     prompt_title = "Obsidian Vault"
@@ -849,11 +850,74 @@ end, { desc = "Find files in Obsidian vault" })
 
 map("n", "<leader>Ot", safe_cmd("ObsidianTemplate"), { desc = "Insert Obsidian template" })
 map("n", "<leader>ON", safe_cmd("ObsidianNewFromTemplate"), { desc = "New note from template" })
-map("n", "<leader>Op", function()
-  pcall(vim.cmd, "ObsidianPasteImg")
-  vim.cmd("put =''")
-  vim.cmd("put =''")
-end, { desc = "Paste image and add two lines" })
+
+-- Helper to paste an image into the Obsidian vault and insert a wiki link
+local function paste_obsidian_image()
+  -- Try obsidian.nvim's own mechanisms first, to benefit from its attachment handling
+  local used_obsidian = false
+
+  if vim.fn.exists(":ObsidianPasteImg") == 2 then
+    local ok = pcall(vim.cmd, "ObsidianPasteImg")
+    if ok then
+      used_obsidian = true
+    end
+  else
+    local ok, obsidian = pcall(require, "obsidian")
+    if ok then
+      if obsidian.util and type(obsidian.util) == "table" then
+        if type(obsidian.util.paste_img_and_link) == "function" then
+          pcall(obsidian.util.paste_img_and_link)
+          used_obsidian = true
+        elseif type(obsidian.util.paste_img) == "function" then
+          pcall(obsidian.util.paste_img)
+          used_obsidian = true
+        end
+      end
+      if (not used_obsidian) and obsidian.commands and type(obsidian.commands) == "table" then
+        if type(obsidian.commands.paste_img) == "function" then
+          pcall(obsidian.commands.paste_img)
+          used_obsidian = true
+        end
+      end
+    end
+  end
+
+  if used_obsidian then
+    -- Add two blank lines for spacing after whatever text Obsidian inserted
+    vim.cmd("put =''")
+    vim.cmd("put =''")
+    return
+  end
+
+  -- Fallback: handle clipboard image ourselves using pngpaste (macOS)
+  -- This assumes pngpaste is installed and the clipboard contains an image.
+  -- Match obsidian.nvim workspace path so images are saved in the same vault
+  local vault_path = "/Users/s_a_b/Notebook"
+  local attachments_dir = vault_path .. "/attachments"
+
+  -- Ensure attachments directory exists
+  vim.fn.mkdir(attachments_dir, "p")
+
+  -- Build filename using the same timestamp pattern as obsidian.nvim config
+  local filename = os.date("%Y%m%d-%H%M%S") .. ".png"
+  local fullpath = attachments_dir .. "/" .. filename
+
+  -- Save clipboard image to file
+  local cmd = string.format('pngpaste "%s"', fullpath)
+  vim.fn.system(cmd)
+
+  if vim.v.shell_error ~= 0 then
+    vim.notify("Failed to paste image: pngpaste not available or clipboard is not an image", vim.log.levels.ERROR)
+    return
+  end
+
+  -- Insert markdown image link using the same relative pattern as obsidian.nvim's img_text_func:
+  -- note in "notes" folder → image in "../attachments/<filename>"
+  local link_line = string.format("![%s](<../attachments/%s>)", filename, filename)
+  vim.api.nvim_put({ link_line, "", "" }, "l", true, true)
+end
+
+map("n", "<leader>Op", paste_obsidian_image, { desc = "Paste image and add two lines" })
 
 map("n", "<leader>Ov", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Toggle Obsidian Preview" })
 

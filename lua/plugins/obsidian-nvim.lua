@@ -32,7 +32,8 @@ obsidian.setup({
     workspaces = {
         {
             name = "notebook",
-            path = "/Users/s_a_b/Library/Mobile Documents/iCloud~md~obsidian/Documents/Notebook",
+            -- Use the local Notebook vault so paths like ../attachments/… resolve correctly
+            path = "/Users/s_a_b/Notebook",
         },
     },
 
@@ -61,7 +62,10 @@ obsidian.setup({
             return os.date("%Y%m%d-%H%M%S")
         end,
         img_text_func = function(client, path)
-            -- Use vault-relative path for proper markdown links
+            -- Use markdown image syntax compatible with external tools
+            -- (matches the behaviour expected by wikilinks_converter.py)
+            -- The link is rendered relative to a note in the "notes" folder,
+            -- so we need a ../ prefix to reach the vault root.
             path = client:vault_relative_path(path) or path
             return string.format("![%s](<../%s>)", path.name, path)
         end,
