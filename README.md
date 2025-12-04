@@ -26,15 +26,21 @@ Neovim configuration optimised for academic research and scientific computing. D
 ## Requirements
 
 ### Essential
-- **Homebrew**: Package manager for macOS ([install here](https://brew.sh/))
+- **Package Manager**:
+  - **macOS**: Homebrew ([install here](https://brew.sh/))
+  - **Arch Linux**: pacman (built-in) and yay/paru for AUR packages
 - Neovim 0.12+ (required for vim.pack plugin management)
 - Git
 - Cargo (for blink.cmp compilation)
 - ripgrep, fd (for Telescope fuzzy finding)
 
 ### Document Processing
-- **LaTeX**: MacTeX or BasicTeX, Skim PDF viewer (macOS)
-- **Typst**: `brew install typst`
+- **LaTeX**: 
+  - **macOS**: MacTeX or BasicTeX, Skim PDF viewer
+  - **Arch Linux**: texlive-most, Zathura PDF viewer
+- **Typst**: 
+  - **macOS**: `brew install typst`
+  - **Arch Linux**: `yay -S typst` (AUR)
 - **Markdown**: Node.js (for preview plugin)
 
 ### Language Support
@@ -185,9 +191,15 @@ Install language servers via Mason:
 
 ### LaTeX SyncTeX
 
+**macOS (Skim)**:
 - Verify Skim preferences: Sync → Custom command
 - Check script path: Use absolute path, no tilde (~)
 - Debug log: `tail -f /tmp/inverse_search.log`
+
+**Arch Linux (Zathura)**:
+- VimTeX may configure this automatically
+- If needed, configure in `~/.config/zathura/zathurarc`: `set synctex-editor-command "nvim --headless -c \"VimtexInverseSearch %{line} '%{input}'\""`
+- See Installation Guide for detailed setup
 
 ## Recent Changes
 

@@ -67,15 +67,21 @@ features:
 ## Requirements
 
 ### Essential
-- **Homebrew**: Package manager for macOS ([install here](https://brew.sh/))
+- **Package Manager**:
+  - **macOS**: Homebrew ([install here](https://brew.sh/))
+  - **Arch Linux**: pacman (built-in) and yay/paru for AUR
 - Neovim 0.12+ (required for vim.pack)
 - Git
 - Cargo (for blink.cmp compilation)
 - ripgrep, fd (for Telescope)
 
 ### Document Processing
-- **LaTeX**: MacTeX or BasicTeX, Skim PDF viewer (macOS)
-- **Typst**: `brew install typst`
+- **LaTeX**: 
+  - **macOS**: MacTeX or BasicTeX, Skim PDF viewer
+  - **Arch Linux**: texlive-most, Zathura PDF viewer
+- **Typst**: 
+  - **macOS**: `brew install typst`
+  - **Arch Linux**: `yay -S typst` (AUR)
 - **Markdown**: Node.js (for preview)
 
 ### Language Support
@@ -113,7 +119,9 @@ Terminal with code block detection:
 
 LaTeX: bidirectional SyncTeX
 - Forward search: Neovim → PDF (`\lv`)
-- Inverse search: PDF → Neovim (Skim: Cmd+Shift+Click)
+- Inverse search: PDF → Neovim 
+  - **macOS**: Skim (Cmd+Shift+Click)
+  - **Arch Linux**: Zathura (Ctrl+Click)
 - Compilation: latexmk
 - Bibliography management
 

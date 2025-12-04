@@ -5,20 +5,35 @@ Common issues and solutions.
 ### LaTeX Inverse Search Issues
 
 #### No response on inverse search
-- **Skim Sync settings**: Preferences → Sync → Command `nvim`, Arguments `--headless -c "VimtexInverseSearch %line '%file'"`.
-- **Neovim path**: Verify `which nvim` points to your Neovim 0.12 install.
-- **Synctex**: Ensure your build includes `-synctex=1` (configured via VimTeX latexmk options here).
+
+**macOS (Skim)**:
+- **Skim Sync settings**: Preferences → Sync → Command should point to `skim_inverse_search.sh`, Arguments: `%line "%file"`
+- **Neovim path**: Verify `which nvim` points to your Neovim 0.12 install
+- **Synctex**: Ensure your build includes `-synctex=1` (configured via VimTeX latexmk options)
+
+**Arch Linux (Zathura)**:
+- **Zathura configuration**: If needed, add to `~/.config/zathura/zathurarc`: `set synctex-editor-command "nvim --headless -c \"VimtexInverseSearch %{line} '%{input}'\""`
+- **Neovim path**: Verify `which nvim` points to your Neovim 0.12 install
+- **Synctex**: Ensure your build includes `-synctex=1` (configured via VimTeX latexmk options)
+- **Note**: VimTeX may configure this automatically. Test first without manual configuration.
 
 #### Path Configuration Problems
-- **Verify Script Path**: In Skim preferences, use the full canonical absolute path to the script; do not use tilde (~) and do not use symlinks. Use exactly: `<Full/path/to>/nvim/scripts/skim_inverse_search.sh`
-- **Test Script Manually**: Run `<Full/path/to>/nvim/scripts/skim_inverse_search.sh 10 "/absolute/path/to/test.tex"` to validate the script directly.
-- **Check nvr Installation**: Verify nvr is installed at `/opt/homebrew/bin/nvr` with `which nvr`.
-- **Homebrew Path Issues**: If nvr is installed elsewhere, update the script path accordingly.
+
+**macOS**:
+- **Verify Script Path**: In Skim preferences, use the full canonical absolute path to the script; do not use tilde (~) and do not use symlinks. Use exactly: `/Users/<username>/.config/nvim/scripts/skim_inverse_search.sh`
+- **Test Script Manually**: Run `/Users/<username>/.config/nvim/scripts/skim_inverse_search.sh 10 "/absolute/path/to/test.tex"` to validate the script directly
+- **Check nvr Installation**: Verify nvr is installed with `which nvr` (typically `/opt/homebrew/bin/nvr` on Apple Silicon or `/usr/local/bin/nvr` on Intel)
+
+**Arch Linux**:
+- **Simplest solution**: Use VimTeX's built-in function directly in `~/.config/zathura/zathurarc`: `set synctex-editor-command "nvim --headless -c \"VimtexInverseSearch %{line} '%{input}'\""`
+- **Alternative with nvr**: If using nvr: `set synctex-editor-command "nvr --servername /tmp/nvim_server --remote-silent +%{line} '%{input}'"`
+- **Note**: VimTeX may configure this automatically. Test first without manual configuration.
+- **Check nvr Installation** (if using nvr): Verify nvr is installed with `which nvr` (typically `/usr/bin/nvr` on Arch Linux)
 
 #### Files not found with relative paths in LaTeX projects
-- The script now includes intelligent path resolution
-- For custom project layouts, export `INVERSE_SEARCH_PROJECT_ROOT=/path/to/project`
-- Check debug log: `tail -f /tmp/inverse_search.log` whilst testing inverse search
+- VimTeX's built-in `VimtexInverseSearch` handles path resolution automatically
+- For custom project layouts, ensure your LaTeX project structure is standard
+- If using the optional script, check debug log: `tail -f /tmp/inverse_search.log`
 - Verify your project structure matches supported patterns
 
 ### Plugin and Configuration Issues
@@ -52,7 +67,14 @@ Common issues and solutions.
 - Verify Python is in PATH
 
 #### LaTeX LSP issues
+
+**macOS**:
 - Install texlab: `brew install texlab`
+- Or use Mason: `<leader>Mm` then install `texlab`
+- Verify LaTeX distribution is properly installed
+
+**Arch Linux**:
+- Install texlab: `sudo pacman -S texlab`
 - Or use Mason: `<leader>Mm` then install `texlab`
 - Verify LaTeX distribution is properly installed
 

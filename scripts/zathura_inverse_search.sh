@@ -1,7 +1,19 @@
 #!/bin/bash
 
-LINE="$1"
-FILE="$2"
+# Zathura inverse search script for Arch Linux
+# 
+# NOTE: This script is OPTIONAL. The simplest solution is to use VimTeX's built-in
+# function directly in ~/.config/zathura/zathurarc:
+#   set synctex-editor-command "nvim --headless -c \"VimtexInverseSearch %{line} '%{input}'\""
+#
+# This script provides a fallback that tries to use nvr (neovim-remote) if available,
+# otherwise falls back to VimTeX's built-in function. Use this only if you need
+# the nvr functionality or if the simple solution doesn't work for your setup.
+#
+# Zathura passes arguments as: %{input} (file) %{line} (line number)
+
+FILE="$1"
+LINE="$2"
 
 # Detect platform and set appropriate paths
 if [[ "$OSTYPE" == "darwin"* ]]; then

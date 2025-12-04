@@ -1,17 +1,21 @@
 # Installation Guide
 
-Installation instructions for BabaVim on macOS.
+Installation instructions for BabaVim on macOS and Arch Linux.
 
 ## System Requirements
 
-- **Operating System**: macOS 10.15+ (tested on macOS 13+)
+- **Operating System**: 
+  - macOS 10.15+ (tested on macOS 13+)
+  - Arch Linux (tested on latest stable)
 - **Neovim**: 0.12 or later (required for vim.pack plugin management)
-- **Terminal**: [Ghostty](https://github.com/ghostty-org/ghostty), [iTerm2](https://iterm2.com/), or [Warp](https://www.warp.dev/) (256-colour support)
+- **Terminal**: 
+  - **macOS**: [Ghostty](https://github.com/ghostty-org/ghostty), [iTerm2](https://iterm2.com/), or [Warp](https://www.warp.dev/) (256-colour support)
+  - **Arch Linux**: Alacritty, Kitty, or any terminal with 256-colour support
 - **Internet Connection**: Required for plugin installation
 
 ## Prerequisites
 
-### Homebrew Package Manager
+### macOS: Homebrew Package Manager
 
 Install dependencies via Homebrew. If Homebrew is not installed:
 
@@ -27,9 +31,28 @@ Homebrew: https://brew.sh/
 
 Add Homebrew to PATH per installation instructions.
 
+### Arch Linux: Pacman Package Manager
+
+Arch Linux uses `pacman` as its package manager. Ensure your system is up to date:
+
+```bash
+# Update system packages
+sudo pacman -Syu
+
+# Verify pacman is working
+pacman --version
+```
+
+For AUR packages, you'll need an AUR helper. Recommended options:
+
+- **yay** (recommended): `sudo pacman -S --needed base-devel git && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si`
+- **paru**: `sudo pacman -S --needed base-devel git && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si`
+
 ## Core Dependencies
 
 ### 1. Neovim 0.12+
+
+#### macOS
 
 ```bash
 # Install via Homebrew
@@ -45,7 +68,25 @@ make CMAKE_BUILD_TYPE=Release
 sudo make install
 ```
 
+#### Arch Linux
+
+```bash
+# Install via pacman
+sudo pacman -S neovim
+
+# Verify version
+nvim --version  # Must show 0.12.0 or later
+
+# Build from source (alternative, if needed)
+git clone https://github.com/neovim/neovim
+cd neovim
+make CMAKE_BUILD_TYPE=Release
+sudo make install
+```
+
 ### 2. Essential Command-Line Tools
+
+#### macOS
 
 ```bash
 # Ripgrep (for Telescope live grep)
@@ -62,6 +103,28 @@ brew install lazygit
 
 # Cargo (for blink.cmp compilation)
 brew install rust
+```
+
+#### Arch Linux
+
+```bash
+# Ripgrep (for Telescope live grep)
+sudo pacman -S ripgrep
+
+# fd (for Telescope file finding)
+sudo pacman -S fd
+
+# Git (for plugin management)
+sudo pacman -S git
+
+# LazyGit (for Git interface)
+# Available in AUR
+yay -S lazygit
+# or
+paru -S lazygit
+
+# Cargo (for blink.cmp compilation)
+sudo pacman -S rust
 ```
 
 Verify installation:
@@ -106,6 +169,8 @@ If plugins don't install automatically:
 
 ### LaTeX Workflow
 
+#### macOS
+
 ```bash
 # Full TeX distribution (3.5 GB)
 brew install --cask mactex
@@ -120,13 +185,33 @@ brew install --cask skim
 brew install texlab
 ```
 
+#### Arch Linux
+
+```bash
+# Full TeX distribution
+sudo pacman -S texlive-most texlive-lang
+
+# Or minimal installation
+sudo pacman -S texlive-core texlive-bin texlive-latex
+
+# PDF viewer with SyncTeX support (Zathura recommended)
+sudo pacman -S zathura zathura-pdf-mupdf
+# Alternative: Okular
+# sudo pacman -S okular
+
+# LaTeX language server (optional, can install via Mason)
+sudo pacman -S texlab
+```
+
 Verify LaTeX installation:
 ```bash
 pdflatex --version
 latexmk --version
 ```
 
-#### Configure Skim for SyncTeX
+#### Configure PDF Viewer for SyncTeX
+
+##### macOS: Configure Skim
 
 1. Open Skim
 2. Navigate to **Preferences** → **Sync** → **PDF-TeX Sync**
@@ -136,6 +221,32 @@ latexmk --version
      - **Important**: Use absolute path, no tilde (~) or symlinks
      - Replace `<username>` with your actual username
    - **Arguments**: `%line "%file"`
+
+In Skim:
+- Cmd+Shift+Click for inverse search (PDF → Neovim)
+
+##### Arch Linux: Configure Zathura
+
+VimTeX automatically configures Zathura for inverse search when using `vim.g.vimtex_view_method = "zathura"`. However, you may need to configure Zathura manually if automatic setup doesn't work.
+
+**Simplest solution** (recommended): Use VimTeX's built-in function directly in `~/.config/zathura/zathurarc`:
+
+```
+set synctex true
+set synctex-editor-command "nvim --headless -c \"VimtexInverseSearch %{line} '%{input}'\""
+```
+
+**Alternative** (if using nvr/neovim-remote): If you have `nvr` installed and want to use the running Neovim instance:
+
+```
+set synctex true
+set synctex-editor-command "nvr --servername /tmp/nvim_server --remote-silent +%{line} '%{input}'"
+```
+
+**Note**: VimTeX automatically starts Zathura with the `-x` argument for inverse search, so manual configuration may not be necessary. Test first without configuring `synctex-editor-command`.
+
+In Zathura:
+- Ctrl+Click for inverse search (PDF → Neovim)
 
 Test SyncTeX:
 ```bash
@@ -147,10 +258,9 @@ In Neovim:
 - `\ll` to compile
 - `\lv` for forward search (Neovim → PDF)
 
-In Skim:
-- Cmd+Shift+Click for inverse search (PDF → Neovim)
-
 ### Markdown Workflow
+
+#### macOS
 
 ```bash
 # Node.js (for markdown-preview plugin)
@@ -158,6 +268,16 @@ brew install node
 
 # Optional: Pandoc for advanced Markdown conversion
 brew install pandoc
+```
+
+#### Arch Linux
+
+```bash
+# Node.js (for markdown-preview plugin)
+sudo pacman -S nodejs npm
+
+# Optional: Pandoc for advanced Markdown conversion
+sudo pacman -S pandoc
 ```
 
 Test Markdown preview:
@@ -169,9 +289,23 @@ In Neovim: `<Space>Kp` to start preview
 
 ### Typst Workflow
 
+#### macOS
+
 ```bash
 # Typst compiler
 brew install typst
+
+# Verify installation
+typst --version
+```
+
+#### Arch Linux
+
+```bash
+# Typst compiler (available in AUR)
+yay -S typst
+# or
+paru -S typst
 
 # Verify installation
 typst --version
@@ -186,9 +320,23 @@ In Neovim: `\tp` to toggle preview
 
 ### Quarto Workflow
 
+#### macOS
+
 ```bash
 # Quarto publishing system
 brew install --cask quarto
+
+# Verify installation
+quarto check
+```
+
+#### Arch Linux
+
+```bash
+# Quarto publishing system (available in AUR)
+yay -S quarto-bin
+# or
+paru -S quarto-bin
 
 # Verify installation
 quarto check
@@ -198,9 +346,23 @@ quarto check
 
 ### Julia
 
+#### macOS
+
 ```bash
 # Install Julia
 brew install julia
+
+# Verify installation
+julia --version  # 1.9.0+ recommended
+```
+
+#### Arch Linux
+
+```bash
+# Install Julia (available in AUR)
+yay -S julia-bin
+# or
+paru -S julia-bin
 
 # Verify installation
 julia --version  # 1.9.0+ recommended
@@ -228,12 +390,24 @@ Install Julia LSP via Mason (in Neovim):
 
 ### Python
 
+#### macOS
+
 ```bash
 # Python 3 (usually pre-installed on macOS)
 python3 --version  # 3.8+ required
 
 # pip for package management
 python3 -m ensurepip --upgrade
+```
+
+#### Arch Linux
+
+```bash
+# Python 3
+sudo pacman -S python python-pip
+
+# Verify installation
+python --version  # 3.8+ required
 ```
 
 Install Python LSP via Mason:
@@ -244,9 +418,23 @@ Install Python LSP via Mason:
 
 ### R
 
+#### macOS
+
 ```bash
 # R programming language
 brew install r
+
+# Verify installation
+R --version
+```
+
+#### Arch Linux
+
+```bash
+# R programming language (available in AUR)
+yay -S r
+# or
+paru -S r
 
 # Verify installation
 R --version
@@ -306,6 +494,8 @@ Mason provides a unified interface for installing language servers.
 
 If Mason installation fails, install manually:
 
+#### macOS
+
 ```bash
 # Lua LSP
 brew install lua-language-server
@@ -317,13 +507,37 @@ npm install -g pyright
 brew install texlab
 ```
 
+#### Arch Linux
+
+```bash
+# Lua LSP
+sudo pacman -S lua-language-server
+
+# Python LSP
+sudo npm install -g pyright
+
+# LaTeX LSP
+sudo pacman -S texlab
+```
+
 ## Optional Tools
 
 ### Obsidian Integration
 
+#### macOS
+
 ```bash
 # Install Obsidian
 brew install --cask obsidian
+```
+
+#### Arch Linux
+
+```bash
+# Install Obsidian (available in AUR)
+yay -S obsidian
+# or
+paru -S obsidian
 ```
 
 Configure vault path in `lua/keymaps.lua`:
@@ -333,12 +547,23 @@ local obsidian_path = "/path/to/your/vault"
 
 ### Database Tools
 
+#### macOS
+
 ```bash
 # SQLite (for Telescope frecency)
 brew install sqlite3
 ```
 
+#### Arch Linux
+
+```bash
+# SQLite (for Telescope frecency)
+sudo pacman -S sqlite
+```
+
 ### Additional Utilities
+
+#### macOS
 
 ```bash
 # Tree-sitter CLI (for parser updates)
@@ -349,6 +574,19 @@ pip3 install neovim-remote
 
 # GitHub CLI (for gh integration)
 brew install gh
+```
+
+#### Arch Linux
+
+```bash
+# Tree-sitter CLI (for parser updates)
+sudo npm install -g tree-sitter-cli
+
+# Neovim remote (for advanced workflows)
+pip install neovim-remote
+
+# GitHub CLI (for gh integration)
+sudo pacman -S github-cli
 ```
 
 ## Verification
@@ -466,24 +704,41 @@ echo $TERM  # Should be xterm-256color or similar
 curl -s https://gist.githubusercontent.com/lifepillar/09a44b8cf0f9397465614e622979107f/raw/24-bit-color.sh | bash
 
 # Install a Nerd Font for icons
+```
+
+#### macOS
+
+```bash
 brew tap homebrew/cask-fonts
 brew install --cask font-hack-nerd-font
+```
 
-# Configure terminal to use Nerd Font
+#### Arch Linux
+
+```bash
+# Install Nerd Fonts (available in AUR)
+yay -S nerd-fonts-hack
+# or
+paru -S nerd-fonts-hack
 ```
 
 **Recommended terminals**:
+
+**macOS**:
 - [Ghostty](https://github.com/ghostty-org/ghostty) - Fast, native macOS terminal
 - [iTerm2](https://iterm2.com/) - Feature-rich terminal with extensive customisation
 - [Warp](https://www.warp.dev/) - Modern terminal with AI features
 
-**Terminal.app**: macOS built-in terminal has 256-colour support but requires configuration:
+**Arch Linux**:
+- [Alacritty](https://github.com/alacritty/alacritty) - Fast, GPU-accelerated terminal (`sudo pacman -S alacritty`)
+- [Kitty](https://sw.kovidgoyal.net/kitty/) - Feature-rich terminal (`sudo pacman -S kitty`)
+- [WezTerm](https://wezfurlong.org/wezterm/) - Cross-platform terminal (`sudo pacman -S wezterm`)
+
+**Terminal.app** (macOS): Built-in terminal has 256-colour support but requires configuration:
 1. Terminal → Preferences → Profiles
 2. Select or create a profile
 3. Advanced tab → Set "Declare terminal as:" to `xterm-256color`
 4. Text tab → Install a Nerd Font for proper icon display
-
-Recommended terminals: iTerm2, Warp, Ghostty (better font rendering, icon support).
 
 ## Updating
 
@@ -542,12 +797,22 @@ All tools install natively on Apple Silicon. No Rosetta required.
 
 Standard installation. Ensure Homebrew is installed for x86_64 architecture.
 
-### Linux Support
+### Arch Linux
 
-This configuration is configured for macOS but should work on Linux with modifications:
-- Replace Skim with Zathura or Okular for LaTeX preview
-- Adjust paths in shell scripts
-- Install tools via apt/dnf instead of brew
+This configuration is fully supported on Arch Linux. Key differences from macOS:
+
+- **PDF Viewer**: Use Zathura or Okular instead of Skim for LaTeX SyncTeX
+- **Package Manager**: Use `pacman` for official packages and `yay`/`paru` for AUR packages
+- **Zathura Configuration**: VimTeX may configure inverse search automatically. If manual configuration is needed, use VimTeX's built-in function (see Zathura configuration section above)
+- **Font Installation**: Install Nerd Fonts via AUR instead of Homebrew casks
+
+### Other Linux Distributions
+
+This configuration should work on other Linux distributions with modifications:
+- Replace package manager commands (`pacman` → `apt`/`dnf`/`zypper`)
+- Use appropriate PDF viewer (Zathura, Okular, or Evince)
+- Adjust paths in shell scripts for your distribution
+- Install AUR packages from source or use distribution-specific alternatives
 
 ## Next Steps
 

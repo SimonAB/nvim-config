@@ -1,8 +1,28 @@
 -- Configuration for vimtex
 -- LaTeX editing support with enhanced features
 
+-- Detect platform and set appropriate PDF viewer
+local is_macos = vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1
+local is_linux = vim.fn.has("unix") == 1 and vim.fn.has("macunix") == 0
+
 -- VimTeX configuration (vim variables)
-vim.g.vimtex_view_method = "skim" -- Use Skim for PDF viewing
+if is_macos then
+	-- macOS: Use Skim for PDF viewing
+	vim.g.vimtex_view_method = "skim"
+	vim.g.vimtex_view_general_viewer = "skim"
+	vim.g.vimtex_view_general_options = "--unique file:@pdf\\#src:@line@tex"
+elseif is_linux then
+	-- Linux: Use Zathura for PDF viewing
+	vim.g.vimtex_view_method = "zathura"
+	vim.g.vimtex_view_general_viewer = "zathura"
+	vim.g.vimtex_view_general_options = "--synctex-forward %line:0:%tex %pdf"
+else
+	-- Fallback: generic viewer
+	vim.g.vimtex_view_method = "general"
+	vim.g.vimtex_view_general_viewer = "zathura"
+	vim.g.vimtex_view_general_options = "--synctex-forward %line:0:%tex %pdf"
+end
+
 vim.g.vimtex_compiler_method = "latexmk" -- Use latexmk for compilation
 vim.g.vimtex_compiler_latexmk = {
 	build_dir = "build",
@@ -14,8 +34,6 @@ vim.g.vimtex_compiler_latexmk = {
 		"-file-line-error",
 	},
 }
-vim.g.vimtex_view_general_viewer = "skim"
-vim.g.vimtex_view_general_options = "--unique file:@pdf\\#src:@line@tex"
 
 -- Disable spell checking in citation arguments
 -- This must be set before VimTeX initialises to take effect

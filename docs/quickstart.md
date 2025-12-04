@@ -4,7 +4,7 @@ BabaVim: Neovim setup for research workflows.
 
 ## Prerequisites
 
-### Homebrew Package Manager
+### macOS: Homebrew Package Manager
 
 If you don't have Homebrew installed:
 
@@ -15,7 +15,23 @@ If you don't have Homebrew installed:
 
 See https://brew.sh/ for more information.
 
+### Arch Linux: Pacman and AUR Helper
+
+Ensure your system is up to date:
+
+```bash
+# Update system
+sudo pacman -Syu
+
+# Install AUR helper (yay recommended)
+sudo pacman -S --needed base-devel git
+git clone https://aur.archlinux.org/yay.git
+cd yay && makepkg -si
+```
+
 ### Essential Tools
+
+#### macOS
 
 ```bash
 # Neovim 0.12+
@@ -31,7 +47,25 @@ brew install lazygit
 brew install node
 ```
 
+#### Arch Linux
+
+```bash
+# Neovim 0.12+
+sudo pacman -S neovim
+
+# Fuzzy finding utilities
+sudo pacman -S ripgrep fd
+
+# Git interface (AUR)
+yay -S lazygit
+
+# Node.js (language servers, markdown preview)
+sudo pacman -S nodejs npm
+```
+
 ### Academic Workflow Tools
+
+#### macOS
 
 ```bash
 # LaTeX support
@@ -48,6 +82,25 @@ brew install julia
 
 # R programming (optional)
 brew install r
+```
+
+#### Arch Linux
+
+```bash
+# LaTeX support
+sudo pacman -S texlive-most texlive-lang
+
+# PDF viewer for LaTeX sync
+sudo pacman -S zathura zathura-pdf-mupdf
+
+# Typst typesetting (AUR)
+yay -S typst
+
+# Julia programming (optional, AUR)
+yay -S julia-bin
+
+# R programming (optional, AUR)
+yay -S r
 ```
 
 ## Installation
@@ -184,13 +237,37 @@ Academic workflow servers:
 
 ## LaTeX Workflow Setup
 
-### Configure Skim for SyncTeX
+### macOS: Configure Skim for SyncTeX
 
 1. Open Skim → Preferences → Sync
 2. Set **Preset** to: Custom
 3. Set **Command** to: `/Users/<username>/.config/nvim/scripts/skim_inverse_search.sh`
    - Use absolute path, no tilde (~)
 4. Set **Arguments** to: `%line "%file"`
+
+In Skim:
+- Cmd+Shift+Click on PDF to jump to corresponding line in Neovim
+
+### Arch Linux: Configure Zathura for SyncTeX
+
+VimTeX automatically configures Zathura for inverse search. If needed, create or edit `~/.config/zathura/zathurarc`:
+
+**Simplest solution** (recommended):
+```
+set synctex true
+set synctex-editor-command "nvim --headless -c \"VimtexInverseSearch %{line} '%{input}'\""
+```
+
+**Alternative** (if using nvr):
+```
+set synctex true
+set synctex-editor-command "nvr --servername /tmp/nvim_server --remote-silent +%{line} '%{input}'"
+```
+
+**Note**: VimTeX may handle this automatically. Test first without manual configuration.
+
+In Zathura:
+- Ctrl+Click on PDF to jump to corresponding line in Neovim
 
 ### Test LaTeX Integration
 
@@ -204,9 +281,6 @@ In Neovim:
 \ll                  " Compile document
 \lv                  " Open PDF and jump to cursor position
 ```
-
-In Skim:
-- Cmd+Shift+Click on PDF to jump to corresponding line in Neovim
 
 ## Obsidian Integration
 
@@ -284,6 +358,8 @@ nvim -c "lua print(pcall(require, 'toggleterm'))"
 
 ### LaTeX SyncTeX Not Working
 
+#### macOS (Skim)
+
 ```bash
 # Check script exists
 ls ~/.config/nvim/scripts/skim_inverse_search.sh
@@ -293,6 +369,19 @@ ls ~/.config/nvim/scripts/skim_inverse_search.sh
 
 # Check debug log
 tail -f /tmp/inverse_search.log
+```
+
+#### Arch Linux (Zathura)
+
+```bash
+# Verify Zathura configuration
+cat ~/.config/zathura/zathurarc
+
+# Test inverse search command manually (if configured)
+nvim --headless -c "VimtexInverseSearch 10 '/absolute/path/to/test.tex'"
+
+# Or with nvr (if using nvr)
+nvr --servername /tmp/nvim_server --remote-silent +10 "/absolute/path/to/test.tex"
 ```
 
 ## Feature Discovery
