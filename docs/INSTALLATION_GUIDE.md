@@ -54,12 +54,17 @@ For AUR packages, you'll need an AUR helper. Recommended options:
 
 #### macOS
 
+**Note**: Neovim 0.12 is not yet released in stable Homebrew. Install from HEAD to get 0.12:
+
 ```bash
-# Install via Homebrew
-brew install neovim
+# Install Neovim 0.12 from HEAD (development version)
+brew install neovim --HEAD
 
 # Verify version
 nvim --version  # Must show 0.12.0 or later
+
+# If you need to update later
+brew upgrade neovim --HEAD
 
 # Build from source (alternative)
 git clone https://github.com/neovim/neovim
@@ -70,9 +75,13 @@ sudo make install
 
 #### Arch Linux
 
+**Note**: Neovim 0.12 is not yet in the official Arch repositories. Install from AUR:
+
 ```bash
-# Install via pacman
-sudo pacman -S neovim
+# Install Neovim 0.12 from AUR (requires yay or paru)
+yay -S neovim-nightly-bin
+# or
+paru -S neovim-nightly-bin
 
 # Verify version
 nvim --version  # Must show 0.12.0 or later

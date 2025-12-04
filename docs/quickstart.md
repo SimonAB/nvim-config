@@ -34,8 +34,8 @@ cd yay && makepkg -si
 #### macOS
 
 ```bash
-# Neovim 0.12+
-brew install neovim
+# Neovim 0.12+ (install from HEAD as 0.12 is not yet in stable)
+brew install neovim --HEAD
 
 # Fuzzy finding utilities
 brew install ripgrep fd
@@ -50,8 +50,10 @@ brew install node
 #### Arch Linux
 
 ```bash
-# Neovim 0.12+
-sudo pacman -S neovim
+# Neovim 0.12+ (install from AUR as 0.12 is not yet in official repos)
+yay -S neovim-nightly-bin
+# or
+paru -S neovim-nightly-bin
 
 # Fuzzy finding utilities
 sudo pacman -S ripgrep fd
