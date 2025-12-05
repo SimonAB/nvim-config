@@ -75,10 +75,61 @@ if ok then
 		group = augroup,
 		pattern = { "markdown", "text", "gitcommit", "tex", "plaintex" },
 		callback = function()
+			-- Custom function to handle Enter key with colon detection
+			-- Inserts an extra newline before bullet list when line ends with colon
+			-- This ensures markdown renders the list correctly (requires blank line before list)
+			local function handle_enter_with_colon()
+				local bufnr = vim.api.nvim_get_current_buf()
+				local cursor = vim.api.nvim_win_get_cursor(0)
+				local line_num = cursor[1] - 1 -- Convert to 0-indexed for get_lines
+				local line = vim.api.nvim_buf_get_lines(bufnr, line_num, line_num + 1, false)[1] or ""
+				
+				-- Check if the line ends with a colon (ignoring trailing whitespace)
+				local trimmed_line = line:match("^%s*(.-)%s*$")
+				if trimmed_line:match(":$") then
+					-- Save the indentation from the colon line
+					local colon_indent = line:match("^%s*")
+					-- Get the tab character/string from autolist config
+					local tab = autolist_config.tab or "  "
+					-- Get preferred bullet marker from colon config
+					local preferred = autolist_config.colon.preferred or "-"
+					
+					-- Line ends with colon: insert Enter to create new line
+					vim.cmd("normal! a\r")
+					-- Schedule the blank line insertion and bullet creation
+					vim.schedule(function()
+						local current_cursor = vim.api.nvim_win_get_cursor(0)
+						local current_line_0idx = current_cursor[1] - 1 -- 0-indexed for buffer operations
+						-- Insert blank line at current position
+						vim.api.nvim_buf_set_lines(bufnr, current_line_0idx, current_line_0idx, false, { "" })
+						-- The bullet should be on the line after the blank line
+						-- For buffer operations (0-indexed): current_line_0idx + 1
+						-- For cursor operations (1-indexed): current_line_0idx + 2
+						local bullet_line_0idx = current_line_0idx + 1 -- 0-indexed
+						local bullet_line_1idx = current_line_0idx + 2 -- 1-indexed
+						
+						-- Get the current content of the bullet line (if any)
+						local current_bullet_line = vim.api.nvim_buf_get_lines(bufnr, bullet_line_0idx, bullet_line_0idx + 1, false)[1] or ""
+						-- Manually create the bullet with correct indentation
+						-- Format: tab + colon_indent + preferred + " "
+						local bullet = tab .. colon_indent .. preferred .. " "
+						-- Set the line with the bullet, preserving any existing content (strip leading whitespace)
+						local new_line = bullet .. current_bullet_line:gsub("^%s*", "", 1)
+						vim.api.nvim_buf_set_lines(bufnr, bullet_line_0idx, bullet_line_0idx + 1, false, { new_line })
+						-- Move cursor to after the bullet (1-indexed for cursor)
+						vim.api.nvim_win_set_cursor(0, { bullet_line_1idx, #bullet })
+					end)
+				else
+					-- Normal behavior: Enter + AutolistNewBullet
+					vim.cmd("normal! a\r")
+					vim.cmd("AutolistNewBullet")
+				end
+			end
+
 			-- Insert mode mappings
 			vim.keymap.set("i", "<Tab>", "<cmd>AutolistTab<cr>", { buffer = true, desc = "Autolist: Indent list" })
 			vim.keymap.set("i", "<S-Tab>", "<cmd>AutolistShiftTab<cr>", { buffer = true, desc = "Autolist: Dedent list" })
-			vim.keymap.set("i", "<CR>", "<CR><cmd>AutolistNewBullet<cr>", { buffer = true, desc = "Autolist: New bullet" })
+			vim.keymap.set("i", "<CR>", handle_enter_with_colon, { buffer = true, desc = "Autolist: New bullet (with colon handling)" })
 
 			-- Normal mode mappings
 			vim.keymap.set("n", "o", "o<cmd>AutolistNewBullet<cr>", { buffer = true, desc = "Autolist: New bullet below" })
