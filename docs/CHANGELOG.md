@@ -1,6 +1,29 @@
 # Changelog
 
-## [Latest] - Which-Key Convention Enforcement
+## [Latest] - Table Operations and Documentation Updates
+
+### 📊 Markdown Table Operations
+- **Table-nvim Integration**: Added comprehensive table editing keymaps under `<leader>Kt`
+  - `<leader>Ktf` - Format/realign table
+  - `<leader>Ktn/Ktp` - Navigate table cells
+  - `<leader>Kto/KtO` - Insert row below/above
+  - `<leader>KtJ/KtK` - Move row down/up
+  - `<leader>Kti/KtI` - Insert column right/left
+  - `<leader>KtL/KtH` - Move column right/left
+  - `<leader>Ktdc` - Delete column
+  - `<leader>Ktt/KtT` - Insert table (with/without outline)
+- **Filetype Support**: Works in markdown, quarto, pandoc, and text files
+- **Quarto Support**: Extended table-nvim functionality to `.qmd` files
+- **Which-Key Integration**: Table operations registered under `<leader>Kt` group
+
+### 📚 Documentation Updates
+- **Keymaps Reference**: Added comprehensive table operations section
+- **Quickstart Guide**: Added table operation examples
+- **Note**: `<leader>Kt` serves dual purpose - press immediately to toggle markdown preview, or wait to see table operations menu
+
+---
+
+## [Previous] - Which-Key Convention Enforcement
 
 ### 🔧 Keymap Refactoring
 - **Convention Enforcement**: Strict adherence to lowercase/uppercase leader key pattern

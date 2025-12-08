@@ -47,33 +47,40 @@ end
 -- or servers that need custom configuration beyond the defaults
 
 -- Julia LSP setup (bypass Mason due to current instability)
+-- Uses @nvim-lspconfig environment which needs LanguageServer.jl installed
+local function build_julia_lsp_cmd(project_env)
+  return {
+    "julia",
+    "--project=" .. project_env,
+    "--startup-file=no",
+    "--history-file=no",
+    "-e",
+    [[
+      try
+        using LanguageServer, Pkg
+        project_path = try
+          Base.current_project() |> dirname
+        catch
+          dirname(Pkg.Types.Context().env.project_file)
+        end
+        server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, "")
+        run(server)
+      catch err
+        Base.println(stderr, err)
+        Base.println(stderr, sprint(showerror, err, catch_backtrace()))
+        flush(stderr)
+        exit(1)
+      end
+    ]],
+  }
+end
+
 -- Load immediately since Mason's handler is disabled
 local julia_ok, julia_err = pcall(function()
+  local project_env = "@nvim-lspconfig"
+  
   vim.lsp.config('julials', {
-      cmd = {
-        "julia",
-        "--project=@nvim-lspconfig",
-        "--startup-file=no",
-        "--history-file=no",
-        "-e",
-        [[
-          try
-            using LanguageServer, Pkg
-            project_path = try
-              Base.current_project() |> dirname
-            catch
-              dirname(Pkg.Types.Context().env.project_file)
-            end
-            server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, "")
-            run(server)
-          catch err
-            Base.println(stderr, err)
-            Base.println(stderr, sprint(showerror, err, catch_backtrace()))
-            flush(stderr)
-            exit(1)
-          end
-        ]],
-      },
+    cmd = build_julia_lsp_cmd(project_env),
     filetypes = { 'julia' },
     root_dir = function(fname)
       -- Try to find project root, otherwise use file's directory
@@ -85,7 +92,7 @@ local julia_ok, julia_err = pcall(function()
       -- Fallback to file's directory for standalone files
       return vim.fn.fnamemodify(fname, ':p:h')
     end,
-      on_attach = on_attach,
+    on_attach = on_attach,
     capabilities = _G.enhanced_lsp_capabilities or capabilities,
   })
   vim.lsp.enable('julials')
@@ -93,77 +100,65 @@ end)
 
 if not julia_ok then
   vim.notify("Julia LSP config failed: " .. tostring(julia_err), vim.log.levels.ERROR)
-else
-  -- Create user command to update Julia LSP
-  vim.api.nvim_create_user_command('JuliaLspUpdate', function()
-    vim.notify("Updating LanguageServer.jl...", vim.log.levels.INFO)
-    vim.fn.jobstart({
-      'julia',
-      '--project=@nvim-lspconfig',
-      '-e',
-      'using Pkg; Pkg.update()'
-    }, {
-      on_exit = function(_, exit_code)
-        if exit_code == 0 then
-          vim.notify("LanguageServer.jl updated successfully! Restart Neovim to use the new version.", vim.log.levels.INFO)
-        else
-          vim.notify("Failed to update LanguageServer.jl", vim.log.levels.ERROR)
-        end
-      end,
-      on_stdout = function(_, data)
-        if data then
-          for _, line in ipairs(data) do
-            if line ~= "" then
-              print(line)
-            end
+end
+
+-- Create user command to install LanguageServer.jl in the @nvim-lspconfig environment
+vim.api.nvim_create_user_command('JuliaLspInstall', function()
+  vim.notify("Installing LanguageServer.jl in @nvim-lspconfig environment...", vim.log.levels.INFO)
+  local project_env = "@nvim-lspconfig"
+  vim.fn.jobstart({
+    'julia',
+    '--project=' .. project_env,
+    '-e',
+    'using Pkg; Pkg.add("LanguageServer")'
+  }, {
+    on_exit = function(_, exit_code)
+      if exit_code == 0 then
+        vim.notify("LanguageServer.jl installed successfully! Restart Neovim or reopen Julia files to use it.", vim.log.levels.INFO)
+      else
+        vim.notify("Failed to install LanguageServer.jl. You may need to run manually: julia --project=@nvim-lspconfig -e 'using Pkg; Pkg.add(\"LanguageServer\")'", vim.log.levels.ERROR)
+      end
+    end,
+    on_stdout = function(_, data)
+      if data then
+        for _, line in ipairs(data) do
+          if line ~= "" then
+            print(line)
           end
         end
-      end,
-    })
-  end, { desc = "Update Julia LanguageServer.jl" })
-
-  -- Create autocommand to manually start julials for Julia files
-  vim.api.nvim_create_autocmd("FileType", {
-    pattern = "julia",
-    callback = function(args)
-      local bufname = vim.api.nvim_buf_get_name(args.buf)
-      local util = require('lspconfig.util')
-      local found_root = util.root_pattern('Project.toml', 'JuliaProject.toml', '.git')(bufname)
-      local root_dir = found_root or vim.fn.fnamemodify(bufname, ':p:h')
-      
-      vim.lsp.start({
-        name = 'julials',
-        cmd = {
-          "julia",
-          "--project=@nvim-lspconfig",
-          "--startup-file=no",
-          "--history-file=no",
-          "-e",
-          [[
-            try
-              using LanguageServer, Pkg
-              project_path = try
-                Base.current_project() |> dirname
-              catch
-                dirname(Pkg.Types.Context().env.project_file)
-              end
-              server = LanguageServer.LanguageServerInstance(stdin, stdout, project_path, "")
-              run(server)
-            catch err
-              Base.println(stderr, err)
-              Base.println(stderr, sprint(showerror, err, catch_backtrace()))
-              flush(stderr)
-              exit(1)
-            end
-          ]],
-        },
-        root_dir = root_dir,
-        on_attach = on_attach,
-        capabilities = _G.enhanced_lsp_capabilities or capabilities,
-      })
+      end
+    end,
+    on_stderr = function(_, data)
+      if data then
+        for _, line in ipairs(data) do
+          if line ~= "" then
+            print(line)
+          end
+        end
+      end
     end,
   })
-end
+end, { desc = "Install Julia LanguageServer.jl in @nvim-lspconfig environment" })
+
+-- Create autocommand to manually start julials for Julia files
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "julia",
+  callback = function(args)
+    local bufname = vim.api.nvim_buf_get_name(args.buf)
+    local util = require('lspconfig.util')
+    local found_root = util.root_pattern('Project.toml', 'JuliaProject.toml', '.git')(bufname)
+    local root_dir = found_root or vim.fn.fnamemodify(bufname, ':p:h')
+    local project_env = "@nvim-lspconfig"
+    
+    vim.lsp.start({
+      name = 'julials',
+      cmd = build_julia_lsp_cmd(project_env),
+      root_dir = root_dir,
+      on_attach = on_attach,
+      capabilities = _G.enhanced_lsp_capabilities or capabilities,
+    })
+  end,
+})
 
 -- Lua LSP setup (if not handled by Mason)
 vim.lsp.config('lua_ls', {

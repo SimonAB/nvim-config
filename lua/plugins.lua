@@ -47,6 +47,7 @@ local essential_plugins = {
 	{ url = "https://github.com/epwalsh/obsidian.nvim",           name = "obsidian.nvim" },      -- Obsidian vault support
 	{ url = "https://github.com/3rd/image.nvim",                  name = "image.nvim" },         -- Image viewing in Neovim
 	{ url = "https://github.com/gaoDean/autolist.nvim",           name = "autolist.nvim" },      -- Automatic list continuation and formatting
+	{ url = "https://github.com/SCJangra/table-nvim",              name = "table-nvim" },         -- Markdown table formatting
 
 	{ url = "https://github.com/jmbuhr/otter.nvim",               name = "otter.nvim" },         -- Code execution in Quarto
 	{ url = "https://github.com/quarto-dev/quarto-nvim",          name = "quarto-nvim" },        -- Quarto support
@@ -125,6 +126,7 @@ vim.defer_fn(function()
 			"plugins.typst-preview-nvim",
 			"plugins.obsidian-nvim",
 			"plugins.autolist-nvim",
+			"plugins.table-nvim",
 			"plugins.otter-nvim",
 			"plugins.quarto-nvim",
 			"plugins.trouble-nvim",

@@ -33,7 +33,7 @@ obsidian.setup({
         {
             name = "notebook",
             -- Use the local Notebook vault so paths like ../attachments/… resolve correctly
-            path = "/Users/s_a_b/Notebook",
+            path = "/Users/s_a_b/Library/Mobile Documents/iCloud~md~obsidian/Documents/Notebook",
         },
     },
 

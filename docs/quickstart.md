@@ -175,7 +175,11 @@ K                    " Show documentation
 
 " Markdown
 <Space>Kp            " Start preview
-<Space>Kt            " Toggle preview
+<Space>Kt            " Toggle preview (or wait for table operations menu)
+<Space>Ktf           " Format table
+<Space>Ktn/Ktp       " Navigate table cells
+<Space>Kto/KtO      " Insert row below/above
+<Space>Kti/KtI      " Insert column right/left
 
 " Quarto
 <Space>Qp            " Preview document

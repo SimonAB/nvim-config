@@ -135,6 +135,27 @@ allowing you to scroll through output, yank error messages, and dismiss with `q`
 <Leader>QRw     " Render to Word
 ```
 
+### Markdown Table Operations
+Table editing operations for markdown and quarto files (table-nvim):
+```vim
+<Leader>Ktf     " Format/realign table
+<Leader>Ktn     " Next cell
+<Leader>Ktp     " Previous cell
+<Leader>Kto     " Insert row below
+<Leader>KtO     " Insert row above
+<Leader>KtJ     " Move row down
+<Leader>KtK     " Move row up
+<Leader>Kti     " Insert column right
+<Leader>KtI     " Insert column left
+<Leader>KtL     " Move column right
+<Leader>KtH     " Move column left
+<Leader>Ktdc    " Delete column
+<Leader>Ktt     " Insert table
+<Leader>KtT     " Insert table (no outline)
+```
+
+**Note**: `<Leader>Kt` is used both as a direct command (toggle markdown preview) and as a group prefix for table operations. Press `<Leader>Kt` immediately to toggle preview, or wait to see the table operations menu.
+
 ### Molten (Jupyter)
 ```vim
 <Leader>QMi     " Show image popup
