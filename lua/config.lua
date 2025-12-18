@@ -198,7 +198,8 @@ local function create_optimised_autocmds()
     group = augroup,
     pattern = "*",
     callback = function()
-      local pos = vim.api.nvim_win_get_cursor(0)
+      -- Preserve window view and cursor position while we normalise whitespace.
+      local view = vim.fn.winsaveview()
       local bufnr = vim.api.nvim_get_current_buf()
 
       -- Remove trailing whitespace (existing functionality)
@@ -223,18 +224,11 @@ local function create_optimised_autocmds()
       -- Only update buffer if changes were made
       if #collapsed_lines ~= #lines then
         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, collapsed_lines)
-
-        -- Adjust cursor position if needed
-        local new_row = math.min(pos[1], #collapsed_lines)
-        local line_length = #(collapsed_lines[new_row] or "")
-        local new_col = math.min(pos[2], line_length)
-        pos = { new_row, new_col }
       end
 
       -- Enforce exactly one newline at end of file
       lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
       if #lines > 0 then
-        local last_line = lines[#lines]
         local non_empty_lines = {}
 
         -- Find the last non-empty line
@@ -249,27 +243,11 @@ local function create_optimised_autocmds()
         if #non_empty_lines > 0 then
           non_empty_lines[#non_empty_lines + 1] = "" -- Add exactly one empty line
           vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, non_empty_lines)
-
-          -- Update cursor position to be within bounds after buffer modification
-          local new_line_count = #non_empty_lines
-          local new_col = math.min(pos[2], #lines[pos[1]] or 0)
-          local new_row = math.min(pos[1], new_line_count)
-
-          -- Ensure cursor is within valid bounds
-          if new_row > 0 and new_row <= new_line_count then
-            vim.api.nvim_win_set_cursor(0, { new_row, new_col })
-          else
-            -- Fallback: set cursor to end of file
-            vim.api.nvim_win_set_cursor(0, { new_line_count, 0 })
-          end
-        else
-          -- No non-empty lines found, restore original position
-          vim.api.nvim_win_set_cursor(0, pos)
         end
-      else
-        -- Empty file, restore original position
-        vim.api.nvim_win_set_cursor(0, pos)
       end
+
+      -- Restore original view and cursor to avoid any scroll jumps on save.
+      vim.fn.winrestview(view)
     end,
   })
 

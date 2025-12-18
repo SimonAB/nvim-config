@@ -72,6 +72,16 @@ local function buffer_operation(bufferline_cmd, fallback_cmd)
   end
 end
 
+--- Toggle Zen Mode using folke/zen-mode.nvim with graceful fallback.
+local function toggle_zen_mode()
+	local ok, zen_mode = pcall(require, "zen-mode")
+	if not ok then
+		vim.notify("zen-mode.nvim not available", vim.log.levels.WARN)
+		return
+	end
+	zen_mode.toggle()
+end
+
 -- ============================================================================
 -- GENERAL KEYMAPS
 -- ============================================================================
@@ -164,6 +174,7 @@ map("n", "<leader>|h", "<cmd>split<CR>", { desc = "Split Horizontal" })
 -- Toggle options (using Y prefix since T is for Terminal)
 map("n", "<leader>Yw", "<cmd>set wrap!<CR>", { desc = "Toggle wrap" })
 map("n", "<leader>Yn", "<cmd>set number!<CR>", { desc = "Toggle line numbers" })
+map("n", "<leader>Yz", toggle_zen_mode, { desc = "Toggle Zen Mode" })
 
 -- Enhanced theme management functions with deferred loading
 local function show_theme_picker()

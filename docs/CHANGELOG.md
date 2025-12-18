@@ -16,10 +16,16 @@
 - **Quarto Support**: Extended table-nvim functionality to `.qmd` files
 - **Which-Key Integration**: Table operations registered under `<leader>Kt` group
 
+### 🧘 Zen Mode for Markdown
+- **Distraction-Free Writing**: Added `folke/zen-mode.nvim` with sensible defaults
+- **Automatic Activation**: Zen Mode opens by default for all markdown buffers (Obsidian notes, research notes, etc.)
+- **Keybinding**: `<leader>Yz` toggles Zen Mode on and off (documented in Quickstart and Keymaps Reference)
+- **Cursor Behaviour**: Fixed cursor placement when Zen Mode auto-opens so the cursor appears correctly in the Zen window
+
 ### 📚 Documentation Updates
 - **Keymaps Reference**: Added comprehensive table operations section
-- **Quickstart Guide**: Added table operation examples
-- **Note**: `<leader>Kt` serves dual purpose - press immediately to toggle markdown preview, or wait to see table operations menu
+- **Quickstart Guide**: Added table operation examples and Zen Mode toggle keymap
+- **Note**: `<leader>Kt` serves dual purpose - press immediately to toggle markdown preview, or wait to see the table operations menu
 
 ---
 

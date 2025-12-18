@@ -48,6 +48,7 @@ local essential_plugins = {
 	{ url = "https://github.com/3rd/image.nvim",                  name = "image.nvim" },         -- Image viewing in Neovim
 	{ url = "https://github.com/gaoDean/autolist.nvim",           name = "autolist.nvim" },      -- Automatic list continuation and formatting
 	{ url = "https://github.com/SCJangra/table-nvim",              name = "table-nvim" },         -- Markdown table formatting
+	{ url = "https://github.com/folke/zen-mode.nvim",             name = "zen-mode.nvim" },      -- Distraction-free writing mode
 
 	{ url = "https://github.com/jmbuhr/otter.nvim",               name = "otter.nvim" },         -- Code execution in Quarto
 	{ url = "https://github.com/quarto-dev/quarto-nvim",          name = "quarto-nvim" },        -- Quarto support

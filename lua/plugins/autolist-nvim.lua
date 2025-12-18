@@ -175,8 +175,8 @@ if ok then
 			return
 		end
 
-		-- Save current cursor position
-		local saved_pos = vim.api.nvim_win_get_cursor(0)
+		-- Save current view (cursor + scroll position)
+		local view = vim.fn.winsaveview()
 		local bufnr = vim.api.nvim_get_current_buf()
 		
 		-- Read all lines at once for efficiency
@@ -205,8 +205,8 @@ if ok then
 			end
 		end
 		
-		-- Restore cursor position
-		vim.api.nvim_win_set_cursor(0, saved_pos)
+		-- Restore original view to avoid scroll jumps on save
+		vim.fn.winrestview(view)
 	end
 
 	-- Recalculate lists on document save

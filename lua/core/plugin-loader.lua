@@ -29,6 +29,7 @@ local LOAD_PHASES = {
 		"gitsigns-nvim",      -- Git integration
 		"toggleterm-nvim",    -- Terminal management
 		"markdown-preview-nvim", -- Markdown preview
+		"zen-mode-nvim",      -- Distraction-free writing for prose
 	},
 
 	-- Phase 3: LAZY (500ms) - Non-essentials and themes

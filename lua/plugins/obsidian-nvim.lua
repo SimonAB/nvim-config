@@ -205,6 +205,8 @@ obsidian.setup({
             vim.api.nvim_create_autocmd("BufWritePre", {
                 pattern = "*.md",
                 callback = function()
+                    -- Preserve current view so updating frontmatter does not scroll the buffer.
+                    local view = vim.fn.winsaveview()
                     local bufnr = vim.api.nvim_get_current_buf()
                     local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
                     local content = table.concat(lines, "\n")
@@ -231,6 +233,9 @@ obsidian.setup({
                         local new_content = frontmatter .. content
                         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(new_content, "\n"))
                     end
+
+                    -- Restore original view after modifying the buffer.
+                    vim.fn.winrestview(view)
                 end,
             })
         end,

@@ -258,6 +258,7 @@ Table editing operations for markdown and quarto files (table-nvim):
 ```vim
 <Leader>Yc      " Cycle through themes
 <Leader>Yw      " Toggle word wrap
+<Leader>Yz      " Toggle Zen Mode (markdown writing)
 <Leader>Yn      " Toggle line numbers
 <Leader>Ys      " Toggle spell check
 <Leader>Yse     " Set spell language to English (British)

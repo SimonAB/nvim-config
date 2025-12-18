@@ -19,7 +19,7 @@ hero:
 features:
   - icon: 📄
     title: Document Processing
-    details: LaTeX (VimTeX, SyncTeX), Markdown (live preview), Quarto, Typst.
+    details: LaTeX (VimTeX, SyncTeX), Markdown (Zen Mode, live preview), Quarto, Typst.
 
   - icon: 🧪
     title: Scientific Computing
