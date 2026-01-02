@@ -166,6 +166,7 @@ map("n", "<leader>w", "<cmd>w<CR>", { desc = "Write" })
 map("n", "<C-s>", "<cmd>w<CR>", { desc = "Quick save" })
 map("n", "<leader>q", "<cmd>bdelete<CR>", { desc = "Close Buffer" })
 map("n", "<leader>h", "<cmd>nohlsearch<CR>", { desc = "Hide Highlight" })
+map("n", "<leader>z", toggle_zen_mode, { desc = "Toggle Zen Mode" })
 
 -- Split commands in Split group (using | since S is for Search)
 map("n", "<leader>|v", "<cmd>vsplit<CR>", { desc = "Split Vertical" })

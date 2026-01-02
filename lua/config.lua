@@ -251,6 +251,117 @@ local function create_optimised_autocmds()
     end,
   })
 
+  -- Ensure one empty line before and after lists in markdown files
+  vim.api.nvim_create_autocmd("BufWritePre", {
+    group = augroup,
+    pattern = { "*.md", "*.Rmd", "*.qmd" },
+    desc = "Ensure empty lines before and after lists in markdown files",
+    callback = function()
+      local view = vim.fn.winsaveview()
+      local bufnr = vim.api.nvim_get_current_buf()
+      local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+      
+      if #lines == 0 then
+        return
+      end
+
+      -- Patterns for detecting list items (matches autolist patterns)
+      local list_patterns = {
+        unordered = "^%s*[-+*]%s+",  -- - + *
+        ordered = "^%s*%d+[.)]%s+",   -- 1. 2. 3. or 1) 2) 3)
+        ascii = "^%s*%a[.)]%s+",      -- a) b) c)
+        roman = "^%s*%u+[.)]%s+",     -- I. II. III.
+      }
+
+      -- Function to check if a line is a list item
+      local function is_list_item(line)
+        if not line or line:match("^%s*$") then
+          return false
+        end
+        for _, pattern in pairs(list_patterns) do
+          if line:match(pattern) then
+            return true
+          end
+        end
+        return false
+      end
+
+      -- Function to check if a line is empty (or only whitespace)
+      local function is_empty(line)
+        return not line or line:match("^%s*$") ~= nil
+      end
+
+      -- Find all list blocks and track where to insert empty lines
+      local modifications = {}
+      local i = 1
+      local line_count = #lines
+
+      while i <= line_count do
+        local line = lines[i]
+        
+        if is_list_item(line) then
+          -- Found the start of a list block
+          local list_start = i
+          local list_end = i
+          
+          -- Find the end of this list block (consecutive list items)
+          -- An empty line or non-list item terminates the block
+          while list_end < line_count do
+            local next_line = lines[list_end + 1]
+            if is_list_item(next_line) then
+              list_end = list_end + 1
+            else
+              -- Non-list item or empty line ends the block
+              break
+            end
+          end
+          
+          -- Skip trailing empty lines at the end of the list block
+          while list_end > list_start and is_empty(lines[list_end]) do
+            list_end = list_end - 1
+          end
+          
+          -- Check if we need an empty line before the list
+          if list_start > 1 then
+            local prev_line = lines[list_start - 1]
+            if not is_empty(prev_line) then
+              table.insert(modifications, { pos = list_start, type = "before" })
+            end
+          end
+          
+          -- Check if we need an empty line after the list
+          if list_end < line_count then
+            local next_line = lines[list_end + 1]
+            if not is_empty(next_line) then
+              table.insert(modifications, { pos = list_end + 1, type = "after" })
+            end
+          end
+          
+          i = list_end + 1
+        else
+          i = i + 1
+        end
+      end
+
+      -- Apply modifications in reverse order to maintain correct line numbers
+      if #modifications > 0 then
+        table.sort(modifications, function(a, b)
+          return a.pos > b.pos
+        end)
+        
+        for _, mod in ipairs(modifications) do
+          if mod.type == "before" then
+            vim.api.nvim_buf_set_lines(bufnr, mod.pos - 1, mod.pos - 1, false, { "" })
+          elseif mod.type == "after" then
+            vim.api.nvim_buf_set_lines(bufnr, mod.pos, mod.pos, false, { "" })
+          end
+        end
+      end
+
+      vim.fn.winrestview(view)
+    end,
+  })
+
   -- Auto-save on focus loss/exit
   vim.api.nvim_create_autocmd({ "FocusLost", "VimLeavePre" }, {
     group = augroup,

@@ -263,6 +263,7 @@ Table editing operations for markdown and quarto files (table-nvim):
 <Leader>Ys      " Toggle spell check
 <Leader>Yse     " Set spell language to English (British)
 <Leader>Ysf     " Set spell language to French
+<Leader>z       " Toggle Zen Mode (quick shortcut)
 ```
 
 ## Window Management

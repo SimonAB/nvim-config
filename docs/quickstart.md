@@ -212,6 +212,7 @@ Julia REPLs: `--threads=auto`
 <Space>Yc            " Cycle through themes
 <Space>YTs           " Show current theme
 <Space>Yz            " Toggle Zen Mode (markdown writing mode)
+<Space>z             " Quick Zen Mode toggle
 ```
 
 Themes: Catppuccin, OneDark, Tokyo Night, Nord, GitHub Dark/Light.
