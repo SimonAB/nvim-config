@@ -988,7 +988,18 @@ local function quarto_render_to_format(format, format_name)
       return
     end
     vim.notify("Rendering " .. vim.fn.expand("%:t") .. " to " .. format_name .. "...", vim.log.levels.INFO)
-    vim.fn.jobstart({"quarto", "render", file, "--to", format}, {
+    
+    -- Build command with PDF-specific options
+    local cmd = {"quarto", "render", file, "--to", format}
+    if format == "pdf" then
+      -- Add non-stop mode for LaTeX compilation
+      -- Pass via --pdf-engine-opt (Pandoc flag)
+      table.insert(cmd, "--pdf-engine-opt=-interaction=nonstopmode")
+    end
+    
+    -- Set environment to ensure non-interactive execution
+    local current_env = vim.fn.environ()
+    local job_opts = {
       on_exit = function(_, exit_code)
         if exit_code == 0 then
           vim.notify("✓ " .. format_name .. " render complete: " .. vim.fn.expand("%:t"), vim.log.levels.INFO)
@@ -1005,17 +1016,104 @@ local function quarto_render_to_format(format, format_name)
           end
         end
       end,
-    })
+      -- Set up environment for non-interactive execution
+      env = {},
+    }
+    
+    -- Copy existing environment
+    for k, v in pairs(current_env) do
+      job_opts.env[k] = v
+    end
+    
+    -- Set environment variables for non-interactive execution
+    -- Make Julia run in non-interactive/batch mode
+    job_opts.env["JULIA_NUM_THREADS"] = job_opts.env["JULIA_NUM_THREADS"] or "1"
+    -- Prevent Julia from prompting (set to empty or no)
+    job_opts.env["JULIA_INTERACTIVE"] = "no"
+    -- Set TERM to prevent interactive prompts
+    job_opts.env["TERM"] = "dumb"
+    -- Ensure non-interactive mode
+    job_opts.env["NONINTERACTIVE"] = "1"
+    -- Disable paging (prevents "Press ENTER" prompts from less/more)
+    job_opts.env["PAGER"] = "cat"
+    job_opts.env["MANPAGER"] = "cat"
+    job_opts.env["LESS"] = "-R"  -- Raw control chars, but no paging
+    job_opts.env["MORE"] = "-R"
+    
+    -- Add environment variable for latexmk if rendering to PDF
+    if format == "pdf" then
+      -- Set LATEXMKOPTS to ensure non-stop mode for all LaTeX passes
+      local latexmkopts = current_env["LATEXMKOPTS"] or ""
+      if latexmkopts ~= "" then
+        job_opts.env["LATEXMKOPTS"] = latexmkopts .. " -interaction=nonstopmode"
+      else
+        job_opts.env["LATEXMKOPTS"] = "-interaction=nonstopmode"
+      end
+    end
+    
+    -- Execute command directly with environment variables set
+    -- The pager environment variables (PAGER=cat, etc.) will prevent paging
+    -- Stdin redirection is handled by jobstart's default behavior
+    vim.fn.jobstart(cmd, job_opts)
   end
 end
 
 map("n", "<leader>Qp", quarto_operation("quartoPreview"), { desc = "Quarto Preview" })
 map("n", "<leader>Qc", quarto_operation("quartoClosePreview"), { desc = "Close preview" })
 
+-- Function to render all files in the project
+local function quarto_render_all()
+  vim.notify("Rendering all files in project...", vim.log.levels.INFO)
+  
+  -- Build command to render all files (no file specified = render all)
+  local cmd = {"quarto", "render"}
+  
+  -- Set environment to ensure non-interactive execution
+  local current_env = vim.fn.environ()
+  local job_opts = {
+    on_exit = function(_, exit_code)
+      if exit_code == 0 then
+        vim.notify("✓ Render all complete", vim.log.levels.INFO)
+      else
+        vim.notify("✗ Render all failed with exit code " .. exit_code, vim.log.levels.ERROR)
+      end
+    end,
+    on_stderr = function(_, data)
+      if data and #data > 0 then
+        for _, line in ipairs(data) do
+          if line ~= "" then
+            print(line)
+          end
+        end
+      end
+    end,
+    env = {},
+  }
+  
+  -- Copy existing environment
+  for k, v in pairs(current_env) do
+    job_opts.env[k] = v
+  end
+  
+  -- Set environment variables for non-interactive execution
+  job_opts.env["JULIA_NUM_THREADS"] = job_opts.env["JULIA_NUM_THREADS"] or "1"
+  job_opts.env["JULIA_INTERACTIVE"] = "no"
+  job_opts.env["TERM"] = "dumb"
+  job_opts.env["NONINTERACTIVE"] = "1"
+  -- Disable paging (prevents "Press ENTER" prompts from less/more)
+  job_opts.env["PAGER"] = "cat"
+  job_opts.env["MANPAGER"] = "cat"
+  job_opts.env["LESS"] = "-R"
+  job_opts.env["MORE"] = "-R"
+  
+  vim.fn.jobstart(cmd, job_opts)
+end
+
 -- Format-specific render commands
 map("n", "<leader>QRh", quarto_render_to_format("html", "HTML"), { desc = "Render to HTML" })
 map("n", "<leader>QRp", quarto_render_to_format("pdf", "PDF"), { desc = "Render to PDF" })
 map("n", "<leader>QRw", quarto_render_to_format("docx", "Word"), { desc = "Render to Word" })
+map("n", "<leader>QRa", quarto_render_all, { desc = "Render all" })
 
 -- Molten keymaps
 local molten_commands = {
