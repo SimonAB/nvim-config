@@ -1,6 +1,23 @@
 # Changelog
 
-## [Latest] - Table Operations and Documentation Updates
+## [Latest] - Markdown List Formatting Fix
+
+### 🐛 Bug Fixes
+- **Markdown List Formatting**: Fixed issue where empty lines were incorrectly inserted between math blocks (`$$...$$`) and list items
+  - Enhanced list block detection to recognise math blocks as part of list item content
+  - Added support for continuation lines (indented content within list items)
+  - Improved handling of display math blocks (`$$`) within markdown lists
+  - Formatter now correctly preserves math blocks without adding unwanted empty lines
+
+### 📝 Technical Details
+- Updated `BufWritePre` autocmd in `lua/config.lua` to track math block state
+- Added `has_math_delimiters()` function to detect lines containing `$$`
+- Added `update_math_block_state()` function to track math block boundaries
+- Enhanced list continuation detection to handle indented content properly
+
+---
+
+## [Previous] - Table Operations and Documentation Updates
 
 ### 📊 Markdown Table Operations
 - **Table-nvim Integration**: Added comprehensive table editing keymaps under `<leader>Kt`

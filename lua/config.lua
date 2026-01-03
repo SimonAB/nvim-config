@@ -291,6 +291,49 @@ local function create_optimised_autocmds()
         return not line or line:match("^%s*$") ~= nil
       end
 
+      -- Function to get the indentation level of a list item
+      local function get_list_indent(line)
+        local indent = line:match("^(%s*)")
+        return #indent
+      end
+
+      -- Function to check if a line is a continuation of a list item
+      -- (indented content that's part of the list item)
+      local function is_list_continuation(line, list_indent)
+        if is_empty(line) then
+          return true -- Empty lines can be part of list items
+        end
+        local line_indent = line:match("^(%s*)")
+        return #line_indent > list_indent
+      end
+
+      -- Function to check if a line contains math block delimiters
+      local function has_math_delimiters(line)
+        if not line then
+          return false
+        end
+        -- Check for display math blocks ($$)
+        return line:match("%$%$") ~= nil
+      end
+
+      -- Function to track math block state
+      -- Returns new state: true if inside math block, false otherwise
+      local function update_math_block_state(line, currently_inside)
+        if not line then
+          return currently_inside
+        end
+        -- Count $$ delimiters (display math blocks)
+        local dollar_count = 0
+        for _ in line:gmatch("%$%$") do
+          dollar_count = dollar_count + 1
+        end
+        -- If we have an odd number of $$, we're toggling the state
+        if dollar_count % 2 == 1 then
+          return not currently_inside
+        end
+        return currently_inside
+      end
+
       -- Find all list blocks and track where to insert empty lines
       local modifications = {}
       local i = 1
@@ -303,21 +346,42 @@ local function create_optimised_autocmds()
           -- Found the start of a list block
           local list_start = i
           local list_end = i
+          local list_indent = get_list_indent(line)
+          local in_math_block = false
           
-          -- Find the end of this list block (consecutive list items)
-          -- An empty line or non-list item terminates the block
+          -- Find the end of this list block
+          -- Continue through list items, continuations, and math blocks
           while list_end < line_count do
             local next_line = lines[list_end + 1]
-            if is_list_item(next_line) then
+            
+            -- Update math block state
+            in_math_block = update_math_block_state(next_line, in_math_block)
+            
+            -- If we're inside a math block or the line contains math delimiters, continue
+            -- (math delimiters are part of the list item content)
+            if in_math_block or has_math_delimiters(next_line) then
+              list_end = list_end + 1
+            elseif is_list_item(next_line) then
+              -- Another list item at the same or less indentation level
+              local next_indent = get_list_indent(next_line)
+              if next_indent <= list_indent then
+                list_end = list_end + 1
+                list_indent = next_indent -- Update for nested lists
+              else
+                -- More indented list item - continuation of current item
+                list_end = list_end + 1
+              end
+            elseif is_list_continuation(next_line, list_indent) then
+              -- Continuation line (indented content or empty line)
               list_end = list_end + 1
             else
-              -- Non-list item or empty line ends the block
+              -- Truly separate content - end the list block
               break
             end
           end
           
           -- Skip trailing empty lines at the end of the list block
-          while list_end > list_start and is_empty(lines[list_end]) do
+          while list_end > list_start and is_empty(lines[list_end]) and not in_math_block do
             list_end = list_end - 1
           end
           
