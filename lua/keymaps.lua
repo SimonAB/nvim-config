@@ -377,11 +377,120 @@ local function send_current_code_block()
   end
 end
 
+-- Function to yank code chunk content (excluding delimiters)
+-- Works when cursor is inside the chunk or on the delimiter lines
+-- Supports both Quarto format (```{language}) and Markdown format (```language or ```)
+local function yank_code_chunk()
+  local buf = vim.api.nvim_get_current_buf()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local current_line = cursor[1]
+  local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+
+  local fenced_start = nil
+  local fenced_end = nil
+
+  -- Helper function to check if a line is an opening delimiter
+  local function is_opening_delimiter(line)
+    if not line then return false end
+    -- Match Quarto format: ```{language} or ```{language, options}
+    if line:match("^```{.*}") then return true end
+    -- Match Markdown format: ```language or ``` (plain)
+    if line:match("^```") then return true end
+    return false
+  end
+
+  -- Helper function to check if a line is a closing delimiter
+  local function is_closing_delimiter(line)
+    if not line then return false end
+    -- Closing delimiter is just ``` (with optional whitespace)
+    return line:match("^```%s*$") ~= nil
+  end
+
+  -- Check if current line is a delimiter line
+  local is_on_opening = is_opening_delimiter(lines[current_line])
+  local is_on_closing = is_closing_delimiter(lines[current_line])
+
+  -- Find the start of the fenced code block
+  -- If we're on the opening delimiter, use it; otherwise search backwards
+  if is_on_opening then
+    fenced_start = current_line
+  elseif is_on_closing then
+    -- If on closing delimiter, search backwards to find the matching opening
+    for i = current_line - 1, 1, -1 do
+      if is_opening_delimiter(lines[i]) then
+        fenced_start = i
+        break
+      end
+    end
+    -- If we found a start, the end is the current line
+    if fenced_start then
+      fenced_end = current_line
+    end
+  else
+    -- Cursor is inside the code block, search backwards for opening
+    for i = current_line, 1, -1 do
+      if is_opening_delimiter(lines[i]) then
+        fenced_start = i
+        break
+      end
+    end
+  end
+
+  -- If we found a start but not an end yet, search forwards for the closing delimiter
+  if fenced_start and not fenced_end then
+    -- Search forwards from the start (skip the opening delimiter)
+    for i = fenced_start + 1, #lines do
+      if is_closing_delimiter(lines[i]) then
+        fenced_end = i
+        break
+      end
+    end
+  end
+
+  -- Check if we have a valid code chunk
+  if fenced_start and fenced_end and fenced_start < fenced_end then
+    -- Extract only the code content (exclude delimiters)
+    local code_start = fenced_start + 1
+    local code_end = fenced_end - 1
+
+    -- Only proceed if there's actual code content
+    if code_start <= code_end then
+      -- Get the code lines
+      local code_lines = {}
+      for i = code_start, code_end do
+        table.insert(code_lines, lines[i])
+      end
+
+      -- Join lines with newlines
+      local code_content = table.concat(code_lines, "\n")
+      -- Add trailing newline if content exists
+      if #code_lines > 0 then
+        code_content = code_content .. "\n"
+      end
+
+      -- Yank to the default register
+      vim.fn.setreg('"', code_content)
+      vim.fn.setreg('+', code_content) -- Also yank to system clipboard if available
+      vim.fn.setreg('*', code_content) -- Also yank to primary selection if available
+
+      -- Show visual feedback
+      vim.notify("Yanked code chunk (" .. (code_end - code_start + 1) .. " lines)", vim.log.levels.INFO)
+    else
+      vim.notify("Empty code chunk", vim.log.levels.WARN)
+    end
+  else
+    vim.notify("No code chunk found around cursor", vim.log.levels.WARN)
+  end
+end
+
 -- Terminal keybindings
 map("n", "<C-t>", "<esc><cmd>ToggleTerm<CR>", { desc = "Toggle terminal" })
 map("n", "<C-i>", "<esc><cmd>ToggleTermSendCurrentLine<CR>j", { desc = "Send current line to terminal" })
 map("n", "<C-c>", send_current_code_block, { desc = "Send current code block to terminal" })
 map("v", "<C-s>", ":'<,'>ToggleTermSendVisualSelection<CR>", { desc = "Send selected lines to terminal" })
+
+-- Code chunk yank keybinding
+map("n", "yic", yank_code_chunk, { desc = "Yank code chunk" })
 -- Terminal clear - works from any window, finds and clears terminal
 map("n", "<leader>Tk", function()
   local current_win = vim.api.nvim_get_current_win()
