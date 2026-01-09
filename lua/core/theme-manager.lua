@@ -90,6 +90,55 @@ function ThemeManager.apply_formatting_parity()
   formatting_cache[theme] = true
 end
 
+-- Apply link highlighting (blue and underlined) for markdown links, wiki links, and URLs
+function ThemeManager.apply_link_highlights()
+  -- Try to extract blue colour from common highlight groups that are typically blue
+  -- Try Function, Keyword, Type, or Special in order of preference
+  local link_colour = nil
+  local blue_groups = { "Function", "Keyword", "Type", "Special", "Statement" }
+  
+  for _, group_name in ipairs(blue_groups) do
+    local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group_name })
+    if ok and hl and hl.fg then
+      link_colour = hl.fg
+      break
+    end
+  end
+  
+  -- Fallback to a default blue if we couldn't extract one
+  if not link_colour then
+    link_colour = "#339af0"
+  end
+
+  -- Markdown link highlights
+  -- Use 'sp' parameter to set underline colour to match foreground
+  pcall(vim.api.nvim_set_hl, 0, "markdownLinkText", {
+    fg = link_colour,
+    sp = link_colour, -- Underline colour matches foreground
+    underline = true,
+  })
+
+  pcall(vim.api.nvim_set_hl, 0, "markdownUrl", {
+    fg = link_colour,
+    sp = link_colour,
+    underline = true,
+  })
+
+  -- Wiki link highlight (for Obsidian-style [[links]])
+  pcall(vim.api.nvim_set_hl, 0, "markdownWikiLink", {
+    fg = link_colour,
+    sp = link_colour,
+    underline = true,
+  })
+
+  -- URL highlight (for bare URLs)
+  pcall(vim.api.nvim_set_hl, 0, "markdownUrlTitle", {
+    fg = link_colour,
+    sp = link_colour,
+    underline = true,
+  })
+end
+
 ---Apply the configured UI opacity across Neovim.
 ---Note: Blur effects are handled by the terminal emulator/window manager when transparency is enabled.
 ---On macOS, the window manager automatically applies blur to transparent windows.
@@ -264,6 +313,7 @@ function ThemeManager.setup_highlight_autocmd()
         ThemeManager.update_which_key_highlights()
         ThemeManager.apply_formatting_parity()
         ThemeManager.apply_spell_undercurl()
+        ThemeManager.apply_link_highlights()
         ThemeManager.apply_global_opacity()
       end, 50)
     end,
@@ -299,6 +349,7 @@ function ThemeManager.init()
 	ThemeManager.update_which_key_highlights()
   ThemeManager.apply_formatting_parity()
   ThemeManager.apply_spell_undercurl()
+  ThemeManager.apply_link_highlights()
   ThemeManager.apply_global_opacity()
 
 	vim.notify("Theme system initialized: " .. active_theme, vim.log.levels.INFO)

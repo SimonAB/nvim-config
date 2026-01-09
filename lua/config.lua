@@ -491,3 +491,29 @@ end
 
 -- Create optimised autocmds
 create_optimised_autocmds()
+
+-- Setup syntax matching for wiki links and bare URLs in markdown files
+-- Note: Standard markdown links [text](url) are already handled by built-in syntax
+local function setup_markdown_link_syntax()
+  local markdown_group = vim.api.nvim_create_augroup("MarkdownLinks", { clear = true })
+  
+  vim.api.nvim_create_autocmd("FileType", {
+    group = markdown_group,
+    pattern = { "markdown", "pandoc", "quarto" },
+    callback = function()
+      -- Create syntax match for wiki links [[...]] (Obsidian-style)
+      -- Exclude from code blocks and inline code to avoid false matches
+      vim.cmd('syntax match markdownWikiLink /\\[\\[[^\\]]\\+\\]\\]/ containedin=ALLBUT,markdownCodeBlock,markdownCodeDelimiter,markdownInlineCode')
+      vim.cmd('highlight link markdownWikiLink markdownWikiLink')
+      
+      -- Create syntax match for bare URLs (http://, https://, www.)
+      -- Only if not already matched by existing markdown syntax
+      -- Exclude from code blocks and inline code
+      vim.cmd('syntax match markdownBareUrl /https\\?:\\/\\/[^\\s<>"{}|\\\\^`\\[\\]]\\+/ containedin=ALLBUT,markdownCodeBlock,markdownCodeDelimiter,markdownInlineCode,markdownLinkText,markdownUrl')
+      vim.cmd('syntax match markdownBareUrl /www\\.[^\\s<>"{}|\\\\^`\\[\\]]\\+/ containedin=ALLBUT,markdownCodeBlock,markdownCodeDelimiter,markdownInlineCode,markdownLinkText,markdownUrl')
+      vim.cmd('highlight link markdownBareUrl markdownUrl')
+    end,
+  })
+end
+
+setup_markdown_link_syntax()
