@@ -90,53 +90,59 @@ function ThemeManager.apply_formatting_parity()
   formatting_cache[theme] = true
 end
 
--- Apply link highlighting (blue and underlined) for markdown links, wiki links, and URLs
-function ThemeManager.apply_link_highlights()
-  -- Try to extract blue colour from common highlight groups that are typically blue
-  -- Try Function, Keyword, Type, or Special in order of preference
-  local link_colour = nil
-  local blue_groups = { "Function", "Keyword", "Type", "Special", "Statement" }
+--- Extract the link colour from the current colourscheme.
+--- Checks treesitter link groups, the standard Underlined group, and common blue groups.
+---@return number|string|nil colour The foreground colour for links
+local function get_link_colour()
+  -- Priority order for extracting link colour:
+  -- 1. Treesitter link groups (most semantic)
+  -- 2. Standard Underlined group (Vim convention for links)
+  -- 3. Common "blue" groups as fallback
+  local groups_to_check = {
+    "@markup.link.url",      -- Treesitter: URL part of links
+    "@markup.link",          -- Treesitter: general link
+    "@string.special.url",   -- Treesitter: URLs as special strings
+    "@text.uri",             -- Treesitter: older name for URLs
+    "Underlined",            -- Standard Vim group for hyperlinks
+    "Special",               -- Often blue in many themes
+    "Function",              -- Commonly blue
+  }
   
-  for _, group_name in ipairs(blue_groups) do
-    local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group_name })
+  for _, group_name in ipairs(groups_to_check) do
+    local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group_name, link = false })
     if ok and hl and hl.fg then
-      link_colour = hl.fg
-      break
+      return hl.fg
     end
   end
   
-  -- Fallback to a default blue if we couldn't extract one
-  if not link_colour then
-    link_colour = "#339af0"
+  return nil
+end
+
+-- Apply link highlighting (blue and underlined) for markdown links, wiki links, and URLs
+function ThemeManager.apply_link_highlights()
+  local link_colour = get_link_colour()
+  
+  -- Build highlight options: always underline, use theme colour if found
+  local hl_opts = { underline = true }
+  if link_colour then
+    hl_opts.fg = link_colour
+    hl_opts.sp = link_colour -- Underline colour matches foreground
   end
 
-  -- Markdown link highlights
-  -- Use 'sp' parameter to set underline colour to match foreground
-  pcall(vim.api.nvim_set_hl, 0, "markdownLinkText", {
-    fg = link_colour,
-    sp = link_colour, -- Underline colour matches foreground
-    underline = true,
-  })
-
-  pcall(vim.api.nvim_set_hl, 0, "markdownUrl", {
-    fg = link_colour,
-    sp = link_colour,
-    underline = true,
-  })
-
+  -- Markdown link highlights (traditional vim syntax)
+  pcall(vim.api.nvim_set_hl, 0, "markdownLinkText", hl_opts)
+  pcall(vim.api.nvim_set_hl, 0, "markdownUrl", hl_opts)
+  pcall(vim.api.nvim_set_hl, 0, "markdownUrlTitle", hl_opts)
+  
   -- Wiki link highlight (for Obsidian-style [[links]])
-  pcall(vim.api.nvim_set_hl, 0, "markdownWikiLink", {
-    fg = link_colour,
-    sp = link_colour,
-    underline = true,
-  })
-
-  -- URL highlight (for bare URLs)
-  pcall(vim.api.nvim_set_hl, 0, "markdownUrlTitle", {
-    fg = link_colour,
-    sp = link_colour,
-    underline = true,
-  })
+  pcall(vim.api.nvim_set_hl, 0, "markdownWikiLink", hl_opts)
+  
+  -- Treesitter link highlights (ensures consistency with modern syntax highlighting)
+  pcall(vim.api.nvim_set_hl, 0, "@markup.link", hl_opts)
+  pcall(vim.api.nvim_set_hl, 0, "@markup.link.url", hl_opts)
+  pcall(vim.api.nvim_set_hl, 0, "@markup.link.label", hl_opts)
+  pcall(vim.api.nvim_set_hl, 0, "@string.special.url", hl_opts)
+  pcall(vim.api.nvim_set_hl, 0, "@text.uri", hl_opts) -- Older treesitter name
 end
 
 ---Apply the configured UI opacity across Neovim.
