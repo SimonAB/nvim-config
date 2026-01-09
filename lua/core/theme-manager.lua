@@ -6,7 +6,6 @@
 local ThemeManager = {}
 local highlight_cache = {}
 local formatting_cache = {}
-local link_highlight_cache = {} -- Cache for link highlighting per theme
 local ThemePicker = nil -- Lazy load to avoid circular dependencies
 local ThemeSettings = require("core.theme-settings")
 
@@ -120,14 +119,8 @@ local function get_link_colour()
 end
 
 -- Apply link highlighting (blue and underlined) for markdown links, wiki links, and URLs
+-- Note: No caching - this is fast and must re-apply reliably after theme changes
 function ThemeManager.apply_link_highlights()
-  local theme = vim.g.colors_name or "default"
-  
-  -- Skip if already applied for this theme
-  if link_highlight_cache[theme] then
-    return
-  end
-  
   local link_colour = get_link_colour()
   
   -- Build highlight options: always underline, use theme colour if found
@@ -151,9 +144,6 @@ function ThemeManager.apply_link_highlights()
   pcall(vim.api.nvim_set_hl, 0, "@markup.link.label", hl_opts)
   pcall(vim.api.nvim_set_hl, 0, "@string.special.url", hl_opts)
   pcall(vim.api.nvim_set_hl, 0, "@text.uri", hl_opts) -- Older treesitter name
-  
-  -- Cache to avoid redundant applications for this theme
-  link_highlight_cache[theme] = true
 end
 
 ---Apply the configured UI opacity across Neovim.
@@ -258,7 +248,6 @@ end
 function ThemeManager.clear_highlight_cache()
 	highlight_cache = {}
   formatting_cache = {}
-  link_highlight_cache = {}
 end
 
 -- Theme picker integration
@@ -325,15 +314,47 @@ end
 
 -- Setup auto-updating highlights when theme changes
 function ThemeManager.setup_highlight_autocmd()
+  local group = vim.api.nvim_create_augroup("ThemeManagerHighlights", { clear = true })
+  
+  -- Helper to apply all highlight customisations
+  local function apply_all_highlights()
+    ThemeManager.update_which_key_highlights()
+    ThemeManager.apply_formatting_parity()
+    ThemeManager.apply_spell_undercurl()
+    ThemeManager.apply_link_highlights()
+    ThemeManager.apply_global_opacity()
+  end
+  
+  -- Primary trigger: ColorScheme change
+  -- Use multiple deferred calls to ensure we run after treesitter and other plugins
   vim.api.nvim_create_autocmd("ColorScheme", {
+    group = group,
     callback = function()
-      vim.defer_fn(function()
-        ThemeManager.update_which_key_highlights()
-        ThemeManager.apply_formatting_parity()
-        ThemeManager.apply_spell_undercurl()
-        ThemeManager.apply_link_highlights()
-        ThemeManager.apply_global_opacity()
-      end, 50)
+      -- First pass: quick application
+      vim.defer_fn(apply_all_highlights, 10)
+      -- Second pass: catch any plugins that apply highlights after us
+      vim.defer_fn(apply_all_highlights, 100)
+      -- Final pass: ensure everything is correct after all deferred operations
+      vim.defer_fn(apply_all_highlights, 300)
+    end,
+  })
+  
+  -- Secondary trigger: when background option changes (auto-dark-mode sets this first)
+  vim.api.nvim_create_autocmd("OptionSet", {
+    group = group,
+    pattern = "background",
+    callback = function()
+      vim.defer_fn(apply_all_highlights, 150)
+    end,
+  })
+  
+  -- Tertiary trigger: re-apply when entering markdown buffers
+  -- This catches cases where treesitter re-highlights the buffer
+  vim.api.nvim_create_autocmd("FileType", {
+    group = group,
+    pattern = { "markdown", "quarto", "pandoc" },
+    callback = function()
+      vim.defer_fn(ThemeManager.apply_link_highlights, 50)
     end,
   })
 end
