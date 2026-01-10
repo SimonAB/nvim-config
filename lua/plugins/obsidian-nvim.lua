@@ -205,6 +205,12 @@ obsidian.setup({
             vim.api.nvim_create_autocmd("BufWritePre", {
                 pattern = "*.md",
                 callback = function()
+                    -- Skip README.md files (e.g., GitHub profile READMEs)
+                    local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()), ":t")
+                    if filename:lower() == "readme.md" then
+                        return
+                    end
+
                     -- Preserve current view so updating frontmatter does not scroll the buffer.
                     local view = vim.fn.winsaveview()
                     local bufnr = vim.api.nvim_get_current_buf()
@@ -227,8 +233,8 @@ obsidian.setup({
                         end
                     else
                         -- No YAML header, add complete frontmatter
-                        local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t:r")
-                        local frontmatter = build_yaml_frontmatter(filename, current_date)
+                        local file_id = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t:r")
+                        local frontmatter = build_yaml_frontmatter(file_id, current_date)
 
                         local new_content = frontmatter .. content
                         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(new_content, "\n"))
