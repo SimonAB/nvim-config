@@ -198,9 +198,15 @@ local function create_optimised_autocmds()
     group = augroup,
     pattern = "*",
     callback = function()
+      local bufnr = vim.api.nvim_get_current_buf()
+      
+      -- Skip if buffer is not modifiable
+      if not vim.bo[bufnr].modifiable then
+        return
+      end
+      
       -- Preserve window view and cursor position while we normalise whitespace.
       local view = vim.fn.winsaveview()
-      local bufnr = vim.api.nvim_get_current_buf()
 
       -- Remove trailing whitespace (existing functionality)
       local has_trailing = vim.fn.search('\\s\\+$', 'n') > 0
@@ -257,8 +263,14 @@ local function create_optimised_autocmds()
     pattern = { "*.md", "*.Rmd", "*.qmd" },
     desc = "Ensure empty lines before and after lists in markdown files",
     callback = function()
-      local view = vim.fn.winsaveview()
       local bufnr = vim.api.nvim_get_current_buf()
+      
+      -- Skip if buffer is not modifiable
+      if not vim.bo[bufnr].modifiable then
+        return
+      end
+      
+      local view = vim.fn.winsaveview()
       local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
       
       if #lines == 0 then

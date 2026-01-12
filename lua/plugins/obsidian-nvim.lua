@@ -205,15 +205,21 @@ obsidian.setup({
             vim.api.nvim_create_autocmd("BufWritePre", {
                 pattern = "*.md",
                 callback = function()
+                    local bufnr = vim.api.nvim_get_current_buf()
+                    
+                    -- Skip if buffer is not modifiable
+                    if not vim.bo[bufnr].modifiable then
+                        return
+                    end
+                    
                     -- Skip README.md files (e.g., GitHub profile READMEs)
-                    local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()), ":t")
+                    local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t")
                     if filename:lower() == "readme.md" then
                         return
                     end
 
                     -- Preserve current view so updating frontmatter does not scroll the buffer.
                     local view = vim.fn.winsaveview()
-                    local bufnr = vim.api.nvim_get_current_buf()
                     local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
                     local content = table.concat(lines, "\n")
                     local current_date = get_current_yaml_date()
