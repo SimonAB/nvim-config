@@ -73,3 +73,4 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = enable_markdown_zen_mode,
 })
 
+

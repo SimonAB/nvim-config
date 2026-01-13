@@ -269,8 +269,10 @@ if ok then
 			vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
 		end
 	end, desc = "Mason Status" },
-		-- Markdown preview
+		-- Markdown group (preview + list operations)
 		{ "<leader>K", group = "Markdown" },
+		{ "<leader>Kn", desc = "Autolist: Next list style" },
+		{ "<leader>Kp", desc = "Autolist: Previous list style" },
 
 		-- Theme management (enhanced with floating picker)
 		{ "<leader>YT", group = "Themes" },

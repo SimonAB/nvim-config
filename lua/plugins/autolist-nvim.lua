@@ -138,8 +138,9 @@ if ok then
 			vim.keymap.set("n", "<C-r>", "<cmd>AutolistRecalculate<cr>", { buffer = true, desc = "Autolist: Recalculate list" })
 
 			-- Cycle list types with dot-repeat
-			vim.keymap.set("n", "<leader>cn", autolist.cycle_next_dr, { buffer = true, expr = true, desc = "Autolist: Cycle next" })
-			vim.keymap.set("n", "<leader>cp", autolist.cycle_prev_dr, { buffer = true, expr = true, desc = "Autolist: Cycle prev" })
+			-- Use Markdown group prefix (<leader>K...) to keep group keys capitalised
+			vim.keymap.set("n", "<leader>Kn", autolist.cycle_next_dr, { buffer = true, expr = true, desc = "Autolist: Cycle next list style" })
+			vim.keymap.set("n", "<leader>Kp", autolist.cycle_prev_dr, { buffer = true, expr = true, desc = "Autolist: Cycle previous list style" })
 
 			-- Recalculate list on edit
 			vim.keymap.set("n", ">>", ">><cmd>AutolistRecalculate<cr>", { buffer = true, desc = "Autolist: Indent and recalculate" })
