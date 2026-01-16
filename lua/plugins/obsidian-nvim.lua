@@ -212,9 +212,10 @@ obsidian.setup({
                         return
                     end
                     
-                    -- Skip README.md files (e.g., GitHub profile READMEs)
+                    -- Skip README.md and AGENTS.md files (e.g., GitHub profile READMEs, configuration docs)
                     local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t")
-                    if filename:lower() == "readme.md" then
+                    local lower_filename = filename:lower()
+                    if lower_filename == "readme.md" or lower_filename == "agents.md" then
                         return
                     end
 

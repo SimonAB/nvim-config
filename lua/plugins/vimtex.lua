@@ -52,12 +52,6 @@ vim.g.vimtex_syntax_custom_cmds = {
   { name = 'autocite', argspell = false },
 }
 
--- Additional VimTeX syntax configuration for better spell checking
-vim.g.vimtex_syntax_nospell_commands = {
-  'cite', 'citep', 'citet', 'citealp', 'citealt', 'citeauthor', 'citeyear',
-  'parencite', 'footcite', 'textcite', 'autocite', 'supercite'
-}
-
 -- Function to apply citation spell exclusion rules
 local function apply_citation_nospell_rules()
   -- Only apply if we're in a tex file

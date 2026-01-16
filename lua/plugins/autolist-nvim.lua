@@ -27,6 +27,7 @@ if ok then
 
 	autolist.setup({
 		enabled = true,
+		tab = "  ", -- Use 2 spaces for list indentation instead of tabs
 		colon = {
 			indent = true, -- If in list and line ends in `:` then create list
 			indent_raw = true, -- Above, but doesn't need to be in a list to work
@@ -89,8 +90,8 @@ if ok then
 				if trimmed_line:match(":$") then
 					-- Save the indentation from the colon line
 					local colon_indent = line:match("^%s*")
-					-- Get the tab character/string from autolist config
-					local tab = autolist_config.tab or "  "
+					-- Use 2 spaces for first bullet point indentation (hardcoded for markdown)
+					local tab = "  "
 					-- Get preferred bullet marker from colon config
 					local preferred = autolist_config.colon.preferred or "-"
 					
@@ -108,14 +109,23 @@ if ok then
 						local bullet_line_0idx = current_line_0idx + 1 -- 0-indexed
 						local bullet_line_1idx = current_line_0idx + 2 -- 1-indexed
 						
-						-- Get the current content of the bullet line (if any)
-						local current_bullet_line = vim.api.nvim_buf_get_lines(bufnr, bullet_line_0idx, bullet_line_0idx + 1, false)[1] or ""
-						-- Manually create the bullet with correct indentation
-						-- Format: tab + colon_indent + preferred + " "
-						local bullet = tab .. colon_indent .. preferred .. " "
-						-- Set the line with the bullet, preserving any existing content (strip leading whitespace)
-						local new_line = bullet .. current_bullet_line:gsub("^%s*", "", 1)
-						vim.api.nvim_buf_set_lines(bufnr, bullet_line_0idx, bullet_line_0idx + 1, false, { new_line })
+					-- Manually create the bullet with correct indentation
+					-- Format: tab + preferred + " " (use 2 spaces for first bullet, ignore colon_indent)
+					local bullet = tab .. preferred .. " "
+					-- Get any existing content on the bullet line (excluding leading whitespace)
+					local current_bullet_line = vim.api.nvim_buf_get_lines(bufnr, bullet_line_0idx, bullet_line_0idx + 1, false)[1] or ""
+					local content = current_bullet_line:gsub("^%s*", "", 1)
+					-- Set the line with exactly 2 spaces + bullet + existing content (no extra indentation)
+					-- Temporarily disable auto-indent to prevent interference
+					local old_indentexpr = vim.bo[bufnr].indentexpr
+					local old_smartindent = vim.bo[bufnr].smartindent
+					vim.bo[bufnr].indentexpr = ""
+					vim.bo[bufnr].smartindent = false
+					local new_line = bullet .. content
+					vim.api.nvim_buf_set_lines(bufnr, bullet_line_0idx, bullet_line_0idx + 1, false, { new_line })
+					-- Restore auto-indent settings
+					vim.bo[bufnr].indentexpr = old_indentexpr
+					vim.bo[bufnr].smartindent = old_smartindent
 						-- Move cursor to after the bullet (1-indexed for cursor)
 						vim.api.nvim_win_set_cursor(0, { bullet_line_1idx, #bullet })
 					end)
