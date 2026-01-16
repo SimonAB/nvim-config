@@ -115,17 +115,10 @@ if ok then
 					-- Get any existing content on the bullet line (excluding leading whitespace)
 					local current_bullet_line = vim.api.nvim_buf_get_lines(bufnr, bullet_line_0idx, bullet_line_0idx + 1, false)[1] or ""
 					local content = current_bullet_line:gsub("^%s*", "", 1)
-					-- Set the line with exactly 2 spaces + bullet + existing content (no extra indentation)
-					-- Temporarily disable auto-indent to prevent interference
-					local old_indentexpr = vim.bo[bufnr].indentexpr
-					local old_smartindent = vim.bo[bufnr].smartindent
-					vim.bo[bufnr].indentexpr = ""
-					vim.bo[bufnr].smartindent = false
+					-- Set the line with exactly 2 spaces + bullet + existing content
+					-- nvim_buf_set_lines directly sets content, so auto-indent doesn't apply
 					local new_line = bullet .. content
 					vim.api.nvim_buf_set_lines(bufnr, bullet_line_0idx, bullet_line_0idx + 1, false, { new_line })
-					-- Restore auto-indent settings
-					vim.bo[bufnr].indentexpr = old_indentexpr
-					vim.bo[bufnr].smartindent = old_smartindent
 						-- Move cursor to after the bullet (1-indexed for cursor)
 						vim.api.nvim_win_set_cursor(0, { bullet_line_1idx, #bullet })
 					end)
