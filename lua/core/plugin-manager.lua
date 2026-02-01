@@ -6,30 +6,15 @@
 local PluginManager = {}
 local progress_handle = nil
 
--- Progress and notification system with improved error handling
+-- Progress and notification system (vim.notify only; no fidget dependency)
 local function create_progress(title, message)
 	if progress_handle then
 		pcall(function() progress_handle:finish() end)
 	end
-
-	local ok, fidget = pcall(require, "fidget")
-	if ok and fidget and fidget.progress and fidget.progress.handle then
-		local success, handle = pcall(fidget.progress.handle.create, {
-			title = title,
-			message = message,
-			percentage = 0,
-		})
-		if success then
-			progress_handle = handle
-		else
-			vim.notify("Failed to create progress handle: " .. tostring(handle), vim.log.levels.WARN)
-		end
-	else
-		vim.notify(message, vim.log.levels.INFO, {
-			title = title,
-			timeout = 5000,
-		})
-	end
+	vim.notify(message, vim.log.levels.INFO, {
+		title = title,
+		timeout = 5000,
+	})
 	return progress_handle
 end
 

@@ -102,51 +102,8 @@ for _, dir in ipairs(plugin_dirs) do
 	end
 end
 
--- Defer plugin configurations
-vim.defer_fn(function()
-	-- Load critical plugins that need immediate setup
-	vim.cmd("packadd nvim-lspconfig")
-	vim.cmd("packadd mason.nvim")
-	vim.cmd("packadd mason-lspconfig.nvim")
-
-	-- Defer other plugin configurations
-	vim.defer_fn(function()
-		-- Load plugin configurations
-		local plugin_configs = {
-			"plugins.blink-cmp",
-			"plugins.nvim-treesitter",
-			"plugins.telescope",
-			"plugins.nvim-tree",
-			"plugins.lualine-nvim",
-			"plugins.bufferline-nvim",
-			"plugins.gitsigns-nvim",
-			"plugins.which-key-nvim",
-			"plugins.toggleterm-nvim",
-			"plugins.vimtex",
-			"plugins.markdown-preview-nvim",
-			"plugins.typst-preview-nvim",
-			"plugins.obsidian-nvim",
-			"plugins.autolist-nvim",
-			"plugins.table-nvim",
-			"plugins.otter-nvim",
-			"plugins.quarto-nvim",
-			"plugins.trouble-nvim",
-			"plugins.auto-dark-mode-nvim",
-			"plugins.gruvbox-nvim",
-			"plugins.github-nvim-theme",
-			"plugins.nord-vim",
-			"plugins.awesome-vim-colorschemes",
-			"plugins.tokyonight-nvim",
-			"plugins.onedark-nvim",
-			"plugins.catppuccin",
-			"plugins.julia-vim",
-		}
-
-		for _, config in ipairs(plugin_configs) do
-			pcall(require, config)
-		end
-	end, 100)
-end, 50)
+-- Plugin config loading is handled by core/plugin-loader.lua (require.lua) in phased
+-- immediate / deferred / lazy order. This file only installs, packloads, and sets rtp.
 
 -- Store plugins table globally for other modules to access
 _G.neovim_plugins = essential_plugins

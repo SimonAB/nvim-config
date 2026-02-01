@@ -78,7 +78,7 @@ opt.guifont = "LigaSFMonoNerdFont-Regular:h10" -- Set font
 local config_dir = vim.fn.stdpath('config')
 local config_files = {
   init = config_dir .. '/init.lua',
-  plugins = config_dir .. '/lua/plugins/require.lua',
+  plugins = config_dir .. '/lua/require.lua',
   keymaps = config_dir .. '/lua/keymaps.lua',
   custom = config_dir .. '/lua/config.lua',
 }
@@ -88,9 +88,6 @@ _G.nvim_config_files = config_files
 
 -- Enable filetype detection
 vim.cmd("filetype plugin indent on")
-
--- Theme customisation
-vim.g.sonokai_enable_italic_comment = 1
 
 -- VimTeX configuration (Skim integration)
 

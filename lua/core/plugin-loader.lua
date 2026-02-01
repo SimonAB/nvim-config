@@ -30,6 +30,14 @@ local LOAD_PHASES = {
 		"toggleterm-nvim",    -- Terminal management
 		"markdown-preview-nvim", -- Markdown preview
 		"zen-mode-nvim",      -- Distraction-free writing for prose
+		"vimtex",             -- LaTeX support
+		"typst-preview-nvim", -- Typst preview
+		"obsidian-nvim",      -- Obsidian vault support
+		"autolist-nvim",      -- List continuation
+		"table-nvim",         -- Markdown tables
+		"otter-nvim",         -- Code execution (Quarto)
+		"quarto-nvim",        -- Quarto support
+		"julia-vim",          -- Julia syntax/indent
 	},
 
 	-- Phase 3: LAZY (500ms) - Non-essentials and themes
@@ -37,10 +45,13 @@ local LOAD_PHASES = {
 		"which-key-nvim",     -- Keymap discovery
 		"auto-dark-mode-nvim", -- Auto theme switching
 		-- Themes (loaded on-demand)
+		"gruvbox-nvim",
 		"tokyonight-nvim",
 		"nord-vim",
 		"github-nvim-theme",
 		"awesome-vim-colorschemes",
+		"onedark-nvim",
+		"catppuccin",
 	}
 }
 

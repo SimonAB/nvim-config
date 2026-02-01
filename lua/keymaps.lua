@@ -1337,7 +1337,7 @@ end
 local function julia_command(command, desc)
   return function()
     local project_path = vim.fn.shellescape(vim.fn.getcwd())
-    local julia_cmd = "julia --project=. --threads=auto" .. project_path .. " -e '" .. command .. "'"
+    local julia_cmd = "julia --project=" .. project_path .. " --threads=auto -e '" .. command .. "'"
     local terminal = create_terminal(julia_cmd, { direction = "horizontal" })
     terminal:toggle()
   end
