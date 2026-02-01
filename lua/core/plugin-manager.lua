@@ -138,7 +138,7 @@ function PluginManager.update_all_plugins()
 			return
 		end
 
-		-- Update plugin
+		-- Update plugin: try pull first; on local-changes conflict, reset to upstream
 		local cmd = { "git", "-C", plugin.path, "pull", "--ff-only", "--quiet" }
 		local result = vim.fn.system(cmd)
 
@@ -148,7 +148,20 @@ function PluginManager.update_all_plugins()
 				updated = updated + 1
 			end
 		else
-			table.insert(failed, plugin.name .. ": " .. result:gsub("\n", " "))
+			local local_changes_msg = result:match("would be overwritten by merge")
+				or result:match("local changes to the following files")
+			if local_changes_msg then
+				-- Discard local changes (e.g. generated doc/tags) and sync to upstream
+				vim.fn.system({ "git", "-C", plugin.path, "fetch", "origin", "--quiet" })
+				local reset_result = vim.fn.system({ "git", "-C", plugin.path, "reset", "--hard", "@{u}", "--quiet" })
+				if vim.v.shell_error == 0 then
+					updated = updated + 1
+				else
+					table.insert(failed, plugin.name .. ": " .. reset_result:gsub("\n", " "))
+				end
+			else
+				table.insert(failed, plugin.name .. ": " .. result:gsub("\n", " "))
+			end
 		end
 
 		completed = completed + 1
@@ -185,6 +198,16 @@ function PluginManager.update_plugin(plugin_name)
 		local cmd = { "git", "-C", plugin_path, "pull", "--ff-only" }
 		local result = vim.fn.system(cmd)
 
+		if vim.v.shell_error ~= 0 then
+			local local_changes_msg = result:match("would be overwritten by merge")
+				or result:match("local changes to the following files")
+			if local_changes_msg then
+				vim.fn.system({ "git", "-C", plugin_path, "fetch", "origin", "--quiet" })
+				vim.fn.system({ "git", "-C", plugin_path, "reset", "--hard", "@{u}", "--quiet" })
+				result = (vim.v.shell_error == 0) and "Updated (local changes discarded)" or result
+			end
+		end
+
 		if handle then
 			if vim.v.shell_error == 0 then
 				if result:match("Already up to date") then
@@ -205,7 +228,7 @@ function PluginManager.update_plugin(plugin_name)
 				notify("✓ " .. plugin_name .. " updated successfully", vim.log.levels.INFO)
 			end
 		else
-			notify("✗ Failed to update " .. plugin_name, vim.log.levels.ERROR)
+			notify("✗ Failed to update " .. plugin_name .. ": " .. result:gsub("\n", " "), vim.log.levels.ERROR)
 		end
 	end, 100)
 end
