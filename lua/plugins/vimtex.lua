@@ -1,6 +1,64 @@
 -- Configuration for vimtex
 -- LaTeX editing support with enhanced features
 
+-- Proofreading todo categories (from AGENTS.md) for VimTeX TOC (<localleader>lt).
+-- VimTeX looks up with toupper(type), so keys must be UPPERCASE (see todo_comments.vim).
+vim.g.vimtex_toc_todo_labels = {
+	TODO = "TODO: ",
+	FIXME = "FIXME: ",
+	TIGHTEN = "Tighten: ",
+	EDIT = "Edit: ",
+	ADD = "Add: ",
+	CLARIFY = "Clarify: ",
+	REF = "Ref: ",
+	VERIFY = "Verify: ",
+	DELETE = "Delete: ",
+}
+
+-- Custom TOC matchers for proofreading commands (todonotes-style macros).
+-- Must be defined in Vimscript so each matcher has get_entry() returning type 'todo',
+-- so entries appear in the TOC todo layer instead of mixed with content/headings.
+vim.cmd([[
+function! VimtexProofTocGetEntry(context) abort dict
+  let content = matchstr(a:context.line, '\v\\' . self.cmd . '\s*\{\zs[^}]*\ze\}')
+  let title = content !=# '' ? self.title . ': ' . content : self.title
+  return {
+    \ 'title': title,
+    \ 'number': '',
+    \ 'file': a:context.file,
+    \ 'line': a:context.lnum,
+    \ 'level': a:context.max_level - a:context.level.current,
+    \ 'rank': a:context.lnum_total,
+    \ 'type': 'todo',
+    \}
+endfunction
+let g:vimtex_toc_custom_matchers = [
+  \ {'name': 'proof_tighten', 'title': 'Tighten', 'cmd': 'tighten', 'prefilter_cmds': ['tighten'], 're': '\v\\tighten\s*\{[^}]*\}', 'in_content': 1, 'get_entry': function('VimtexProofTocGetEntry')},
+  \ {'name': 'proof_edit', 'title': 'Edit', 'cmd': 'edit', 'prefilter_cmds': ['edit'], 're': '\v\\edit\s*\{[^}]*\}', 'in_content': 1, 'get_entry': function('VimtexProofTocGetEntry')},
+  \ {'name': 'proof_add', 'title': 'Add', 'cmd': 'add', 'prefilter_cmds': ['add'], 're': '\v\\add\s*\{[^}]*\}', 'in_content': 1, 'get_entry': function('VimtexProofTocGetEntry')},
+  \ {'name': 'proof_clarify', 'title': 'Clarify', 'cmd': 'clarify', 'prefilter_cmds': ['clarify'], 're': '\v\\clarify\s*\{[^}]*\}', 'in_content': 1, 'get_entry': function('VimtexProofTocGetEntry')},
+  \ {'name': 'proof_ref', 'title': 'Ref', 'cmd': 'checkref', 'prefilter_cmds': ['checkref'], 're': '\v\\checkref\s*\{[^}]*\}', 'in_content': 1, 'get_entry': function('VimtexProofTocGetEntry')},
+  \ {'name': 'proof_verify', 'title': 'Verify', 'cmd': 'verify', 'prefilter_cmds': ['verify'], 're': '\v\\verify\s*\{[^}]*\}', 'in_content': 1, 'get_entry': function('VimtexProofTocGetEntry')},
+  \ {'name': 'proof_delete', 'title': 'Delete', 'cmd': 'delete', 'prefilter_cmds': ['delete'], 're': '\v\\delete\s*\{[^}]*\}', 'in_content': 1, 'get_entry': function('VimtexProofTocGetEntry')},
+  \]
+]])
+
+-- TOC syntax: VimTeX only highlights todo prefixes that match uppercase keys (TODO:, ADD:).
+-- Our proofreading entries display as "Add:", "Tighten:", etc. Add a rule so they get the same green.
+local vimtex_toc_hl_group = vim.api.nvim_create_augroup("VimtexTocProofHighlight", { clear = true })
+vim.api.nvim_create_autocmd("User", {
+	group = vimtex_toc_hl_group,
+	pattern = "VimtexEventTocCreated",
+	desc = "Highlight proofreading todo prefixes in TOC like standard TODOs",
+	callback = function()
+		vim.cmd([[
+      syntax match VimtexTocProofTodo "\v\zs%(Tighten|Edit|Add|Clarify|Ref|Verify|Delete):\ze " contained
+      syntax cluster VimtexTocTitleStuff add=VimtexTocProofTodo
+      highlight link VimtexTocProofTodo VimtexTocTodo
+    ]])
+	end,
+})
+
 -- Detect platform and set appropriate PDF viewer
 local is_macos = vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1
 local is_linux = vim.fn.has("unix") == 1 and vim.fn.has("macunix") == 0
