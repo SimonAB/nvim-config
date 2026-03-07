@@ -38,6 +38,7 @@ local LOAD_PHASES = {
 		"otter-nvim",         -- Code execution (Quarto)
 		"quarto-nvim",        -- Quarto support
 		"julia-vim",          -- Julia syntax/indent
+		"forge-nvim",         -- Forge task & project manager
 	},
 
 	-- Phase 3: LAZY (500ms) - Non-essentials and themes

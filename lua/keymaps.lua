@@ -12,7 +12,7 @@
 -- • Addition of Split Group: New <leader>|* prefix for split window commands
 --   using pipe symbol (|) which visually represents splitting
 -- • Key Collision Resolution: Terminal (<leader>T*), Toggle (<leader>Y*),
---
+-- • Frecency moved from <leader>F* to <leader>R* (Forge now uses <leader>F*)
 
 local map = vim.keymap.set
 
@@ -835,15 +835,15 @@ map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file tree" })
 
 -- File operations
 map("n", "<leader>f", "<cmd>Telescope find_files<CR>", { desc = "Find files" })
-map("n", "<leader>F", "<cmd>Telescope frecency<CR>", { desc = "Find files (by frequency/recency)" })
-map("n", "<leader>Ff", "<cmd>Telescope frecency<CR>", { desc = "Find files (frecency)" })
-map("n", "<leader>Fr", function()
+map("n", "<leader>R", "<cmd>Telescope frecency<CR>", { desc = "Find files (by frequency/recency)" })
+map("n", "<leader>Rf", "<cmd>Telescope frecency<CR>", { desc = "Find files (frecency)" })
+map("n", "<leader>Rr", function()
   require('telescope').extensions.frecency.frecency()
 end, { desc = "Refresh frecency database" })
-map("n", "<leader>Fd", function()
+map("n", "<leader>Rd", function()
   print('Frecency DB: ' .. vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3')
 end, { desc = "Show frecency database location" })
-map("n", "<leader>Fb", function()
+map("n", "<leader>Rb", function()
   vim.fn.delete(vim.fn.stdpath('data') .. '/telescope-frecency.sqlite3')
   print('Frecency database deleted. Restart Neovim to rebuild.')
 end, { desc = "Rebuild frecency database" })

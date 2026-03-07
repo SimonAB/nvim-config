@@ -177,12 +177,60 @@ function M.prewarm_cache()
 	end
 end
 
+-- Create Forge section — adapts to whether the CLI is installed.
+function M.create_forge_items()
+	local forge_ok, forge = pcall(require, "plugins.forge-nvim")
+	local keys = config.DASHBOARD.FORGE_KEYS
+
+	if not forge_ok or not forge.is_available() then
+		local has_script = forge_ok and forge.has_setup_script()
+		if has_script then
+			return {
+				{
+					name = keys[1] .. ".  Set up Forge",
+					action = "ForgeSetup",
+					section = "Forge",
+				},
+			}
+		end
+		return {}
+	end
+
+	return {
+		{
+			name = keys[1] .. ".  Inbox",
+			action = "edit " .. vim.fn.fnameescape(vim.fn.expand("~/Documents/Forge/inbox.md")),
+			section = "Forge",
+		},
+		{
+			name = keys[2] .. ".  Next actions",
+			action = "ForgeNext",
+			section = "Forge",
+		},
+		{
+			name = keys[3] .. ".  Board",
+			action = "ForgeBoard",
+			section = "Forge",
+		},
+		{
+			name = keys[4] .. ".  Review",
+			action = "ForgeReview",
+			section = "Forge",
+		},
+	}
+end
+
 -- Create all dashboard items with immediate generation for core items
 function M.create_all_items()
 	local items = {}
 
 	-- Add shortcuts (lightweight, always immediate)
 	for _, item in ipairs(M.create_shortcuts()) do
+		table.insert(items, item)
+	end
+
+	-- Add Forge actions
+	for _, item in ipairs(M.create_forge_items()) do
 		table.insert(items, item)
 	end
 

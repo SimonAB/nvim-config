@@ -95,6 +95,7 @@ vim.g.vimtex_compiler_latexmk = {
 
 -- Disable spell checking in citation arguments
 -- This must be set before VimTeX initialises to take effect
+-- lua-ul [soul]: \ul and \uline get underline; \st and \hl get custom syntax below (same command names)
 vim.g.vimtex_syntax_custom_cmds = {
   { name = 'cite', argspell = false },
   { name = 'supercite', argspell = false },
@@ -108,6 +109,8 @@ vim.g.vimtex_syntax_custom_cmds = {
   { name = 'footcite', argspell = false },
   { name = 'textcite', argspell = false },
   { name = 'autocite', argspell = false },
+  { name = 'ul', argstyle = 'under' },
+  { name = 'uline', argstyle = 'under' },
 }
 
 -- Function to apply citation spell exclusion rules
@@ -190,5 +193,31 @@ vim.api.nvim_create_autocmd("User", {
   desc = "Apply citation spell rules after VimTeX initialization",
   callback = function()
     vim.defer_fn(apply_citation_nospell_rules, 50)
+  end,
+})
+
+-- lua-ul [soul]: \st (strikethrough) and \hl (highlight) — no built-in argstyle, so add syntax
+-- so their content gets texStyleStrike / texStyleHl; theme-manager sets gui (OpenType-friendly)
+local function add_tex_style_syntax()
+  if vim.bo.filetype ~= "tex" then return end
+  vim.cmd([[
+    syntax region texStyleStrike matchgroup=texDelim start="\\st\s*{" skip="\%#=1\\\\[{}]" end="}" contains=TOP,@NoSpell
+    syntax region texStyleStrike matchgroup=texDelim start="\\sout\s*{" skip="\%#=1\\\\[{}]" end="}" contains=TOP,@NoSpell
+    syntax region texStyleHl matchgroup=texDelim start="\\hl\s*{" skip="\%#=1\\\\[{}]" end="}" contains=TOP,@NoSpell
+  ]])
+end
+local vimtex_style_group = vim.api.nvim_create_augroup("VimtexStyleSyntax", { clear = true })
+vim.api.nvim_create_autocmd("FileType", {
+  group = vimtex_style_group,
+  pattern = "tex",
+  desc = "Add syntax for \\st and \\hl (lua-ul [soul]) so content gets styled",
+  callback = add_tex_style_syntax,
+})
+vim.api.nvim_create_autocmd("User", {
+  group = vimtex_style_group,
+  pattern = "VimtexEventInitPost",
+  desc = "Re-apply \\st/\\hl syntax after VimTeX init",
+  callback = function()
+    vim.defer_fn(add_tex_style_syntax, 10)
   end,
 })

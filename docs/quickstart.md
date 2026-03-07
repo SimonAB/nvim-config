@@ -290,6 +290,17 @@ In Neovim:
 \lv                  " Open PDF and jump to cursor position
 ```
 
+### Underline, strikethrough, highlight (lua-ul)
+
+This config expects **lua-ul** with soul-compatible command names (LuaLaTeX/OpenType-friendly). In your preamble use (order matters: **luacolor before lua-ul**):
+
+```latex
+\usepackage{luacolor}          % required for \hl (highlight); must be before lua-ul
+\usepackage[soul]{lua-ul}      % provides \ul, \uline, \st, \sout, \hl (same names as soul)
+```
+
+Do **not** load `soul` or `ulem`; lua-ul with the `[soul]` option gives you the same `\ul`, `\st`, `\hl` (and `\uline`, `\sout`) with better kerning and OpenType support. The editor will style these commands in the buffer and TOC.
+
 ## Obsidian Integration
 
 Configure Obsidian vault path in `lua/keymaps.lua` (line ~709):

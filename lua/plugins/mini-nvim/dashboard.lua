@@ -81,7 +81,7 @@ function M.setup()
 				end,
 				hooks.indexing and hooks.indexing(
 					"all",
-					config.SECTIONS
+					config.INDEXED_SECTIONS
 				) or function(x)
 					return x
 				end,
@@ -129,12 +129,15 @@ function M.setup_keymaps()
 			local items = (_G.MiniStarter and _G.MiniStarter.config and _G.MiniStarter.config.items) or {}
 			local projects = {}
 			local recent_files = {}
+			local forge_items = {}
 
 			for _, item in ipairs(items) do
 				if item and item.section == "Projects" then
 					table.insert(projects, item)
 				elseif item and item.section == "Recent files" then
 					table.insert(recent_files, item)
+				elseif item and item.section == "Forge" then
+					table.insert(forge_items, item)
 				end
 			end
 
@@ -169,6 +172,13 @@ function M.setup_keymaps()
 				vim.keymap.set("n", config.DASHBOARD.RECENT_FILE_KEYS[i], function()
 					exec_action(recent_files[i].action)
 				end, { buffer = buf, nowait = true, silent = true, desc = "Open Recent File " .. config.DASHBOARD.RECENT_FILE_KEYS[i] })
+			end
+
+			-- Forge shortcuts (I, N, B, S)
+			for i = 1, math.min(#forge_items, #config.DASHBOARD.FORGE_KEYS) do
+				vim.keymap.set("n", config.DASHBOARD.FORGE_KEYS[i], function()
+					exec_action(forge_items[i].action)
+				end, { buffer = buf, nowait = true, silent = true, desc = "Forge: " .. config.DASHBOARD.FORGE_KEYS[i] })
 			end
 		end,
 	})

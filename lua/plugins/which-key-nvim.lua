@@ -199,7 +199,7 @@ if ok then
 		-- Configuration
 		{ "<leader>C", group = "Config" },
 		-- Frecency operations (capital F for group with sub-commands)
-		{ "<leader>F", group = "Frecency" },
+		{ "<leader>F", group = "Forge" },
 		-- Git operations
 		{ "<leader>G", group = "Git" },
 		-- Obsidian operations
@@ -269,6 +269,8 @@ if ok then
 			vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
 		end
 	end, desc = "Mason Status" },
+		-- Forge task & project manager
+		{ "<leader>R", group = "Frecency" },
 		-- Markdown group (preview + list operations)
 		{ "<leader>K", group = "Markdown" },
 		{ "<leader>Kn", desc = "Autolist: Next list style" },
