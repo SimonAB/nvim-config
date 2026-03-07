@@ -146,6 +146,23 @@ function ThemeManager.apply_link_highlights()
   pcall(vim.api.nvim_set_hl, 0, "@text.uri", hl_opts) -- Older treesitter name
 end
 
+---Apply LaTeX lua-ul [soul] style highlights (\st, \hl) for OpenType-friendly display.
+---Strikethrough uses gui=strikethrough; highlight uses underline + optional bg (like link styling).
+function ThemeManager.apply_tex_style_highlights()
+  -- Strikethrough: \st{}, \sout{} — visible in all fonts
+  pcall(vim.api.nvim_set_hl, 0, "texStyleStrike", {
+    strikethrough = true,
+  })
+
+  -- Highlight: \hl{} — underline for OpenType visibility; bg from Search if available
+  local hl_opts = { underline = true }
+  local ok, search_hl = pcall(vim.api.nvim_get_hl, 0, { name = "Search", link = false })
+  if ok and search_hl and search_hl.bg then
+    hl_opts.bg = search_hl.bg
+  end
+  pcall(vim.api.nvim_set_hl, 0, "texStyleHl", hl_opts)
+end
+
 ---Apply the configured UI opacity across Neovim.
 ---Note: Blur effects are handled by the terminal emulator/window manager when transparency is enabled.
 ---On macOS, the window manager automatically applies blur to transparent windows.
@@ -322,6 +339,7 @@ function ThemeManager.setup_highlight_autocmd()
     ThemeManager.apply_formatting_parity()
     ThemeManager.apply_spell_undercurl()
     ThemeManager.apply_link_highlights()
+    ThemeManager.apply_tex_style_highlights()
     ThemeManager.apply_global_opacity()
   end
   
@@ -389,6 +407,7 @@ function ThemeManager.init()
   ThemeManager.apply_formatting_parity()
   ThemeManager.apply_spell_undercurl()
   ThemeManager.apply_link_highlights()
+  ThemeManager.apply_tex_style_highlights()
   ThemeManager.apply_global_opacity()
 
 	vim.notify("Theme system initialized: " .. active_theme, vim.log.levels.INFO)
