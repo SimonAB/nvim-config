@@ -6,6 +6,48 @@ local M = {}
 local FORGE_DIR = vim.fn.expand("~/Documents/Forge")
 local SETUP_SCRIPT = FORGE_DIR .. "/setup.sh"
 
+--- Project root: git root from current buffer/cwd, or directory of current file, or cwd.
+---@return string
+local function project_root()
+	local start = ""
+	local buf = vim.api.nvim_get_current_buf()
+	local path = vim.api.nvim_buf_get_name(buf)
+	if path and path ~= "" then
+		start = vim.fn.fnamemodify(path, ":p:h")
+	else
+		start = vim.fn.getcwd()
+	end
+	local root = vim.fn.trim(vim.fn.system("git -C " .. vim.fn.shellescape(start) .. " rev-parse --show-toplevel 2>/dev/null"))
+	if root and root ~= "" and vim.fn.isdirectory(root) == 1 then
+		return root
+	end
+	return start
+end
+
+--- Path to TASKS.md at the project root (git root, or current buffer dir / cwd).
+---@return string
+local function tasks_path_in_cwd()
+	return project_root() .. "/TASKS.md"
+end
+
+--- Minimal TASKS.md skeleton: section headers only (Forge format).
+--- Per-task notes use indented `>` (blockquote) lines under the task.
+local TASKS_TEMPLATE = [[
+## Next Actions
+
+- [ ] Sample task @due(2026-03-15) @ctx(office)
+  > Add notes for this task here using blockquote style.
+
+## Waiting For
+
+- [ ]
+  >
+
+## Completed
+
+## Notes
+]]
+
 --- Check whether the forge CLI is available on PATH.
 ---@return boolean
 function M.is_available()
@@ -111,6 +153,10 @@ function M.setup_keymaps()
 		forge_terminal("forge board --list")
 	end, { desc = "Kanban board" })
 
+	map("n", "<leader>Fp", function()
+		forge_terminal("forge projects")
+	end, { desc = "Tasks per project" })
+
 	map("n", "<leader>Ft", function()
 		forge_terminal("forge status")
 	end, { desc = "Project status" })
@@ -127,12 +173,16 @@ function M.setup_keymaps()
 		forge_terminal("forge someday")
 	end, { desc = "Someday / maybe" })
 
+	map("n", "<leader>FD", function()
+		forge_terminal("forge due")
+	end, { desc = "Overdue & due tasks" })
+
 	-- Interactive commands (need user input)
 	map("n", "<leader>Fr", function()
 		forge_interactive("forge review")
 	end, { desc = "Weekly review" })
 
-	map("n", "<leader>Fp", function()
+	map("n", "<leader>FI", function()
 		forge_interactive("forge process")
 	end, { desc = "Process inbox" })
 
@@ -175,6 +225,25 @@ function M.setup_keymaps()
 	map("n", "<leader>Fi", function()
 		open_forge_file("inbox.md")
 	end, { desc = "Open inbox" })
+
+	-- Open TASKS.md in current directory (create from template if missing)
+	map("n", "<leader>FT", function()
+		local path = tasks_path_in_cwd()
+		if vim.fn.filereadable(path) == 1 then
+			vim.cmd("edit " .. vim.fn.fnameescape(path))
+		else
+			local dir = vim.fn.fnamemodify(path, ":h")
+			if vim.fn.isdirectory(dir) == 0 then
+				vim.fn.mkdir(dir, "p")
+			end
+			local ok = pcall(vim.fn.writefile, vim.split(TASKS_TEMPLATE, "\n"), path)
+			if ok then
+				vim.cmd("edit " .. vim.fn.fnameescape(path))
+			else
+				vim.notify("Could not create " .. path, vim.log.levels.ERROR)
+			end
+		end
+	end, { desc = "Open TASKS.md (current dir)" })
 
 	-- Telescope: browse area files
 	map("n", "<leader>Fa", function()
@@ -256,6 +325,24 @@ function M.setup_commands()
 		forge_terminal("forge board --list")
 	end, { desc = "Forge: kanban board" })
 
+	vim.api.nvim_create_user_command("ForgeProjects", function(opts)
+		local arg = opts.args
+		if arg and arg ~= "" then
+			forge_terminal("forge projects -p " .. arg)
+		else
+			forge_terminal("forge projects")
+		end
+	end, { nargs = "?", desc = "Forge: tasks per project" })
+
+	vim.api.nvim_create_user_command("ForgeDue", function(opts)
+		local arg = opts.args
+		if arg and arg ~= "" then
+			forge_terminal("forge due -d " .. arg)
+		else
+			forge_terminal("forge due")
+		end
+	end, { nargs = "?", desc = "Forge: show overdue and due tasks" })
+
 	vim.api.nvim_create_user_command("ForgeSync", function()
 		forge_terminal("forge sync --verbose")
 	end, { desc = "Forge: sync with Reminders & Calendar" })
@@ -310,6 +397,30 @@ function M.setup_commands()
 			vim.notify("No task ID provided or found on current line", vim.log.levels.WARN)
 		end
 	end, { nargs = "?", desc = "Forge: complete a task by ID" })
+
+	vim.api.nvim_create_user_command("ForgeNvimTasks", function()
+		local path = tasks_path_in_cwd()
+		if vim.fn.filereadable(path) == 1 then
+			vim.cmd("edit " .. vim.fn.fnameescape(path))
+		else
+			local dir = vim.fn.fnamemodify(path, ":h")
+			if vim.fn.isdirectory(dir) == 0 then
+				vim.fn.mkdir(dir, "p")
+			end
+			local ok = pcall(vim.fn.writefile, vim.split(TASKS_TEMPLATE, "\n"), path)
+			if ok then
+				vim.cmd("edit " .. vim.fn.fnameescape(path))
+			else
+				vim.notify("Could not create " .. path, vim.log.levels.ERROR)
+			end
+		end
+	end, { desc = "Forge: open TASKS.md in current directory" })
+
+	vim.api.nvim_create_user_command("ForgeTASKSTemplate", function()
+		local line = vim.api.nvim_win_get_cursor(0)[1]
+		vim.api.nvim_buf_set_lines(0, line - 1, line - 1, true, vim.split(TASKS_TEMPLATE, "\n"))
+		vim.notify("Inserted TASKS.md template", vim.log.levels.INFO)
+	end, { desc = "Forge: insert TASKS.md section template at cursor" })
 end
 
 -- ===========================================================================

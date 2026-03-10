@@ -12,7 +12,7 @@ if ok then
 		unordered = "[-+*]", -- - + *
 		digit = "%d+[.)]", -- 1. 2. 3.
 		ascii = "%a[.)]", -- a) b) c)
-		roman = "%u*[.)]", -- I. II. III.
+		roman = "[IVXLCDM]+[.)]", -- I. II. III. (avoid matching non-Roman headings like 'A.')
 		latex_item = "\\item",
 	}
 
@@ -193,12 +193,12 @@ if ok then
 		for i = 1, line_count do
 			local line = lines[i]
 			if line and autolist_utils.is_list(line, list_types) then
-				-- Check if this is an ordered list (is_ordered returns a new value if ordered, nil otherwise)
-				local is_ordered = autolist_utils.is_ordered(line)
-				if is_ordered then
-					-- Find the start of this list
-					local list_start = autolist_utils.get_list_start(i, list_types)
-					if list_start and list_start > 0 and list_start <= line_count and not processed_lines[list_start] then
+				-- Safely check if this is an ordered list
+				local ok_ordered, is_ordered = pcall(autolist_utils.is_ordered, line)
+				if ok_ordered and is_ordered then
+					-- Safely find the start of this list
+					local ok_start, list_start = pcall(autolist_utils.get_list_start, i, list_types)
+					if ok_start and list_start and list_start > 0 and list_start <= line_count and not processed_lines[list_start] then
 						processed_lines[list_start] = true
 						-- Move cursor to list start and recalculate
 						vim.api.nvim_win_set_cursor(0, { list_start, 0 })
