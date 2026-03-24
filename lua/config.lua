@@ -89,14 +89,8 @@ _G.nvim_config_files = config_files
 -- Enable filetype detection
 vim.cmd("filetype plugin indent on")
 
--- VimTeX configuration (Skim integration)
-
--- VimTeX configuration with Skim reverse sync support (per official VimTeX docs)
-vim.g.vimtex_enabled = 1               -- Explicitly enable VimTeX
-vim.g.vimtex_view_method = 'skim'
-vim.g.vimtex_view_skim_activate = 0    -- Do not steal focus on view
-vim.g.vimtex_view_skim_reading_bar = 1 -- Highlight current location
-vim.g.vimtex_view_skim_sync = 1        -- Forward sync after compilation
+-- VimTeX core settings live in lua/plugins/vimtex.lua.
+-- Keep this file focused on editor-global behaviour only.
 
 -- Start a Neovim RPC server for robust inverse search (used by Skim)
 do
@@ -116,17 +110,6 @@ vim.g.vimtex_imaps_enabled = 1    -- Enable insert mode mappings
 
 -- Note: VimTeX spell configuration moved to lua/plugins/vimtex.lua
 -- to ensure proper initialization timing
-
--- Compiler configuration with synctex enabled for reverse sync
-vim.g.vimtex_compiler_latexmk = {
-  options = {
-    '-pdf',
-    '-pdflatex=lualatex',
-    '-synctex=1', -- Essential for reverse sync
-    '-interaction=nonstopmode',
-    '-file-line-error',
-  }
-}
 
 -- Markdown preview configuration (handled in plugins/markdown-preview-nvim.lua)
 
