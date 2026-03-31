@@ -1283,7 +1283,7 @@ map("n", "<leader>Mh", "<cmd>MasonHelp<CR>", { desc = "Mason Help" })
 -- Markdown preview keymaps
 map("n", "<leader>Kp", "<cmd>MarkdownPreview<CR>", { desc = "Start Markdown Preview" })
 map("n", "<leader>Ks", "<cmd>MarkdownPreviewStop<CR>", { desc = "Stop Markdown Preview" })
-map("n", "<leader>Kt", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Toggle Markdown Preview" })
+map("n", "<leader>Kv", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Toggle Markdown Preview" })
 
 -- Configuration reload
 map("n", "<leader>Cs", function()

@@ -142,8 +142,8 @@ if ok then
 
 			-- Cycle list types with dot-repeat
 			-- Use Markdown group prefix (<leader>K...) to keep group keys capitalised
-			vim.keymap.set("n", "<leader>Kn", autolist.cycle_next_dr, { buffer = true, expr = true, desc = "Autolist: Cycle next list style" })
-			vim.keymap.set("n", "<leader>Kp", autolist.cycle_prev_dr, { buffer = true, expr = true, desc = "Autolist: Cycle previous list style" })
+			vim.keymap.set("n", "<leader>Kln", autolist.cycle_next_dr, { buffer = true, expr = true, desc = "Autolist: Cycle next list style" })
+			vim.keymap.set("n", "<leader>Klp", autolist.cycle_prev_dr, { buffer = true, expr = true, desc = "Autolist: Cycle previous list style" })
 
 			-- Recalculate list on edit
 			vim.keymap.set("n", ">>", ">><cmd>AutolistRecalculate<cr>", { buffer = true, desc = "Autolist: Indent and recalculate" })

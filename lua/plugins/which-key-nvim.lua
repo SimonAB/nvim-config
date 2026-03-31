@@ -273,8 +273,9 @@ if ok then
 		{ "<leader>R", group = "Frecency" },
 		-- Markdown group (preview + list operations)
 		{ "<leader>K", group = "Markdown" },
-		{ "<leader>Kn", desc = "Autolist: Next list style" },
-		{ "<leader>Kp", desc = "Autolist: Previous list style" },
+		{ "<leader>Kl", group = "List" },
+		{ "<leader>Kln", desc = "Autolist: Next list style" },
+		{ "<leader>Klp", desc = "Autolist: Previous list style" },
 
 		-- Theme management (enhanced with floating picker)
 		{ "<leader>YT", group = "Themes" },

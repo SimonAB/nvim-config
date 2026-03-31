@@ -126,7 +126,10 @@ allowing you to scroll through output, yank error messages, and dismiss with `q`
 ```vim
 <Leader>Kp      " Start markdown preview
 <Leader>Ks      " Stop markdown preview
-<Leader>Kt      " Toggle markdown preview
+<Leader>Kv      " Toggle markdown preview
+
+<Leader>Kln     " Autolist: Next list style
+<Leader>Klp     " Autolist: Previous list style
 
 <Leader>Qp      " Quarto preview
 <Leader>Qc      " Close Quarto preview
@@ -154,7 +157,7 @@ Table editing operations for markdown and quarto files (table-nvim):
 <Leader>KtT     " Insert table (no outline)
 ```
 
-**Note**: `<Leader>Kt` is used both as a direct command (toggle markdown preview) and as a group prefix for table operations. Press `<Leader>Kt` immediately to toggle preview, or wait to see the table operations menu.
+**Note**: Table operations live under `<Leader>Kt…`. Markdown preview is `<Leader>Kp` (start), `<Leader>Ks` (stop), `<Leader>Kv` (toggle).
 
 ### Molten (Jupyter)
 ```vim

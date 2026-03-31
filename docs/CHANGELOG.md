@@ -42,7 +42,7 @@
 ### 📚 Documentation Updates
 - **Keymaps Reference**: Added comprehensive table operations section
 - **Quickstart Guide**: Added table operation examples and Zen Mode toggle keymap
-- **Note**: `<leader>Kt` serves dual purpose - press immediately to toggle markdown preview, or wait to see the table operations menu
+- **Note**: Table operations live under `<leader>Kt…`. Markdown preview is `<leader>Kp` (start), `<leader>Ks` (stop), `<leader>Kv` (toggle).
 
 ---
 
