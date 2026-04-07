@@ -169,10 +169,10 @@ nvim
 # 3. Dashboard appears
 ```
 
-If plugins don't install automatically:
-```vim
-:lua require('core.plugin-manager').install_all_plugins()
-```
+Notes:
+- `vim.pack` manages plugins and writes a lockfile to `~/.config/nvim/nvim-pack-lock.json`.
+- If a native build fails (for example `telescope-fzf-native.nvim`), restart Neovim after fixing
+  your toolchain and run a plugin update again.
 
 ## Document Processing Tools
 
@@ -611,7 +611,7 @@ Review each section for warnings or errors.
 ### Verify Plugin Installation
 
 ```vim
-:lua print(vim.inspect(vim.fn.glob('~/.local/share/nvim/pack/plugins/*/*', 0, 1)))
+:lua print(vim.inspect(vim.fn.glob('~/.local/share/nvim/site/pack/core/opt/*', 0, 1)))
 ```
 
 Expected: List of installed plugins
@@ -638,7 +638,7 @@ Expected: List of installed plugins
 **Solution**:
 ```bash
 # Check plugin directory
-ls ~/.local/share/nvim/pack/plugins/
+ls ~/.local/share/nvim/site/pack/core/opt/
 
 # Manual installation
 nvim -c "lua require('core.plugin-manager').install_all_plugins()" -c "q"
@@ -657,7 +657,7 @@ nvim -c "messages" -c "q"
 cargo --version
 
 # Manually compile
-cd ~/.local/share/nvim/pack/plugins/start/blink.cmp
+cd ~/.local/share/nvim/site/pack/core/opt/blink.cmp
 cargo build --release
 
 # Alternative: Use nvim-cmp instead

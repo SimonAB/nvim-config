@@ -303,7 +303,7 @@ Do **not** load `soul` or `ulem`; lua-ul with the `[soul]` option gives you the 
 
 ## Obsidian Integration
 
-Configure Obsidian vault path in `lua/keymaps.lua` (line ~709):
+Configure Obsidian vault path in `lua/keymaps-plugins.lua`:
 
 ```lua
 local obsidian_path = "/Users/<username>/Library/Mobile Documents/iCloud~md~obsidian/Documents/Notebook"
@@ -431,14 +431,14 @@ Press `<Space>` (500ms delay) to view commands grouped by functionality:
 1. Install language servers: `<Space>MA`
 2. Configure theme: `<Space>YTp`
 3. Setup LaTeX: Configure Skim for bidirectional sync
-4. Customise: Add keymaps to `lua/keymaps.lua`
+4. Customise: Add core keymaps to `lua/keymaps-core.lua` (plugin-free) and plugin keymaps to `lua/keymaps-plugins.lua`
 5. Explore: Press `<Space>` to view command groups
 
 ## Advanced Usage
 
 ### Custom Keymaps
 
-Add to `lua/keymaps.lua`:
+Add to `lua/keymaps-core.lua` (plugin-independent) or `lua/keymaps-plugins.lua` (plugin-dependent):
 
 ```lua
 vim.keymap.set("n", "<leader>custom", function()
@@ -451,8 +451,8 @@ end, { desc = "Custom command" })
 Edit `lua/plugins.lua`:
 
 ```lua
-local essential_plugins = {
-    { url = "https://github.com/user/plugin", name = "plugin" },
+local plugins = {
+	{ src = "https://github.com/user/plugin", name = "plugin" },
 }
 ```
 

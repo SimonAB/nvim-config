@@ -40,7 +40,8 @@ Common issues and solutions.
 
 #### Plugins not loading
 - Restart Neovim (auto-installs on first run)
-- Clear cache: `rm -rf ~/.local/share/nvim/pack/`
+- Clear vim.pack plugins: `rm -rf ~/.local/share/nvim/site/pack/core/opt/`
+- If you track the lockfile, keep `~/.config/nvim/nvim-pack-lock.json` (it will reinstall on next start)
 - Check individual plugin files for configuration errors
 - Check error messages in `:messages` for specific plugin failures
 
@@ -50,7 +51,7 @@ Common issues and solutions.
 - Verify plugin dependencies are installed
 
 #### Markdown preview not working
-- Ensure the plugin is built: check `~/.local/share/nvim/pack/plugins/start/markdown-preview.nvim/app/bin/`
+- Ensure the plugin is built: check `~/.local/share/nvim/site/pack/core/opt/markdown-preview.nvim/app/bin/`
 - Use `<leader>Kp` to start preview
 - Check browser permissions for local file access
 

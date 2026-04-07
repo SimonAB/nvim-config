@@ -123,7 +123,9 @@ See [Keymaps Reference](docs/reference/keymaps.md).
 ├── init.lua              # Entry point
 ├── lua/
 │   ├── config.lua        # Editor settings
-│   ├── keymaps.lua       # Keymaps
+│   ├── keymaps-core.lua  # Core keymaps (plugin-independent)
+│   ├── keymaps-plugins.lua # Plugin keymaps (deferred)
+│   ├── keymaps.lua       # Compatibility wrapper (loads both)
 │   ├── plugins.lua       # Plugin definitions
 │   ├── core/             # Core functionality
 │   │   ├── theme-manager.lua
@@ -146,14 +148,15 @@ See [Keymaps Reference](docs/reference/keymaps.md).
 Edit `lua/plugins.lua`:
 
 ```lua
-local essential_plugins = {
-    { url = "https://github.com/user/plugin", name = "plugin" },
+local plugins = {
+	{ src = "https://github.com/user/plugin", name = "plugin" },
 }
 ```
 
 ### Custom Keymaps
 
-Add to `lua/keymaps.lua`:
+Add plugin-independent mappings to `lua/keymaps-core.lua`, and plugin-dependent mappings to
+`lua/keymaps-plugins.lua`:
 
 ```lua
 vim.keymap.set("n", "<leader>custom", ":CustomCommand<CR>", 
