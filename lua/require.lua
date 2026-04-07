@@ -10,8 +10,10 @@ PluginLoader.load_all()
 
 -- Print loading statistics
 local stats = PluginLoader.get_stats()
-vim.notify(string.format("Plugin loading: %d immediate, %d deferred, %d lazy (total: %d)",
-	stats.immediate, stats.deferred, stats.lazy, stats.total), vim.log.levels.INFO)
+if vim.g.startup_debug == 1 or vim.g.startup_debug == true then
+	vim.notify(string.format("Plugin loading: %d immediate, %d deferred, %d lazy (total: %d)",
+		stats.immediate, stats.deferred, stats.lazy, stats.total), vim.log.levels.INFO)
+end
 
 -- Legacy compatibility: expose a function to manually trigger plugin loading
 _G.load_plugin_with_priority = function(plugin_name, priority)

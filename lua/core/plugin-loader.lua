@@ -5,6 +5,12 @@
 
 local PluginLoader = {}
 
+---Return true if startup debug notifications are enabled.
+---@return boolean
+local function is_startup_debug()
+	return vim.g.startup_debug == 1 or vim.g.startup_debug == true
+end
+
 -- Map plugin config modules ("lua/plugins/<module>.lua") to vim.pack plugin names.
 -- This keeps phased loading while using vim.pack's opt-only install location.
 local MODULE_TO_PACK = {
@@ -141,7 +147,9 @@ end
 
 -- Load all plugins in optimized phases
 function PluginLoader.load_all()
-	vim.notify("Loading plugins in optimized phases...", vim.log.levels.INFO)
+	if is_startup_debug() then
+		vim.notify("Loading plugins in optimized phases...", vim.log.levels.INFO)
+	end
 
 	-- Phase 1: Immediate
 	PluginLoader.load_with_phase("immediate", LOAD_PHASES.immediate)
@@ -152,7 +160,9 @@ function PluginLoader.load_all()
 	-- Phase 3: Lazy
 	PluginLoader.load_with_phase("lazy", LOAD_PHASES.lazy)
 
-	vim.notify("Plugin loading complete", vim.log.levels.INFO)
+	if is_startup_debug() then
+		vim.notify("Plugin loading complete", vim.log.levels.INFO)
+	end
 end
 
 -- Get loading statistics
