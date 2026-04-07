@@ -19,7 +19,14 @@ local plugins = {
 	{ src = "https://github.com/nvim-lualine/lualine.nvim", name = "lualine.nvim" },
 	{ src = "https://github.com/nvim-tree/nvim-tree.lua", name = "nvim-tree.lua" },
 	{ src = "https://github.com/nvim-telescope/telescope.nvim", name = "telescope.nvim" },
-	{ src = "https://github.com/nvim-telescope/telescope-fzf-native.nvim", name = "telescope-fzf-native.nvim", data = { build = "make" } },
+	{
+		src = "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
+		name = "telescope-fzf-native.nvim",
+		data = {
+			-- Prevent Conda/SDK toolchain leakage (common on macOS) from breaking link step.
+			build = 'make clean && env -i PATH="/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin" make CC=/usr/bin/clang CFLAGS="-Wall -fpic -std=gnu99"',
+		},
+	},
 	{ src = "https://github.com/nvim-telescope/telescope-frecency.nvim", name = "telescope-frecency.nvim" },
 	{ src = "https://github.com/kkharji/sqlite.lua", name = "sqlite.lua" },
 	{ src = "https://github.com/folke/which-key.nvim", name = "which-key.nvim" },
