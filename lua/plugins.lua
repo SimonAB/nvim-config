@@ -105,7 +105,8 @@ vim.api.nvim_create_autocmd("PackChanged", {
 	callback = run_build_hook,
 })
 
-vim.pack.add(plugins, { load = true, confirm = true })
+-- Install/register plugins, but defer loading to core/plugin-loader.lua phases.
+vim.pack.add(plugins, { load = false, confirm = true })
 
 _G.neovim_plugins = plugins
 
