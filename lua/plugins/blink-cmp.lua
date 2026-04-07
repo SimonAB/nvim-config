@@ -7,6 +7,12 @@ local map = vim.keymap.set -- For custom keymaps if needed
 -- Blink.cmp completion setup with simplified config
 local ok, blink = pcall(require, "blink.cmp")
 if ok then
+	local frecency_path = vim.fn.stdpath("state") .. "/blink/cmp/frecency.dat"
+	-- Repair older state where this path was created as a directory.
+	if vim.fn.isdirectory(frecency_path) == 1 then
+		vim.fn.delete(frecency_path, "rf")
+	end
+
 	blink.setup({
 		keymap = {
 			preset = "default", -- Use default keymap preset
@@ -46,6 +52,10 @@ if ok then
 		},
 		fuzzy = {
 			implementation = "prefer_rust", -- Use Rust for fuzzy matching if available
+			frecency = {
+				enabled = true,
+				path = frecency_path,
+			},
 			prebuilt_binaries = {
 				download = false, -- Do not auto-download binaries
 				ignore_version_mismatch = true, -- Ignore version mismatch warnings
