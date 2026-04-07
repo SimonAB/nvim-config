@@ -61,7 +61,12 @@ if ok then
 			frecency = {
 				show_scores = false,
 				show_unindexed = true,
-				ignore_patterns = {"*.git/*", "*/tmp/*"},
+				ignore_patterns = { "*.git/*", "*/tmp/*", "term://*" },
+				-- Reduce background work and avoid shutdown-time prompts/noise.
+				-- The database will be built as you use it, without importing oldfiles.
+				bootstrap = false,
+				auto_validate = false,
+				db_safe_mode = false,
 			},
 		},
 	})
