@@ -10,8 +10,19 @@ local progress_handle = nil
 ---@param repo_path string
 ---@return string|nil
 local function get_default_remote_branch(repo_path)
+	-- Prefer querying the remote directly to avoid stale origin/HEAD refs.
+	local symref = vim.fn.system({ "git", "-C", repo_path, "ls-remote", "--symref", "origin", "HEAD" })
+	if vim.v.shell_error == 0 and symref and symref ~= "" then
+		for line in symref:gmatch("[^\n]+") do
+			local ref = line:match("^ref:%s+(refs/heads/%S+)%s+HEAD")
+			if ref then
+				return ref:gsub("^refs/heads/", "")
+			end
+		end
+	end
+
 	local ref = vim.fn.system({ "git", "-C", repo_path, "symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD" })
-	if vim.v.shell_error ~= 0 then
+	if vim.v.shell_error ~= 0 or not ref or ref == "" then
 		return nil
 	end
 
@@ -24,6 +35,18 @@ end
 ---@param repo_path string
 ---@return boolean
 local function fix_missing_upstream(repo_path)
+	-- Some clones may have a narrow fetch refspec (e.g. only master). Widen it so we can
+	-- discover the actual default branch and fetch it.
+	pcall(vim.fn.system, {
+		"git",
+		"-C",
+		repo_path,
+		"config",
+		"remote.origin.fetch",
+		"+refs/heads/*:refs/remotes/origin/*",
+	})
+
+	pcall(vim.fn.system, { "git", "-C", repo_path, "fetch", "origin", "--prune", "--quiet" })
 	pcall(vim.fn.system, { "git", "-C", repo_path, "remote", "set-head", "origin", "--auto" })
 
 	local default_branch = get_default_remote_branch(repo_path)
@@ -31,10 +54,17 @@ local function fix_missing_upstream(repo_path)
 		default_branch = "main"
 	end
 
-	local current_branch = vim.fn.system({ "git", "-C", repo_path, "rev-parse", "--abbrev-ref", "HEAD" }):gsub("%s+", "")
-	if current_branch == "HEAD" or current_branch == "" then
-		pcall(vim.fn.system, { "git", "-C", repo_path, "checkout", "-B", default_branch, "--quiet" })
-	else
+	local checkout_ok = pcall(vim.fn.system, {
+		"git",
+		"-C",
+		repo_path,
+		"checkout",
+		"-B",
+		default_branch,
+		"origin/" .. default_branch,
+		"--quiet",
+	})
+	if not checkout_ok or vim.v.shell_error ~= 0 then
 		pcall(vim.fn.system, { "git", "-C", repo_path, "checkout", default_branch, "--quiet" })
 	end
 
