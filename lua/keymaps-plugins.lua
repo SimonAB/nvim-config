@@ -25,6 +25,30 @@ local function safe_cmd(cmd)
 	end
 end
 
+---Return the Obsidian vault path from obsidian.nvim config if available.
+---@return string|nil
+local function get_obsidian_vault_path()
+	local ok, obsidian = pcall(require, "obsidian")
+	if not ok then
+		return nil
+	end
+	if not obsidian.config then
+		return nil
+	end
+	local workspaces = obsidian.config.workspaces
+	if type(workspaces) ~= "table" then
+		return nil
+	end
+	local workspace = workspaces[1]
+	if type(workspace) ~= "table" then
+		return nil
+	end
+	if type(workspace.path) ~= "string" then
+		return nil
+	end
+	return workspace.path
+end
+
 local function create_terminal(cmd, opts)
 	local Terminal = require("toggleterm.terminal").Terminal
 	local default_opts = {
@@ -56,6 +80,83 @@ local function toggle_zen_mode()
 		return
 	end
 	zen_mode.toggle()
+end
+
+---Safely call an obsidian.nvim util operation if available.
+---@param operation_name string
+---@return fun()
+local function obsidian_operation(operation_name)
+	return function()
+		local ok, obsidian = pcall(require, "obsidian")
+		if ok and obsidian.util and obsidian.util[operation_name] then
+			obsidian.util[operation_name]()
+			return
+		end
+		vim.notify("Obsidian operation '" .. operation_name .. "' not available", vim.log.levels.WARN)
+	end
+end
+
+---Paste an image into the Obsidian vault and insert a link, then add two blank lines.
+---Prefers obsidian.nvim's own paste command/utilities; falls back to pngpaste on macOS.
+local function paste_obsidian_image()
+	local used_obsidian = false
+
+	if vim.fn.exists(":ObsidianPasteImg") == 2 then
+		local ok = pcall(vim.cmd, "ObsidianPasteImg")
+		if ok then
+			used_obsidian = true
+		end
+	else
+		local ok, obsidian = pcall(require, "obsidian")
+		if ok then
+			if obsidian.util and type(obsidian.util) == "table" then
+				if type(obsidian.util.paste_img_and_link) == "function" then
+					pcall(obsidian.util.paste_img_and_link)
+					used_obsidian = true
+				elseif type(obsidian.util.paste_img) == "function" then
+					pcall(obsidian.util.paste_img)
+					used_obsidian = true
+				end
+			end
+			if (not used_obsidian) and obsidian.commands and type(obsidian.commands) == "table" then
+				if type(obsidian.commands.paste_img) == "function" then
+					pcall(obsidian.commands.paste_img)
+					used_obsidian = true
+				end
+			end
+		end
+	end
+
+	if used_obsidian then
+		vim.cmd("put =''")
+		vim.cmd("put =''")
+		return
+	end
+
+	local vault_path = get_obsidian_vault_path()
+	if not vault_path then
+		vim.notify("Obsidian vault path not available", vim.log.levels.ERROR)
+		return
+	end
+
+	local attachments_dir = vault_path .. "/attachments"
+	vim.fn.mkdir(attachments_dir, "p")
+
+	local filename = os.date("%Y%m%d-%H%M%S") .. ".png"
+	local fullpath = attachments_dir .. "/" .. filename
+
+	local cmd = string.format('pngpaste "%s"', fullpath)
+	vim.fn.system(cmd)
+	if vim.v.shell_error ~= 0 then
+		vim.notify(
+			"Failed to paste image: pngpaste not available or clipboard is not an image",
+			vim.log.levels.ERROR
+		)
+		return
+	end
+
+	local link_line = string.format("![%s](<../attachments/%s>)", filename, filename)
+	vim.api.nvim_put({ link_line, "", "" }, "l", true, true)
 end
 
 -- ============================================================================
@@ -197,6 +298,38 @@ map("n", "<leader>Mh", "<cmd>MasonHelp<CR>", { desc = "Mason Help" })
 map("n", "<leader>Kp", "<cmd>MarkdownPreview<CR>", { desc = "Start Markdown Preview" })
 map("n", "<leader>Ks", "<cmd>MarkdownPreviewStop<CR>", { desc = "Stop Markdown Preview" })
 map("n", "<leader>Kv", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Toggle Markdown Preview" })
+
+-- Obsidian
+map("n", "<leader>On", obsidian_operation("new_note"), { desc = "New Obsidian note" })
+map("n", "<leader>Ol", obsidian_operation("insert_link"), { desc = "Insert Obsidian link" })
+map("n", "<leader>Of", obsidian_operation("follow_link"), { desc = "Follow Obsidian link" })
+map("n", "<leader>Oc", obsidian_operation("toggle_checkbox"), { desc = "Toggle Obsidian checkbox" })
+map("n", "<leader>Ob", obsidian_operation("show_backlinks"), { desc = "Show Obsidian backlinks" })
+map("n", "<leader>Og", obsidian_operation("show_outgoing_links"), { desc = "Show Obsidian outgoing links" })
+
+map("n", "<leader>Oo", function()
+	local ok, telescope = pcall(require, "telescope.builtin")
+	if not ok then
+		vim.notify("telescope.nvim not available", vim.log.levels.WARN)
+		return
+	end
+
+	local vault_path = get_obsidian_vault_path()
+	if not vault_path then
+		vim.notify("Obsidian vault path not available", vim.log.levels.ERROR)
+		return
+	end
+
+	telescope.find_files({
+		cwd = vault_path,
+		prompt_title = "Obsidian Vault",
+	})
+end, { desc = "Find files in Obsidian vault" })
+
+map("n", "<leader>Ot", safe_cmd("ObsidianTemplate"), { desc = "Insert Obsidian template" })
+map("n", "<leader>ON", safe_cmd("ObsidianNewFromTemplate"), { desc = "New note from template" })
+map("n", "<leader>Op", paste_obsidian_image, { desc = "Paste image and add two lines" })
+map("n", "<leader>Ov", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Toggle Obsidian preview" })
 
 -- Enhanced plugin manager keybindings
 local function call_plugin_manager(func_name)
