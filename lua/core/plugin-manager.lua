@@ -6,14 +6,67 @@
 local PluginManager = {}
 local progress_handle = nil
 
+---Get the default remote branch name (e.g. "main") for a git repo.
+---@param repo_path string
+---@return string|nil
+local function get_default_remote_branch(repo_path)
+	local ref = vim.fn.system({ "git", "-C", repo_path, "symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD" })
+	if vim.v.shell_error ~= 0 then
+		return nil
+	end
+
+	ref = ref:gsub("%s+", "")
+	local branch = ref:match("^origin/(.+)$")
+	return branch
+end
+
+---Try to fix repos tracking a non-existent upstream (e.g. origin/master).
+---@param repo_path string
+---@return boolean
+local function fix_missing_upstream(repo_path)
+	pcall(vim.fn.system, { "git", "-C", repo_path, "remote", "set-head", "origin", "--auto" })
+
+	local default_branch = get_default_remote_branch(repo_path)
+	if not default_branch or default_branch == "" then
+		default_branch = "main"
+	end
+
+	local current_branch = vim.fn.system({ "git", "-C", repo_path, "rev-parse", "--abbrev-ref", "HEAD" }):gsub("%s+", "")
+	if current_branch == "HEAD" or current_branch == "" then
+		pcall(vim.fn.system, { "git", "-C", repo_path, "checkout", "-B", default_branch, "--quiet" })
+	else
+		pcall(vim.fn.system, { "git", "-C", repo_path, "checkout", default_branch, "--quiet" })
+	end
+
+	pcall(vim.fn.system, {
+		"git",
+		"-C",
+		repo_path,
+		"branch",
+		"--set-upstream-to=origin/" .. default_branch,
+		default_branch,
+	})
+
+	return vim.v.shell_error == 0
+end
+
 -- Progress and notification system (vim.notify only; no fidget dependency)
 local function create_progress(title, message)
-	if progress_handle then
-		pcall(function() progress_handle:finish() end)
+	local ok, ProgressPopup = pcall(require, "core.progress-popup")
+	if not ok then
+		vim.notify(message, vim.log.levels.INFO, { title = title, timeout = 5000 })
+		return nil
 	end
-	vim.notify(message, vim.log.levels.INFO, {
-		title = title,
-		timeout = 5000,
+
+	if progress_handle and progress_handle.winid and vim.api.nvim_win_is_valid(progress_handle.winid) then
+		ProgressPopup.close(progress_handle)
+	end
+
+	progress_handle = ProgressPopup.create(title, { width = 78, height = 18 })
+	ProgressPopup.set_lines(progress_handle, {
+		"",
+		message,
+		"",
 	})
 	return progress_handle
 end
@@ -72,7 +125,13 @@ function PluginManager.update_all_plugins()
 
 	if #plugins == 0 then
 		notify("No plugins found to update", vim.log.levels.WARN)
-		if handle then handle:finish() end
+		if handle then
+			local ok, ProgressPopup = pcall(require, "core.progress-popup")
+			if ok then
+				ProgressPopup.append_line(handle, "No plugins found.")
+				vim.defer_fn(function() ProgressPopup.close(handle) end, 1500)
+			end
+		end
 		return
 	end
 
@@ -80,18 +139,35 @@ function PluginManager.update_all_plugins()
 	local completed = 0
 	local updated = 0
 	local failed = {}
+	local updated_plugins = {}
 
 	-- Update plugins sequentially to avoid conflicts
 	local function update_next(index)
 		if index > total then
 			-- All done
 			if handle then
-				local success_msg = string.format("Plugin update complete! %d/%d updated", updated, total)
-				if #failed > 0 then
-					success_msg = success_msg .. string.format(" (%d failed)", #failed)
+				local ok, ProgressPopup = pcall(require, "core.progress-popup")
+				if ok then
+					ProgressPopup.append_line(handle, "")
+					ProgressPopup.append_line(handle,
+						string.format("Done: %d/%d updated%s", updated, total, (#failed > 0) and (" (" .. #failed .. " failed)") or "")
+					)
+					if #updated_plugins > 0 then
+						ProgressPopup.append_line(handle, "")
+						ProgressPopup.append_line(handle, "Updated plugins:")
+						for _, line in ipairs(updated_plugins) do
+							ProgressPopup.append_line(handle, "  - " .. line)
+						end
+					end
+					if #failed > 0 then
+						ProgressPopup.append_line(handle, "")
+						ProgressPopup.append_line(handle, "Failures:")
+						for _, failure in ipairs(failed) do
+							ProgressPopup.append_line(handle, "  - " .. failure)
+						end
+					end
+					vim.defer_fn(function() ProgressPopup.close(handle) end, 10000)
 				end
-				handle.message = success_msg
-				vim.defer_fn(function() handle:finish() end, 1000)
 			end
 
 			local final_msg = string.format("Plugin updates: %d/%d successful", updated, total)
@@ -110,8 +186,17 @@ function PluginManager.update_all_plugins()
 
 		local plugin = plugins[index]
 		if handle then
-			handle.message = string.format("Updating %s (%d/%d)", plugin.name, index, total)
-			handle.percentage = ((index - 1) / total) * 100
+			local ok, ProgressPopup = pcall(require, "core.progress-popup")
+			if ok then
+				local bar = ProgressPopup.progress_bar(index - 1, total, 24)
+				ProgressPopup.set_lines(handle, {
+					"",
+					string.format("%s  %d/%d", bar, index - 1, total),
+					string.format("Updating: %s", plugin.name),
+					"",
+					"Recent results:",
+				})
+			end
 		end
 
 		-- Skip plugins without git
@@ -123,6 +208,8 @@ function PluginManager.update_all_plugins()
 			return
 		end
 
+		local before_commit = vim.fn.system({ "git", "-C", plugin.path, "rev-parse", "--short", "HEAD" }):gsub("\n", "")
+
 		-- Update plugin: try pull first; on local-changes conflict, reset to upstream
 		local cmd = { "git", "-C", plugin.path, "pull", "--ff-only", "--quiet" }
 		local result = vim.fn.system(cmd)
@@ -130,22 +217,74 @@ function PluginManager.update_all_plugins()
 		if vim.v.shell_error == 0 then
 			-- Check if actually updated (not just "Already up to date")
 			if not result:match("Already up to date") then
+				local after_commit = vim.fn.system({ "git", "-C", plugin.path, "rev-parse", "--short", "HEAD" }):gsub("\n", "")
 				updated = updated + 1
+				table.insert(updated_plugins, string.format("%s  %s → %s", plugin.name, before_commit, after_commit))
+				if handle then
+					local ok, ProgressPopup = pcall(require, "core.progress-popup")
+					if ok then
+						ProgressPopup.append_line(handle, "✓ " .. plugin.name .. "  " .. before_commit .. " → " .. after_commit)
+					end
+				end
+			else
+				if handle then
+					local ok, ProgressPopup = pcall(require, "core.progress-popup")
+					if ok then
+						ProgressPopup.append_line(handle, "• " .. plugin.name .. " already up to date (" .. before_commit .. ")")
+					end
+				end
 			end
 		else
+			local missing_upstream = result:match("couldn't find remote ref refs/heads/master")
+				or result:match("upstream branch")
+				or result:match("no such ref")
+			if missing_upstream then
+				local fixed = fix_missing_upstream(plugin.path)
+				if fixed then
+					result = vim.fn.system(cmd)
+				end
+			end
+
 			local local_changes_msg = result:match("would be overwritten by merge")
 				or result:match("local changes to the following files")
 			if local_changes_msg then
 				-- Discard local changes (e.g. generated doc/tags) and sync to upstream
 				vim.fn.system({ "git", "-C", plugin.path, "fetch", "origin", "--quiet" })
-				local reset_result = vim.fn.system({ "git", "-C", plugin.path, "reset", "--hard", "@{u}", "--quiet" })
+				local upstream_ref = vim.fn.system({ "git", "-C", plugin.path, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}" })
+				if vim.v.shell_error ~= 0 or upstream_ref == "" then
+					local default_branch = get_default_remote_branch(plugin.path) or "main"
+					upstream_ref = "origin/" .. default_branch
+				end
+				upstream_ref = upstream_ref:gsub("%s+", "")
+
+				local reset_result = vim.fn.system({ "git", "-C", plugin.path, "reset", "--hard", upstream_ref, "--quiet" })
 				if vim.v.shell_error == 0 then
+					local after_commit = vim.fn.system({ "git", "-C", plugin.path, "rev-parse", "--short", "HEAD" }):gsub("\n", "")
 					updated = updated + 1
+					table.insert(updated_plugins, string.format("%s  %s → %s", plugin.name, before_commit, after_commit))
+					if handle then
+						local ok, ProgressPopup = pcall(require, "core.progress-popup")
+						if ok then
+							ProgressPopup.append_line(handle, "✓ " .. plugin.name .. "  " .. before_commit .. " → " .. after_commit)
+						end
+					end
 				else
 					table.insert(failed, plugin.name .. ": " .. reset_result:gsub("\n", " "))
+					if handle then
+						local ok, ProgressPopup = pcall(require, "core.progress-popup")
+						if ok then
+							ProgressPopup.append_line(handle, "✗ " .. plugin.name .. " failed (reset)")
+						end
+					end
 				end
 			else
 				table.insert(failed, plugin.name .. ": " .. result:gsub("\n", " "))
+				if handle then
+					local ok, ProgressPopup = pcall(require, "core.progress-popup")
+					if ok then
+						ProgressPopup.append_line(handle, "✗ " .. plugin.name .. " failed")
+					end
+				end
 			end
 		end
 
@@ -184,11 +323,28 @@ function PluginManager.update_plugin(plugin_name)
 		local result = vim.fn.system(cmd)
 
 		if vim.v.shell_error ~= 0 then
+			local missing_upstream = result:match("couldn't find remote ref refs/heads/master")
+				or result:match("upstream branch")
+				or result:match("no such ref")
+			if missing_upstream then
+				local fixed = fix_missing_upstream(plugin_path)
+				if fixed then
+					result = vim.fn.system(cmd)
+				end
+			end
+
 			local local_changes_msg = result:match("would be overwritten by merge")
 				or result:match("local changes to the following files")
 			if local_changes_msg then
 				vim.fn.system({ "git", "-C", plugin_path, "fetch", "origin", "--quiet" })
-				vim.fn.system({ "git", "-C", plugin_path, "reset", "--hard", "@{u}", "--quiet" })
+				local upstream_ref = vim.fn.system({ "git", "-C", plugin_path, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}" })
+				if vim.v.shell_error ~= 0 or upstream_ref == "" then
+					local default_branch = get_default_remote_branch(plugin_path) or "main"
+					upstream_ref = "origin/" .. default_branch
+				end
+				upstream_ref = upstream_ref:gsub("%s+", "")
+
+				vim.fn.system({ "git", "-C", plugin_path, "reset", "--hard", upstream_ref, "--quiet" })
 				result = (vim.v.shell_error == 0) and "Updated (local changes discarded)" or result
 			end
 		end

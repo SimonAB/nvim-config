@@ -5,6 +5,8 @@
 
 local MasonUI = {}
 local progress_handle = nil
+local update_popup = nil
+local updated_packages = {}
 
 -- Progress notification system
 local function create_progress_notification(title, message)
@@ -27,6 +29,51 @@ local function create_progress_notification(title, message)
 		})
 	end
 	return progress_handle
+end
+
+---Open (or replace) a floating popup for Mason updates.
+---@param title string
+---@param message string
+local function open_update_popup(title, message)
+	local ok, ProgressPopup = pcall(require, "core.progress-popup")
+	if not ok then
+		return
+	end
+
+	if update_popup and update_popup.winid and vim.api.nvim_win_is_valid(update_popup.winid) then
+		ProgressPopup.close(update_popup)
+	end
+
+	update_popup = ProgressPopup.create(title, { width = 78, height = 18 })
+	ProgressPopup.set_lines(update_popup, {
+		"",
+		message,
+		"",
+		"Updated packages:",
+	})
+end
+
+---Refresh popup contents from the current updated package list.
+local function refresh_update_popup()
+	if not update_popup then
+		return
+	end
+
+	local ok, ProgressPopup = pcall(require, "core.progress-popup")
+	if not ok then
+		return
+	end
+
+	ProgressPopup.set_lines(update_popup, {
+		"",
+		string.format("Updating packages... (%d updated)", #updated_packages),
+		"",
+		"Updated packages:",
+	})
+
+	for _, name in ipairs(updated_packages) do
+		ProgressPopup.append_line(update_popup, "  - " .. name)
+	end
 end
 
 -- Enhanced notification system
@@ -139,6 +186,8 @@ end
 -- Update all installed packages
 function MasonUI.update_all_packages()
 	local handle = create_progress_notification("Updating Packages", "Checking for updates...")
+	updated_packages = {}
+	open_update_popup("Mason: Updating Packages", "Starting update...")
 
 	vim.defer_fn(function()
 		local success = pcall(function()
@@ -152,6 +201,24 @@ function MasonUI.update_all_packages()
 				handle.message = "Update failed or no updates available"
 			end
 			vim.defer_fn(function() handle:finish() end, 2000)
+		end
+
+		if update_popup then
+			local ok, ProgressPopup = pcall(require, "core.progress-popup")
+			if ok then
+				ProgressPopup.append_line(update_popup, "")
+				if success then
+					ProgressPopup.append_line(update_popup,
+						string.format("Done. %d packages reported updated.", #updated_packages)
+					)
+				else
+					ProgressPopup.append_line(update_popup, "Update failed or no updates available.")
+				end
+				vim.defer_fn(function()
+					ProgressPopup.close(update_popup)
+					update_popup = nil
+				end, 10000)
+			end
 		end
 
 		if success then
@@ -253,6 +320,8 @@ function MasonUI.setup_event_handlers()
 		callback = function(ev)
 			local package_name = ev.data or "Unknown"
 			notify("✓ " .. package_name .. " updated", vim.log.levels.INFO)
+			table.insert(updated_packages, package_name)
+			refresh_update_popup()
 		end,
 	})
 end

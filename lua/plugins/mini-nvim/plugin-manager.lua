@@ -13,6 +13,14 @@ function M.update_plugins()
 	utils.show_progress("Updating plugins...")
 
 	vim.defer_fn(function()
+		local ok, PluginManager = pcall(require, "core.plugin-manager")
+		if ok and PluginManager and type(PluginManager.update_all_plugins) == "function" then
+			PluginManager.update_all_plugins()
+			return
+		end
+
+		utils.show_warning("Core Plugin Manager not available; using dashboard updater fallback")
+
 		local updated_count = 0
 		local errors = {}
 		local pack_path = utils.get_plugin_directory()
