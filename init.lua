@@ -60,7 +60,7 @@ require("keymaps-core")
 
 -- Defer plugin-dependent keymaps to avoid startup overhead and plugin availability issues.
 vim.defer_fn(function()
-	require("keymaps")
+	require("keymaps-plugins")
 end, 300)
 
 -- Consolidated autocmds with improved performance
