@@ -56,7 +56,12 @@ pcall(dofile, project_require)
 
 -- Load core configuration
 require("config")
-require("keymaps")
+require("keymaps-core")
+
+-- Defer plugin-dependent keymaps to avoid startup overhead and plugin availability issues.
+vim.defer_fn(function()
+	require("keymaps")
+end, 300)
 
 -- Consolidated autocmds with improved performance
 local function setup_optimized_autocmds()
