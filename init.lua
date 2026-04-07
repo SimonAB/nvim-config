@@ -56,9 +56,16 @@ pcall(dofile, project_require)
 
 -- Load core configuration
 require("config")
+
+-- Keymaps are split to keep startup fast and predictable:
+-- - `keymaps-core` contains only plugin-independent mappings and is safe to load immediately.
+-- - `keymaps-plugins` contains mappings which call into plugins (Telescope, Mason, etc.).
+--   Those are deferred slightly so they don't run before plugins are available.
 require("keymaps-core")
 
 -- Defer plugin-dependent keymaps to avoid startup overhead and plugin availability issues.
+-- This delay is chosen to run after your deferred plugin phase has started, but before which-key
+-- (which is loaded later) so the which-key menu sees the mappings on first use.
 vim.defer_fn(function()
 	require("keymaps-plugins")
 end, 300)

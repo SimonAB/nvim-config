@@ -1,5 +1,10 @@
 -- Essential Core Key Mappings
--- Purpose: Provide fast, plugin-independent keymaps for early startup
+-- PURPOSE: Provide fast, plugin-independent keymaps for early startup
+--
+-- Maintenance notes:
+-- - Keep this file strictly plugin-free: no `require()` calls for external plugins and no
+--   commands that only exist when plugins are loaded.
+-- - If a mapping depends on a plugin, move it to `keymaps-plugins.lua` instead.
 
 local map = vim.keymap.set
 

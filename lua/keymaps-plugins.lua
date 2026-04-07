@@ -3,6 +3,12 @@
 
 -- This module intentionally contains everything that may require plugins.
 -- Core, plugin-independent mappings live in `keymaps-core.lua`.
+--
+-- Maintenance notes:
+-- - Prefer `pcall(require, ...)` for optional plugins to avoid hard startup failures.
+-- - If a mapping can be expressed without plugins, put it in `keymaps-core.lua`.
+-- - If you want even tighter lazy-loading, split this file further into per-plugin keymap
+--   modules and load them in the same phase as their plugin.
 
 local map = vim.keymap.set
 
