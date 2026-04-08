@@ -159,6 +159,81 @@ local function paste_obsidian_image()
 	vim.api.nvim_put({ link_line, "", "" }, "l", true, true)
 end
 
+---Safely call a quarto-nvim operation if available.
+---@param operation_name string
+---@return fun()
+local function quarto_operation(operation_name)
+	return function()
+		local ok, quarto = pcall(require, "quarto")
+		if ok and quarto[operation_name] then
+			quarto[operation_name]()
+			return
+		end
+		vim.notify("Quarto operation '" .. operation_name .. "' not available", vim.log.levels.WARN)
+	end
+end
+
+---Build jobstart options for non-interactive Quarto renders.
+---@param format_name string
+---@return table
+local function build_quarto_job_opts(format_name)
+	return {
+		on_exit = function(_, exit_code)
+			if exit_code == 0 then
+				vim.notify("✓ " .. format_name .. " render complete", vim.log.levels.INFO)
+			else
+				vim.notify("✗ " .. format_name .. " render failed (exit " .. exit_code .. ")", vim.log.levels.ERROR)
+			end
+		end,
+		on_stderr = function(_, data)
+			if not data or #data == 0 then
+				return
+			end
+			for _, line in ipairs(data) do
+				if line ~= "" then
+					print(line)
+				end
+			end
+		end,
+		env = {
+			TERM = "dumb",
+			NONINTERACTIVE = "1",
+			PAGER = "cat",
+			MANPAGER = "cat",
+			LESS = "-R",
+			MORE = "-R",
+		},
+	}
+end
+
+---Render the current Quarto document to a specific format.
+---@param format string
+---@param format_name string
+---@return fun()
+local function quarto_render_to_format(format, format_name)
+	return function()
+		local file = vim.fn.expand("%:p")
+		if file == "" then
+			vim.notify("No file to render", vim.log.levels.WARN)
+			return
+		end
+
+		local cmd = { "quarto", "render", file, "--to", format }
+		if format == "pdf" then
+			table.insert(cmd, "--pdf-engine-opt=-interaction=nonstopmode")
+		end
+
+		vim.notify("Rendering to " .. format_name .. "...", vim.log.levels.INFO)
+		vim.fn.jobstart(cmd, build_quarto_job_opts(format_name))
+	end
+end
+
+---Render all Quarto documents in the current project.
+local function quarto_render_all()
+	vim.notify("Rendering all files in project...", vim.log.levels.INFO)
+	vim.fn.jobstart({ "quarto", "render" }, build_quarto_job_opts("Project"))
+end
+
 -- ============================================================================
 -- PLUGIN-DEPENDENT KEYMAPS
 -- ============================================================================
@@ -298,6 +373,34 @@ map("n", "<leader>Mh", "<cmd>MasonHelp<CR>", { desc = "Mason Help" })
 map("n", "<leader>Kp", "<cmd>MarkdownPreview<CR>", { desc = "Start Markdown Preview" })
 map("n", "<leader>Ks", "<cmd>MarkdownPreviewStop<CR>", { desc = "Stop Markdown Preview" })
 map("n", "<leader>Kv", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Toggle Markdown Preview" })
+
+-- Quarto
+map("n", "<leader>Qp", quarto_operation("quartoPreview"), { desc = "Quarto preview" })
+map("n", "<leader>Qc", quarto_operation("quartoClosePreview"), { desc = "Close Quarto preview" })
+map("n", "<leader>QRh", quarto_render_to_format("html", "HTML"), { desc = "Render to HTML" })
+map("n", "<leader>QRp", quarto_render_to_format("pdf", "PDF"), { desc = "Render to PDF" })
+map("n", "<leader>QRw", quarto_render_to_format("docx", "Word"), { desc = "Render to Word" })
+map("n", "<leader>QRa", quarto_render_all, { desc = "Render all" })
+
+-- Molten
+local molten_commands = {
+	["<leader>QMi"] = { cmd = "MoltenImagePopup", desc = "Show image popup" },
+	["<leader>QMl"] = { cmd = "MoltenEvaluateLine", desc = "Evaluate line" },
+	["<leader>QMe"] = { cmd = "MoltenEvaluateOperator", desc = "Evaluate operator" },
+	["<leader>QMn"] = { cmd = "MoltenInit", desc = "Initialise kernel" },
+	["<leader>QMk"] = { cmd = "MoltenDeinit", desc = "Stop kernel" },
+	["<leader>QMr"] = { cmd = "MoltenRestart", desc = "Restart kernel" },
+	["<leader>QMv"] = { cmd = "MoltenEvaluateVisual", desc = "Evaluate visual selection" },
+	["<leader>QMf"] = { cmd = "MoltenReevaluateCell", desc = "Re-evaluate cell" },
+	["<leader>QMh"] = { cmd = "MoltenHideOutput", desc = "Hide output" },
+	["<leader>QMs"] = { cmd = "MoltenShowOutput", desc = "Show output" },
+	["<leader>QMd"] = { cmd = "MoltenDelete", desc = "Delete cell" },
+	["<leader>QMb"] = { cmd = "MoltenOpenInBrowser", desc = "Open in browser" },
+}
+
+for key, data in pairs(molten_commands) do
+	map("n", key, safe_cmd(data.cmd), { desc = data.desc })
+end
 
 -- Obsidian
 map("n", "<leader>On", obsidian_operation("new_note"), { desc = "New Obsidian note" })
