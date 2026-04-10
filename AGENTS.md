@@ -376,8 +376,9 @@ end, { desc = "Description" })
 | Prefix | Group | Example |
 |--------|-------|---------|
 | `<leader>B` | Buffer operations | `<leader>Bn` = Next buffer |
-| `<leader>C` | Configuration | `<leader>Cs` = Source config |
-| `<leader>F` | File operations (frecency) | `<leader>Ff` = Find files (frecency) |
+| `<leader>C` | Configuration | `<leader>Cs` = Reload configuration |
+| `<leader>F` | Forge (tasks / project) | `<leader>Fn` = Next actions |
+| `<leader>R` | Frecency (recent files) | `<leader>Rf` = Find files (frecency) |
 | `<leader>G` | Git operations | `<leader>Gs` = Git status |
 | `<leader>J` | Julia operations | `<leader>Jrh` = Julia REPL horizontal |
 | `<leader>K` | Markdown preview | `<leader>Kp` = Preview |
@@ -391,7 +392,7 @@ end, { desc = "Description" })
 | `<leader>X` | Diagnostics (Trouble) | `<leader>Xw` = Workspace diagnostics |
 | `<leader>Y` | Toggle options | `<leader>Yw` = Toggle wrap |
 | `<localleader>l` | LaTeX (VimTeX) | `<localleader>ll` = Compile |
-| `<localleader>t` | Typst | `<localleader>tp` = Preview |
+| `<localleader>t` | Typst | `<localleader>tp` = Preview toggle, `tc` = `typst c`, `tw` = `typst w` |
 
 ### Keymap Descriptions
 - **Always include `desc`** for which-key integration

@@ -46,15 +46,14 @@ features:
 
 ```vim
 # Terminal Integration
-<C-t>             # Toggle terminal
-<Leader>Tt        # Terminal toggle (vertical)
+<C-t>             # Toggle terminal (ToggleTerm)
+<Leader>Tt        # Terminal toggle (vertical, smart)
 <Leader>Th/Tv/Tf  # Horizontal/Vertical/Float terminal
-<C-i>             # Send line to terminal
-<C-c>             # Send code block to terminal
 
-# Document Processing
-\lv               # LaTeX forward search
-\ll               # Compile LaTeX
+# Document Processing (VimTeX / Typst use <localleader>, often \ )
+<localleader>lv   # LaTeX forward search
+<localleader>ll   # Compile LaTeX
+<localleader>tp   # Typst preview toggle
 <Leader>Kp        # Markdown preview
 <Leader>Qp        # Quarto preview
 
@@ -109,11 +108,10 @@ See [Installation Guide](/INSTALLATION_GUIDE).
 
 ### Terminal Integration
 
-Terminal with code block detection:
-- Toggle: `<C-t>`, `<Leader>Tt`
-- Send line/block/selection to terminal
-- Layouts: horizontal, vertical, float
-- Julia REPL: `--threads=auto`
+Terminal integration:
+- Toggle: `<C-t>` (ToggleTerm), `<Leader>Tt` (vertical smart toggle)
+- Layouts: `<Leader>Th` / `<Leader>Tv` / `<Leader>Tf`
+- Julia REPL: `--threads=auto` (`<Leader>Jrh` / `Jrv` / `Jrf`)
 
 ### Document Workflows
 

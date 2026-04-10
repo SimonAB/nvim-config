@@ -284,6 +284,6 @@ if ok then
 		{ "<leader>CU", group = "Update" },
 	})
 
-	-- All individual keymaps are now defined in keymaps.lua with desc fields
+	-- Individual keymaps are defined in `keymaps-core.lua` / `keymaps-plugins.lua` with `desc` fields
 	-- which-key automatically discovers and displays them
 end

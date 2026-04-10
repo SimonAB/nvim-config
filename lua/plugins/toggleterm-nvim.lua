@@ -4,6 +4,8 @@
 local ok, toggleterm = pcall(require, "toggleterm")
 if ok then
 	toggleterm.setup({
+		-- Matches README / docs (`<C-t>` toggles the default ToggleTerm instance).
+		open_mapping = [[<c-t>]],
 		size = function(term)
 			-- Dynamically set terminal size based on direction
 			if term.direction == "horizontal" then

@@ -95,7 +95,7 @@ Common issues and solutions.
 
 #### Theme not cycling
 - Use `<leader>Yc` to cycle through available themes
-- Check if auto-dark-mode is working: `<leader>Ys` to toggle
+- Spell check (unrelated to themes): `<leader>Ys` toggles spell; `<leader>Yse` / `<leader>Ysf` set English/French
 - Verify theme plugins are properly installed
 
 #### Icons not displaying

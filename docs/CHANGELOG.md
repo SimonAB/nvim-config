@@ -1,6 +1,19 @@
 # Changelog
 
-## [Latest] - Markdown List Formatting Fix
+## [Latest] - Documentation aligned with keymaps
+
+### Documentation
+- **README**, **docs/reference/keymaps.md**, **docs/index.md**: Frecency under `<leader>R*`; Forge under `<leader>F*`; Typst `<localleader>t*` (preview, sync, `typst c`, `typst w`); removed references to unbound “send to terminal” keys.
+- **AGENTS.md**: Keymap group table updated (Forge, Frecency, Typst).
+- **Troubleshooting**: `<leader>Ys` described as spell toggle (not theme/auto-dark).
+- **scripts/generate-docs.lua**: Leader group summary brought in line with current which-key groups.
+
+### Configuration
+- **toggleterm.nvim**: Set `open_mapping` to `<C-t>` so behaviour matches documented quick toggle.
+
+---
+
+## [Previous] - Markdown List Formatting Fix
 
 ### 🐛 Bug Fixes
 - **Markdown List Formatting**: Fixed issue where empty lines were incorrectly inserted between math blocks (`$$...$$`) and list items

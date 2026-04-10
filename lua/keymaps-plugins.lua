@@ -64,6 +64,85 @@ local function create_terminal(cmd, opts)
 	return terminal
 end
 
+-- VimTeX: custom LuaLaTeX compilation with biber
+-- Executes: latexmk → biber → latexmk × 2
+-- Reuses a single terminal instance for subsequent compilations.
+local latex_compile_terminal = nil
+
+---Compile the current .tex file using LuaLaTeX + biber.
+local function compile_lualatex_with_biber()
+	local current_file = vim.fn.expand("%:p")
+	if current_file == "" then
+		vim.notify("No file is currently open", vim.log.levels.ERROR)
+		return
+	end
+
+	if vim.fn.fnamemodify(current_file, ":e") ~= "tex" then
+		vim.notify("Current file is not a LaTeX file (.tex)", vim.log.levels.ERROR)
+		return
+	end
+
+	local file_dir = vim.fn.fnamemodify(current_file, ":h")
+	local file_base = vim.fn.fnamemodify(current_file, ":t:r")
+
+	local cmd = string.format(
+		'cd "%s"'
+			.. ' && latexmk -pdf -pdflatex=lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"'
+			.. ' && biber "%s"'
+			.. ' && latexmk -pdf -pdflatex=lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"'
+			.. ' && latexmk -pdf -pdflatex=lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"',
+		file_dir,
+		file_base,
+		file_base,
+		file_base,
+		file_base
+	)
+
+	vim.notify("Starting LuaLaTeX compilation: latexmk → biber → latexmk × 2", vim.log.levels.INFO)
+
+	if latex_compile_terminal == nil then
+		local Terminal = require("toggleterm.terminal").Terminal
+		latex_compile_terminal = Terminal:new({
+			hidden = true,
+			direction = "horizontal",
+			size = 15,
+			close_on_exit = false,
+			on_open = function(term)
+				vim.cmd("stopinsert")
+				local opts = { buffer = term.bufnr, noremap = true, silent = true }
+				vim.keymap.set("n", "q", "<cmd>close<CR>", opts)
+				vim.keymap.set("n", "<C-h>", "<C-w>h", opts)
+				vim.keymap.set("n", "<C-j>", "<C-w>j", opts)
+				vim.keymap.set("n", "<C-k>", "<C-w>k", opts)
+				vim.keymap.set("n", "<C-l>", "<C-w>l", opts)
+			end,
+			on_exit = function(_, exit_code)
+				if exit_code == 0 then
+					vim.notify("✓ LuaLaTeX compilation complete", vim.log.levels.INFO)
+				else
+					vim.notify("✗ LuaLaTeX compilation failed (exit " .. exit_code .. ")", vim.log.levels.ERROR)
+				end
+			end,
+		})
+	end
+
+	if not latex_compile_terminal:is_open() then
+		latex_compile_terminal:open()
+	end
+
+	latex_compile_terminal:send(cmd)
+end
+
+---Return a best-effort Git root, falling back to the current working directory.
+---@return string
+local function get_project_root()
+	local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+	if not git_root or git_root == "" or git_root:match("fatal:") then
+		return vim.loop.cwd() or vim.fn.getcwd()
+	end
+	return git_root
+end
+
 local function buffer_operation(bufferline_cmd, fallback_cmd)
 	return function()
 		local success = pcall(vim.cmd, bufferline_cmd)
@@ -234,9 +313,192 @@ local function quarto_render_all()
 	vim.fn.jobstart({ "quarto", "render" }, build_quarto_job_opts("Project"))
 end
 
+---Toggle a vertical terminal: hide if visible, otherwise show/create.
+local function toggle_terminal_vertical_smart()
+	if vim.fn.mode() == "t" then
+		vim.cmd("stopinsert")
+	end
+
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		local buf = vim.api.nvim_win_get_buf(win)
+		if vim.api.nvim_buf_get_option(buf, "buftype") == "terminal" then
+			pcall(vim.api.nvim_win_close, win, true)
+			return
+		end
+	end
+
+	local existing_terminal_buf = nil
+	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+		if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
+			if vim.api.nvim_buf_get_option(buf, "buftype") == "terminal" then
+				existing_terminal_buf = buf
+				break
+			end
+		end
+	end
+
+	if existing_terminal_buf then
+		vim.cmd("vsplit")
+		local win = vim.api.nvim_get_current_win()
+		vim.api.nvim_win_set_buf(win, existing_terminal_buf)
+		vim.cmd("startinsert")
+		return
+	end
+
+	local size = math.floor(vim.o.columns * 0.3)
+	vim.cmd("ToggleTerm direction=vertical size=" .. size)
+end
+
+---Clear the first visible terminal buffer (or current one if already in terminal).
+local function clear_terminal()
+	local current_win = vim.api.nvim_get_current_win()
+	local terminal_win = nil
+	local terminal_buf = nil
+
+	if vim.bo.buftype == "terminal" then
+		terminal_win = current_win
+		terminal_buf = vim.api.nvim_get_current_buf()
+	else
+		for _, win in ipairs(vim.api.nvim_list_wins()) do
+			local buf = vim.api.nvim_win_get_buf(win)
+			if vim.api.nvim_buf_get_option(buf, "buftype") == "terminal" then
+				terminal_win = win
+				terminal_buf = buf
+				break
+			end
+		end
+	end
+
+	if not (terminal_win and terminal_buf) then
+		print("No terminal window found - open a terminal first")
+		return
+	end
+
+	local original_win = vim.api.nvim_get_current_win()
+	vim.api.nvim_set_current_win(terminal_win)
+	vim.cmd("startinsert")
+	vim.api.nvim_feedkeys("clear", "t", false)
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "t", false)
+
+	if original_win ~= terminal_win then
+		vim.schedule(function()
+			pcall(vim.api.nvim_set_current_win, original_win)
+		end)
+	end
+	print("Terminal cleared")
+end
+
+---Kill the first visible terminal buffer (or current one if already in terminal).
+local function kill_terminal()
+	local terminal_buf = nil
+
+	if vim.bo.buftype == "terminal" then
+		terminal_buf = vim.api.nvim_get_current_buf()
+	else
+		for _, win in ipairs(vim.api.nvim_list_wins()) do
+			local buf = vim.api.nvim_win_get_buf(win)
+			if vim.api.nvim_buf_get_option(buf, "buftype") == "terminal" then
+				terminal_buf = buf
+				break
+			end
+		end
+	end
+
+	if not terminal_buf then
+		print("No terminal window found")
+		return
+	end
+
+	vim.api.nvim_buf_delete(terminal_buf, { force = true })
+	print("Terminal killed")
+end
+
+---Open a Julia REPL in a ToggleTerm window.
+---@param direction "horizontal"|"vertical"|"float"
+local function open_julia_repl(direction)
+	local project_path = vim.fn.shellescape(vim.fn.getcwd())
+	local julia_repl = create_terminal("julia --project=" .. project_path .. " --threads=auto", {
+		direction = direction,
+	})
+	julia_repl:toggle()
+end
+
+---Run a Julia command in a terminal using the current project.
+---@param command string
+---@return fun()
+local function julia_command(command)
+	return function()
+		local project_path = vim.fn.shellescape(vim.fn.getcwd())
+		local julia_cmd = "julia --project=" .. project_path .. " --threads=auto -e '" .. command .. "'"
+		local terminal = create_terminal(julia_cmd, { direction = "horizontal", close_on_exit = false })
+		terminal:toggle()
+	end
+end
+
+---Compile the current Typst file to PDF using the CLI (`typst c`).
+local function typst_compile_current()
+	local current_file = vim.fn.expand("%:p")
+	if current_file == "" then
+		vim.notify("No file is currently open", vim.log.levels.ERROR)
+		return
+	end
+
+	if vim.fn.fnamemodify(current_file, ":e") ~= "typ" then
+		vim.notify("Current file is not a Typst file (.typ)", vim.log.levels.ERROR)
+		return
+	end
+
+	local cmd = string.format('typst c "%s"', current_file)
+
+	vim.fn.jobstart(cmd, {
+		on_exit = function(_, exit_code)
+			if exit_code == 0 then
+				vim.notify("PDF compiled successfully", vim.log.levels.INFO)
+			else
+				vim.notify("Failed to compile PDF", vim.log.levels.ERROR)
+			end
+		end,
+		on_stderr = function(_, data)
+			if data and #data > 0 then
+				vim.notify("Typst compilation error: " .. table.concat(data, " "), vim.log.levels.ERROR)
+			end
+		end,
+	})
+end
+
+---Open ToggleTerm with `typst w` for the current Typst file.
+local function typst_watch_current()
+	local current_file = vim.fn.expand("%:p")
+	if current_file == "" then
+		vim.notify("No file is currently open", vim.log.levels.ERROR)
+		return
+	end
+
+	if vim.fn.fnamemodify(current_file, ":e") ~= "typ" then
+		vim.notify("Current file is not a Typst file (.typ)", vim.log.levels.ERROR)
+		return
+	end
+
+	local cmd = string.format('typst w "%s"', current_file)
+
+	local Terminal = require("toggleterm.terminal").Terminal
+	local typst_watch = Terminal:new({
+		cmd = cmd,
+		hidden = true,
+		direction = "horizontal",
+		close_on_exit = false,
+		on_open = function(_)
+			vim.cmd("startinsert!")
+		end,
+	})
+	typst_watch:toggle()
+end
+
 -- ============================================================================
 -- PLUGIN-DEPENDENT KEYMAPS
 -- ============================================================================
+
+local filetype_keymaps_group = vim.api.nvim_create_augroup("FiletypeKeymaps", { clear = true })
 
 -- Buffer Operations (<leader>B)
 map("n", "<leader>Bf", "<cmd>Telescope buffers<CR>", { desc = "Find buffers (Telescope)" })
@@ -356,6 +618,99 @@ map("n", "<leader>Gg", function()
 	lazygit:toggle()
 end, { desc = "LazyGit" })
 
+-- Terminal
+map({ "n", "t" }, "<leader>Tt", toggle_terminal_vertical_smart, { desc = "Toggle terminal (vertical)" })
+map({ "n", "t" }, "<leader>Th", function()
+	vim.cmd("ToggleTerm direction=horizontal size=15")
+end, { desc = "Terminal horizontal" })
+map({ "n", "t" }, "<leader>Tv", function()
+	local size = math.floor(vim.o.columns * 0.3)
+	vim.cmd("ToggleTerm direction=vertical size=" .. size)
+end, { desc = "Terminal vertical" })
+map({ "n", "t" }, "<leader>Tf", function()
+	vim.cmd("ToggleTerm direction=float")
+end, { desc = "Terminal float" })
+map("n", "<leader>Tk", clear_terminal, { desc = "Clear terminal" })
+map("n", "<leader>Td", kill_terminal, { desc = "Kill terminal" })
+
+-- Search (Telescope)
+map("n", "<leader>g", function()
+	local ok, builtin = pcall(require, "telescope.builtin")
+	if not ok then
+		vim.notify("telescope.nvim not available", vim.log.levels.WARN)
+		return
+	end
+	builtin.live_grep({ cwd = get_project_root() })
+end, { desc = "Grep in project" })
+
+map("n", "<leader>Sp", function()
+	local ok, builtin = pcall(require, "telescope.builtin")
+	if not ok then
+		vim.notify("telescope.nvim not available", vim.log.levels.WARN)
+		return
+	end
+	builtin.live_grep({ cwd = get_project_root() })
+end, { desc = "Search in project" })
+
+map("n", "<leader>Sw", function()
+	local ok, builtin = pcall(require, "telescope.builtin")
+	if not ok then
+		vim.notify("telescope.nvim not available", vim.log.levels.WARN)
+		return
+	end
+	builtin.live_grep({ cwd = vim.loop.cwd() or vim.fn.getcwd() })
+end, { desc = "Search in working directory" })
+
+map("n", "<leader>Sh", function()
+	local ok, builtin = pcall(require, "telescope.builtin")
+	if not ok then
+		vim.notify("telescope.nvim not available", vim.log.levels.WARN)
+		return
+	end
+	local home = vim.loop.os_homedir() or vim.fn.expand("~")
+	builtin.live_grep({ search_dirs = { home } })
+end, { desc = "Search in home directory" })
+
+map("n", "<leader>Sc", function()
+	local ok, builtin = pcall(require, "telescope.builtin")
+	if not ok then
+		vim.notify("telescope.nvim not available", vim.log.levels.WARN)
+		return
+	end
+	builtin.live_grep({ cwd = vim.fn.stdpath("config") })
+end, { desc = "Search in config" })
+
+map("n", "<leader>Sf", function()
+	local ok, builtin = pcall(require, "telescope.builtin")
+	if not ok then
+		vim.notify("telescope.nvim not available", vim.log.levels.WARN)
+		return
+	end
+
+	local current_file = vim.fn.expand("%:p")
+	if current_file ~= "" then
+		local current_dir = vim.fn.fnamemodify(current_file, ":h")
+		builtin.live_grep({ cwd = current_dir })
+	else
+		builtin.live_grep()
+	end
+end, { desc = "Search in current file directory" })
+
+-- Config (Telescope)
+map("n", "<leader>Cf", function()
+	local config_path = vim.fn.stdpath("config")
+	vim.cmd("Telescope find_files cwd=" .. config_path)
+end, { desc = "Find config files" })
+
+map("n", "<leader>Cg", function()
+	local ok, builtin = pcall(require, "telescope.builtin")
+	if not ok then
+		vim.notify("telescope.nvim not available", vim.log.levels.WARN)
+		return
+	end
+	builtin.live_grep({ cwd = vim.fn.stdpath("config") })
+end, { desc = "Grep config files" })
+
 -- Trouble diagnostics
 map("n", "<leader>Xw", ":TroubleToggle workspace_diagnostics<CR>", { desc = "Workspace Diagnostics" })
 map("n", "<leader>Xd", ":TroubleToggle document_diagnostics<CR>", { desc = "Document Diagnostics" })
@@ -368,6 +723,8 @@ map("n", "<leader>Mi", "<cmd>MasonInstall<CR>", { desc = "Install Package" })
 map("n", "<leader>Mu", "<cmd>MasonUninstall<CR>", { desc = "Uninstall Package" })
 map("n", "<leader>Ml", "<cmd>MasonLog<CR>", { desc = "View Mason Log" })
 map("n", "<leader>Mh", "<cmd>MasonHelp<CR>", { desc = "Mason Help" })
+
+map("n", "<leader>Lm", "<cmd>Mason<CR>", { desc = "LSP: Open Mason" })
 
 -- Markdown preview
 map("n", "<leader>Kp", "<cmd>MarkdownPreview<CR>", { desc = "Start Markdown Preview" })
@@ -390,6 +747,8 @@ local molten_commands = {
 	["<leader>QMn"] = { cmd = "MoltenInit", desc = "Initialise kernel" },
 	["<leader>QMk"] = { cmd = "MoltenDeinit", desc = "Stop kernel" },
 	["<leader>QMr"] = { cmd = "MoltenRestart", desc = "Restart kernel" },
+	["<leader>QMo"] = { cmd = "MoltenEvaluateOperator", desc = "Evaluate operator" },
+	["<leader>QM<CR>"] = { cmd = "MoltenEvaluateLine", desc = "Evaluate line" },
 	["<leader>QMv"] = { cmd = "MoltenEvaluateVisual", desc = "Evaluate visual selection" },
 	["<leader>QMf"] = { cmd = "MoltenReevaluateCell", desc = "Re-evaluate cell" },
 	["<leader>QMh"] = { cmd = "MoltenHideOutput", desc = "Hide output" },
@@ -401,6 +760,102 @@ local molten_commands = {
 for key, data in pairs(molten_commands) do
 	map("n", key, safe_cmd(data.cmd), { desc = data.desc })
 end
+
+-- Julia
+map("n", "<leader>Jrh", function()
+	open_julia_repl("horizontal")
+end, { desc = "Julia REPL (horizontal)" })
+
+map("n", "<leader>Jrv", function()
+	open_julia_repl("vertical")
+end, { desc = "Julia REPL (vertical)" })
+
+map("n", "<leader>Jrf", function()
+	open_julia_repl("float")
+end, { desc = "Julia REPL (floating)" })
+
+map("n", "<leader>Jp", julia_command("using Pkg; Pkg.status()"), { desc = "Julia: Project status" })
+map("n", "<leader>Ji", julia_command("using Pkg; Pkg.instantiate()"), { desc = "Julia: Instantiate project" })
+map("n", "<leader>Ju", julia_command("using Pkg; Pkg.update()"), { desc = "Julia: Update project" })
+map("n", "<leader>Jt", julia_command("using Pkg; Pkg.test()"), { desc = "Julia: Run tests" })
+map("n", "<leader>Jd", julia_command("using Pkg; using Documenter; makedocs()"), { desc = "Julia: Generate docs" })
+
+-- Filetype-specific (localleader) mappings
+vim.api.nvim_create_autocmd("FileType", {
+	group = filetype_keymaps_group,
+	pattern = "tex",
+	desc = "VimTeX localleader mappings",
+	callback = function(args)
+		local bufnr = args.buf
+		if not vim.api.nvim_buf_is_valid(bufnr) then
+			return
+		end
+
+		-- Ensure VimTeX is loaded before setting <Plug> mappings.
+		vim.cmd("silent! packadd vimtex")
+
+		map("n", "<localleader>ll", "<Plug>(vimtex-compile)", { buffer = bufnr, desc = "Compile" })
+		map("n", "<localleader>lb", compile_lualatex_with_biber, { buffer = bufnr, desc = "Compile LuaLaTeX+Biber" })
+		map("n", "<localleader>lv", "<Plug>(vimtex-view)", { buffer = bufnr, desc = "View PDF" })
+		map("n", "<localleader>lk", "<Plug>(vimtex-stop)", { buffer = bufnr, desc = "Stop" })
+		map("n", "<localleader>lK", "<Plug>(vimtex-stop-all)", { buffer = bufnr, desc = "Stop all" })
+		map("n", "<localleader>lc", "<Plug>(vimtex-clean)", { buffer = bufnr, desc = "Clean aux" })
+		map("n", "<localleader>lC", "<Plug>(vimtex-clean-full)", { buffer = bufnr, desc = "Clean full" })
+		map("n", "<localleader>le", "<Plug>(vimtex-errors)", { buffer = bufnr, desc = "Errors" })
+		map("n", "<localleader>lo", "<Plug>(vimtex-compile-output)", { buffer = bufnr, desc = "Output" })
+		map("n", "<localleader>lg", "<Plug>(vimtex-status)", { buffer = bufnr, desc = "Status" })
+		map("n", "<localleader>lG", "<Plug>(vimtex-status-all)", { buffer = bufnr, desc = "Status all" })
+		map("n", "<localleader>lt", "<Plug>(vimtex-toc-open)", { buffer = bufnr, desc = "TOC" })
+		map("n", "<localleader>lT", "<Plug>(vimtex-toc-toggle)", { buffer = bufnr, desc = "TOC toggle" })
+		map("n", "<localleader>lq", "<Plug>(vimtex-log)", { buffer = bufnr, desc = "Log" })
+		map("n", "<localleader>li", "<Plug>(vimtex-info)", { buffer = bufnr, desc = "Info" })
+		map("n", "<localleader>lI", "<Plug>(vimtex-info-full)", { buffer = bufnr, desc = "Info full" })
+		map("n", "<localleader>lx", "<Plug>(vimtex-reload)", { buffer = bufnr, desc = "Reload" })
+		map("n", "<localleader>lX", "<Plug>(vimtex-reload-state)", { buffer = bufnr, desc = "Reload state" })
+		map("n", "<localleader>la", "<Plug>(vimtex-context-menu)", { buffer = bufnr, desc = "Context menu" })
+		map("n", "<localleader>lm", "<Plug>(vimtex-imaps-list)", { buffer = bufnr, desc = "Insert mode maps" })
+	end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+	group = filetype_keymaps_group,
+	pattern = { "typst", "typ" },
+	desc = "Typst localleader mappings",
+	callback = function(args)
+		local bufnr = args.buf
+		if not vim.api.nvim_buf_is_valid(bufnr) then
+			return
+		end
+
+		map("n", "<localleader>tp", function()
+			if vim.fn.exists(":TypstPreviewToggle") == 2 then
+				pcall(vim.cmd, "TypstPreviewToggle")
+				return
+			end
+			local ok = pcall(require, "typst-preview")
+			if not ok then
+				vim.notify("typst-preview.nvim not available", vim.log.levels.WARN)
+			end
+		end, { buffer = bufnr, desc = "Typst preview: Toggle" })
+
+		map("n", "<localleader>ts", function()
+			if vim.fn.exists(":TypstPreviewSyncCursor") == 2 then
+				pcall(vim.cmd, "TypstPreviewSyncCursor")
+				return
+			end
+			local ok, tp = pcall(require, "typst-preview")
+			if ok and tp.sync_with_cursor then
+				pcall(tp.sync_with_cursor)
+				return
+			end
+			vim.notify("Typst preview sync not available", vim.log.levels.WARN)
+		end, { buffer = bufnr, desc = "Typst preview: Sync cursor" })
+
+		map("n", "<localleader>tc", typst_compile_current, { buffer = bufnr, desc = "Compile PDF (typst c)" })
+
+		map("n", "<localleader>tw", typst_watch_current, { buffer = bufnr, desc = "Watch file (typst w)" })
+	end,
+})
 
 -- Obsidian
 map("n", "<leader>On", obsidian_operation("new_note"), { desc = "New Obsidian note" })

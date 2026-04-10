@@ -10,7 +10,7 @@ Neovim configuration optimised for academic research and scientific computing. D
 - LaTeX: VimTeX, bidirectional SyncTeX (Skim)
 - Markdown: Live preview, Obsidian integration
 - Quarto: Code execution (R, Python, Julia)
-- Typst: Live preview
+- Typst: Preview (typst-preview), CLI compile/watch (`typst c` / `typst w`)
 
 ### Scientific Computing
 - Julia: REPL integration, multi-threaded execution
@@ -74,6 +74,7 @@ Plugins install automatically on first launch (vim.pack). Mason prompts for lang
 |-----|--------|
 | `<leader>f` | Find files (Telescope) |
 | `<leader>g` | Live grep in project |
+| `<leader>R` / `<leader>Rf` | Find files (frecency) |
 | `<leader>e` | Toggle file explorer |
 | `<leader>w` | Save file |
 
@@ -81,18 +82,18 @@ Plugins install automatically on first launch (vim.pack). Mason prompts for lang
 
 | Key | Action |
 |-----|--------|
-| `<C-t>` | Toggle terminal |
-| `<leader>Tt` | Terminal toggle (vertical) |
+| `<C-t>` | Toggle terminal (ToggleTerm `open_mapping`) |
+| `<leader>Tt` | Terminal toggle (vertical, smart) |
 | `<leader>Th/Tv/Tf` | Horizontal/Vertical/Float terminal |
-| `<C-i>` | Send line to terminal |
-| `<C-c>` | Send code block to terminal |
 
 ### Document Workflows
 
 | Key | Action |
 |-----|--------|
-| `<localleader>lv` | LaTeX forward search |
-| `<localleader>ll` | Compile LaTeX |
+| `<localleader>lv` | LaTeX forward search (VimTeX) |
+| `<localleader>ll` | Compile LaTeX (VimTeX) |
+| `<localleader>lb` | LuaLaTeX + Biber (custom terminal workflow) |
+| `<localleader>tp`–`<localleader>tw` | Typst preview / sync / `typst c` / `typst w` |
 | `<leader>Kp` | Markdown preview |
 | `<leader>Qp` | Quarto preview |
 

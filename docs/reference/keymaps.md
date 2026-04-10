@@ -46,13 +46,16 @@ Complete keybinding reference for BabaVim, organised by functionality.
 ### File Navigation
 ```vim
 <Leader>f       " Find files (Telescope)
-<Leader>F       " Find files by frequency/recency (Telescope frecency)
-<Leader>Ff      " Find files (frecency)
-<Leader>Fr      " Refresh frecency database
-<Leader>Fd      " Show frecency database location
-<Leader>Fb      " Rebuild frecency database
+<Leader>R       " Find files by frequency/recency (Telescope frecency)
+<Leader>Rf      " Find files (frecency)
+<Leader>Rr      " Refresh frecency database
+<Leader>Rd      " Show frecency database location
+<Leader>Rb      " Rebuild frecency database
 <Leader>e       " Toggle file explorer (NvimTree)
 ```
+
+### Forge (tasks / project)
+See `lua/plugins/forge-nvim.lua` for the full `<Leader>F*` map set (e.g. `<Leader>Fn` next actions, `<Leader>Fb` board).
 
 ## LSP Operations
 
@@ -115,11 +118,12 @@ VimTeX provides comprehensive default keymaps (see `:help vimtex-default-mapping
 allowing you to scroll through output, yank error messages, and dismiss with `q` when done.
 
 ### Typst
+Buffer-local on `typ` / `typst` files (`<localleader>` is typically `\`):
 ```vim
-\LocalLeader\tp " Toggle Typst preview
-\LocalLeader\ts " Sync cursor in preview
-\LocalLeader\tc " Compile PDF
-\LocalLeader\tw " Watch file
+<localleader>tp " Toggle Typst preview (typst-preview.nvim when installed)
+<localleader>ts " Sync cursor in preview
+<localleader>tc " Compile PDF (`typst c`, CLI)
+<localleader>tw " Watch file (`typst w`, ToggleTerm)
 ```
 
 ### Markdown/Quarto
@@ -136,6 +140,7 @@ allowing you to scroll through output, yank error messages, and dismiss with `q`
 <Leader>QRh     " Render to HTML
 <Leader>QRp     " Render to PDF
 <Leader>QRw     " Render to Word
+<Leader>QRa     " Render all (project)
 ```
 
 ### Markdown Table Operations
@@ -164,7 +169,7 @@ Table editing operations for markdown and quarto files (table-nvim):
 <Leader>QMi     " Show image popup
 <Leader>QMl     " Evaluate line
 <Leader>QMe     " Evaluate operator
-<Leader>QMn     " Initialize kernel
+<Leader>QMn     " Initialise kernel
 <Leader>QMk     " Stop kernel
 <Leader>QMr     " Restart kernel
 <Leader>QMv     " Evaluate visual selection
@@ -207,26 +212,18 @@ Table editing operations for markdown and quarto files (table-nvim):
 ## Terminal Integration
 
 ### Terminal Management
+ToggleTerm is configured with `open_mapping` `<C-t>` (see `lua/plugins/toggleterm-nvim.lua`). Additional bindings:
 ```vim
-<C-t>           " Toggle terminal
-<Leader>Tt      " Toggle terminal (vertical default)
+<C-t>           " Toggle terminal (ToggleTerm default instance)
+<Leader>Tt      " Toggle terminal (vertical default, smart hide/show)
 <Leader>Th      " Horizontal terminal (15 lines)
-<Leader>Tv      " Vertical terminal (30%)
+<Leader>Tv      " Vertical terminal (30% width)
 <Leader>Tf      " Floating terminal
 <Leader>Tk      " Clear terminal
 <Leader>Td      " Kill terminal
-
-<A-1>           " Horizontal terminal (15 lines)
-<A-2>           " Vertical terminal (30%)
-<A-3>           " Floating terminal
 ```
 
-### Terminal Code Execution
-```vim
-<C-i>           " Send current line to terminal
-<C-c>           " Send current code block to terminal
-<C-s>           " Send visual selection to terminal
-```
+Quarto code execution and Molten Jupyter bindings are under `<Leader>Q*` (see above); there are no global `<C-i>` / `<C-c>` “send to terminal” mappings in this configuration.
 
 ## Git Operations
 
@@ -284,7 +281,6 @@ Table editing operations for markdown and quarto files (table-nvim):
 <Leader>Xd      " Document diagnostics
 <Leader>Xl      " Location list
 <Leader>Xq      " Quickfix
-<Leader>Xx      " Toggle Trouble
 ```
 
 ## Plugin Management

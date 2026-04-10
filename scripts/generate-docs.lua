@@ -48,14 +48,15 @@ function DocGenerator.generate_keymaps_summary()
 
 - **B**: Buffer operations
 - **C**: Configuration management
-- **F**: File operations (frequency/recency)
+- **F**: Forge (tasks / project)
+- **R**: Frecency (recent files)
 - **G**: Git operations
 - **J**: Julia development
 - **K**: Markdown preview
 - **L**: LSP operations
 - **M**: Mason package management
 - **O**: Obsidian operations
-- **P**: Plugin management
+- **CU**: Plugin updates (pack)
 - **Q**: Quarto operations
 - **S**: Search operations
 - **T**: Terminal operations
@@ -67,10 +68,10 @@ function DocGenerator.generate_keymaps_summary()
 ## Quick Access Keys
 
 - `<Space>`: Show all available commands (Which-Key)
-- `<C-t>`: Toggle terminal
+- `<C-t>`: Toggle terminal (ToggleTerm `open_mapping`)
 - `<C-s>`: Quick save
 - `<Leader>q`: Close buffer
-- `<Leader>x`: Toggle checkbox (Obsidian)
+- `<Leader>Oc`: Toggle checkbox (Obsidian)
 
 ## LSP Navigation
 

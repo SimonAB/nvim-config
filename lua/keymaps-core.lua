@@ -66,5 +66,81 @@ map("n", "<leader>|h", "<cmd>split<CR>", { desc = "Split Horizontal" })
 map("n", "<leader>Yw", "<cmd>set wrap!<CR>", { desc = "Toggle wrap" })
 map("n", "<leader>Yn", "<cmd>set number!<CR>", { desc = "Toggle line numbers" })
 
+map("n", "<leader>Ys", "<cmd>set spell!<CR>", { desc = "Toggle spell check" })
+map("n", "<leader>Yse", function()
+	local config_dir = vim.fn.stdpath("config")
+
+	-- Disable first to clear spell cache, then re-enable with the new language.
+	vim.cmd("set nospell")
+	vim.opt.spellfile = config_dir .. "/private/spell/en.utf-8.add"
+	vim.cmd("set spelllang=en_gb")
+	vim.cmd("set spell")
+
+	vim.notify("Spell language: English (British)", vim.log.levels.INFO)
+end, { desc = "Spell: English (British)" })
+
+map("n", "<leader>Ysf", function()
+	local config_dir = vim.fn.stdpath("config")
+
+	vim.cmd("set nospell")
+	vim.opt.spellfile = config_dir .. "/private/spell/fr.utf-8.add"
+	vim.cmd("set spelllang=fr")
+	vim.cmd("set spell")
+
+	vim.notify("Spell language: French", vim.log.levels.INFO)
+end, { desc = "Spell: French" })
+
+-- Configuration reload
+map("n", "<leader>Cs", function()
+	local config_path = vim.fn.stdpath("config")
+
+	local modules_to_clear = {
+		"config",
+		"keymaps",
+		"keymaps-core",
+		"keymaps-plugins",
+		"plugins",
+	}
+
+	for _, module in ipairs(modules_to_clear) do
+		package.loaded[module] = nil
+	end
+
+	vim.cmd("source " .. config_path .. "/init.lua")
+	print("✓ Configuration reloaded!")
+end, { desc = "Reload configuration" })
+
+-- LSP operations (built-in)
+map("n", "<leader>Ll", function()
+	local clients = vim.lsp.get_clients({ bufnr = 0 })
+	if #clients == 0 then
+		print("No LSP servers running")
+		return
+	end
+
+	print("Active LSP servers:")
+	for _, client in ipairs(clients) do
+		print(string.format("  %s (ID: %d)", client.name, client.id))
+	end
+end, { desc = "LSP: List servers" })
+
+map("n", "<leader>Lr", function()
+	local clients = vim.lsp.get_clients({ bufnr = 0 })
+	if #clients == 0 then
+		print("No active LSP clients to restart")
+		return
+	end
+	vim.notify("Restarting LSP...", vim.log.levels.INFO)
+	vim.cmd("LspRestart")
+end, { desc = "LSP: Restart" })
+
+map("n", "<leader>Lf", function()
+	vim.lsp.buf.format({ async = true })
+end, { desc = "LSP: Format" })
+
+map("n", "<leader>LR", function()
+	vim.lsp.buf.references()
+end, { desc = "LSP: References" })
+
 return {}
 
