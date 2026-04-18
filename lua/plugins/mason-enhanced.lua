@@ -4,9 +4,16 @@
 -- =============================================================================
 
 local MasonUI = {}
+
+---When true, per-package install notifications are suppressed (batch update).
+local quiet_install_notifications = false
+
 local progress_handle = nil
 local update_popup = nil
 local updated_packages = {}
+
+---Handlers registered on `mason-registry` (cleared and re-registered in `setup_event_handlers`).
+local registry_handlers = {}
 
 -- Progress notification system
 local function create_progress_notification(title, message)
@@ -183,50 +190,137 @@ function MasonUI.install_all_recommended()
 	})
 end
 
--- Update all installed packages
+---Refresh Mason registries then reinstall any installed package whose receipt
+---version differs from the latest version in the registry.
+---Note: `:MasonUpdate` alone only updates registry sources, not installed tools.
 function MasonUI.update_all_packages()
-	local handle = create_progress_notification("Updating Packages", "Checking for updates...")
-	updated_packages = {}
-	open_update_popup("Mason: Updating Packages", "Starting update...")
+	local ok_a, a = pcall(require, "mason-core.async")
+	local ok_registry, registry = pcall(require, "mason-registry")
+	if not ok_a or not ok_registry then
+		notify("Mason registry API not available", vim.log.levels.ERROR)
+		return
+	end
 
-	vim.defer_fn(function()
-		local success = pcall(function()
-			vim.cmd("MasonUpdate")
+	local handle = create_progress_notification("Updating Packages", "Updating registries…")
+	updated_packages = {}
+	quiet_install_notifications = true
+	open_update_popup("Mason: Updating Packages", "Updating registries…")
+
+	a.run(function()
+		a.wait(function(resolve, reject)
+			registry.update(function(success, result)
+				if success then
+					resolve(result)
+				else
+					reject(result)
+				end
+			end)
 		end)
 
-		if handle then
-			if success then
-				handle.message = "All packages updated successfully!"
-			else
-				handle.message = "Update failed or no updates available"
+		local outdated = {}
+		for _, name in ipairs(registry.get_installed_package_names()) do
+			local ok_pkg, pkg = pcall(registry.get_package, name)
+			if ok_pkg and pkg then
+				local current_version = pkg:get_installed_version()
+				local ok_lv, latest_version = pcall(function()
+					return pkg:get_latest_version()
+				end)
+				if ok_lv and current_version ~= latest_version then
+					table.insert(outdated, pkg)
+				end
 			end
-			vim.defer_fn(function() handle:finish() end, 2000)
 		end
 
-		if update_popup then
-			local ok, ProgressPopup = pcall(require, "core.progress-popup")
-			if ok then
-				ProgressPopup.append_line(update_popup, "")
-				if success then
-					ProgressPopup.append_line(update_popup,
-						string.format("Done. %d packages reported updated.", #updated_packages)
-					)
+		if #outdated == 0 then
+			return { n_updated = 0, failed = {} }
+		end
+
+		local failed = {}
+		for _, pkg in ipairs(outdated) do
+			local install_ok = a.wait(function(resolve)
+				pkg:install({}, function(ok)
+					resolve(ok)
+				end)
+			end)
+			a.scheduler()
+			if install_ok then
+				table.insert(updated_packages, pkg.name)
+			else
+				table.insert(failed, pkg.name)
+			end
+		end
+
+		return { n_updated = #updated_packages, failed = failed }
+	end, function(run_ok, result)
+		quiet_install_notifications = false
+
+		vim.schedule(function()
+			if handle then
+				if not run_ok then
+					handle.message = "Update failed: " .. tostring(result)
+				elseif result.n_updated == 0 then
+					handle.message = "Registries updated; all packages already current"
+				elseif #result.failed == 0 then
+					handle.message = string.format("Updated %d package(s)", result.n_updated)
 				else
-					ProgressPopup.append_line(update_popup, "Update failed or no updates available.")
+					handle.message = string.format(
+						"Updated %d; %d failed",
+						result.n_updated,
+						#result.failed
+					)
 				end
 				vim.defer_fn(function()
-					ProgressPopup.close(update_popup)
-					update_popup = nil
-				end, 10000)
+					handle:finish()
+				end, 2000)
 			end
-		end
 
-		if success then
-			notify("Package update completed", vim.log.levels.INFO)
-		else
-			notify("Package update failed", vim.log.levels.WARN)
-		end
-	end, 100)
+			if update_popup then
+				local ok_pp, ProgressPopup = pcall(require, "core.progress-popup")
+				if ok_pp then
+					ProgressPopup.set_lines(update_popup, {
+						"",
+						not run_ok and ("Error: " .. tostring(result)) or "Finished.",
+						"",
+						"Updated packages:",
+					})
+					for _, name in ipairs(updated_packages) do
+						ProgressPopup.append_line(update_popup, "  - " .. name)
+					end
+					if run_ok and type(result) == "table" and #result.failed > 0 then
+						ProgressPopup.append_line(update_popup, "")
+						ProgressPopup.append_line(update_popup, "Failed:")
+						for _, name in ipairs(result.failed) do
+							ProgressPopup.append_line(update_popup, "  - " .. name)
+						end
+					end
+					vim.defer_fn(function()
+						ProgressPopup.close(update_popup)
+						update_popup = nil
+					end, 10000)
+				end
+			end
+
+			if not run_ok then
+				notify("Mason update failed: " .. tostring(result), vim.log.levels.ERROR)
+			elseif result.n_updated == 0 then
+				notify("Mason registries refreshed; no package upgrades needed", vim.log.levels.INFO)
+			elseif #result.failed == 0 then
+				notify(
+					string.format("Mason: upgraded %d package(s)", result.n_updated),
+					vim.log.levels.INFO
+				)
+			else
+				notify(
+					string.format(
+						"Mason: upgraded %d package(s), %d failed (see :MasonLog)",
+						result.n_updated,
+						#result.failed
+					),
+					vim.log.levels.WARN
+				)
+			end
+		end)
+	end)
 end
 
 -- Check Mason status and provide summary
@@ -289,41 +383,45 @@ function MasonUI.setup_commands()
 	end, { desc = "Show Mason installation status" })
 end
 
--- Setup Mason event handlers for better notifications
+---Subscribe to Mason registry install events (Mason does not emit `User` autocmds for these).
 function MasonUI.setup_event_handlers()
-	local group = vim.api.nvim_create_augroup("MasonEnhanced", { clear = true })
+	local ok, registry = pcall(require, "mason-registry")
+	if not ok then
+		return
+	end
 
-	-- Enhanced installation notifications
-	vim.api.nvim_create_autocmd("User", {
-		pattern = "MasonInstallCompleted",
-		group = group,
-		callback = function(ev)
-			local package_name = ev.data or "Unknown"
-			notify("✓ " .. package_name .. " installed successfully", vim.log.levels.INFO)
-		end,
-	})
+	for _, h in ipairs(registry_handlers) do
+		registry:off(h.event, h.fn)
+	end
+	registry_handlers = {}
 
-	-- Installation failure notifications
-	vim.api.nvim_create_autocmd("User", {
-		pattern = "MasonInstallFailed",
-		group = group,
-		callback = function(ev)
-			local package_name = ev.data or "Unknown"
-			notify("✗ Failed to install " .. package_name, vim.log.levels.ERROR)
-		end,
-	})
+	local function track_success(pkg)
+		if quiet_install_notifications then
+			return
+		end
+		notify("✓ " .. pkg.name .. " installed successfully", vim.log.levels.INFO)
+		table.insert(updated_packages, pkg.name)
+		refresh_update_popup()
+	end
 
-	-- Update notifications
-	vim.api.nvim_create_autocmd("User", {
-		pattern = "MasonUpdateCompleted",
-		group = group,
-		callback = function(ev)
-			local package_name = ev.data or "Unknown"
-			notify("✓ " .. package_name .. " updated", vim.log.levels.INFO)
-			table.insert(updated_packages, package_name)
-			refresh_update_popup()
-		end,
-	})
+	local on_success = function(pkg)
+		vim.schedule(function()
+			track_success(pkg)
+		end)
+	end
+	registry:on("package:install:success", on_success)
+	table.insert(registry_handlers, { event = "package:install:success", fn = on_success })
+
+	local on_failed = function(pkg, result)
+		vim.schedule(function()
+			notify(
+				"✗ Failed to install " .. pkg.name .. ": " .. tostring(result),
+				vim.log.levels.ERROR
+			)
+		end)
+	end
+	registry:on("package:install:failed", on_failed)
+	table.insert(registry_handlers, { event = "package:install:failed", fn = on_failed })
 end
 
 -- Initialize the enhanced Mason UI
