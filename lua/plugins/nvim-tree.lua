@@ -19,6 +19,7 @@ if ok then
 	},
 	filters = {
 		dotfiles = false, -- Show dotfiles by default
+		git_ignored = false, -- Show gitignored paths (e.g. Forge tasks/)
 	},
 	-- You can add more config here (e.g., actions, git integration, etc.)
 	})
