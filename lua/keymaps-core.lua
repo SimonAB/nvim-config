@@ -35,6 +35,52 @@ map("n", "<leader>Wj", "<cmd>resize +2<CR>", { desc = "Increase window height" }
 map("n", "<leader>Wh", "<cmd>vertical resize -2<CR>", { desc = "Decrease window width" })
 map("n", "<leader>Wl", "<cmd>vertical resize +2<CR>", { desc = "Increase window width" })
 
+-- Alternative resize bindings for terminals/macOS quirks
+map("n", "<A-Up>", "<cmd>resize -2<CR>", { desc = "Decrease window height (Alt)" })
+map("n", "<A-Down>", "<cmd>resize +2<CR>", { desc = "Increase window height (Alt)" })
+map("n", "<A-Left>", "<cmd>vertical resize -2<CR>", { desc = "Decrease window width (Alt)" })
+map("n", "<A-Right>", "<cmd>vertical resize +2<CR>", { desc = "Increase window width (Alt)" })
+
+map("n", "<M-Up>", "<cmd>resize -2<CR>", { desc = "Decrease window height (Meta)" })
+map("n", "<M-Down>", "<cmd>resize +2<CR>", { desc = "Increase window height (Meta)" })
+map("n", "<M-Left>", "<cmd>vertical resize -2<CR>", { desc = "Decrease window width (Meta)" })
+map("n", "<M-Right>", "<cmd>vertical resize +2<CR>", { desc = "Increase window width (Meta)" })
+
+map("n", "<Esc>[1;3A", "<cmd>resize -2<CR>", { desc = "Decrease window height (ESC seq)" })
+map("n", "<Esc>[1;3B", "<cmd>resize +2<CR>", { desc = "Increase window height (ESC seq)" })
+map("n", "<Esc>[1;3C", "<cmd>vertical resize +2<CR>", { desc = "Increase window width (ESC seq)" })
+map("n", "<Esc>[1;3D", "<cmd>vertical resize -2<CR>", { desc = "Decrease window width (ESC seq)" })
+
+---Check whether an Ex command exists.
+---@param cmd string
+---@return boolean
+local function cmd_exists(cmd)
+	return vim.fn.exists(":" .. cmd) == 2
+end
+
+---Go to the next buffer, preferring BufferLine when available.
+local function goto_next_buffer()
+	if cmd_exists("BufferLineCycleNext") then
+		vim.cmd("BufferLineCycleNext")
+		return
+	end
+
+	vim.cmd("bnext")
+end
+
+---Go to the previous buffer, preferring BufferLine when available.
+local function goto_previous_buffer()
+	if cmd_exists("BufferLineCyclePrev") then
+		vim.cmd("BufferLineCyclePrev")
+		return
+	end
+
+	vim.cmd("bprevious")
+end
+
+map("n", "<S-l>", goto_next_buffer, { desc = "Next buffer" })
+map("n", "<S-h>", goto_previous_buffer, { desc = "Previous buffer" })
+
 -- Clear search highlights
 map("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlights" })
 

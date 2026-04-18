@@ -619,6 +619,259 @@ map("n", "<leader>Gg", function()
 end, { desc = "LazyGit" })
 
 -- Terminal
+---Send the current code block to ToggleTerm (best effort).
+---Supports Quarto/R Markdown fences (```{...}) and header blocks (## ...).
+local function send_current_code_block()
+	local bufnr = vim.api.nvim_get_current_buf()
+	local cursor = vim.api.nvim_win_get_cursor(0)
+	local current_line = cursor[1]
+	local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+
+	local start_line = nil
+	local end_line = nil
+	local block_type = nil -- "fenced" or "header"
+
+	local fenced_start = nil
+	local fenced_end = nil
+
+	for i = current_line, 1, -1 do
+		if lines[i] and lines[i]:match("^```{.*}") then
+			fenced_start = i
+			break
+		end
+	end
+
+	if fenced_start then
+		for i = current_line, #lines do
+			if lines[i] and lines[i]:match("^```%s*$") then
+				fenced_end = i
+				break
+			end
+		end
+	end
+
+	if fenced_start and fenced_end and current_line > fenced_start and current_line < fenced_end then
+		start_line = fenced_start
+		end_line = fenced_end
+		block_type = "fenced"
+	else
+		local header_start = nil
+		local header_end = nil
+
+		for i = current_line, 1, -1 do
+			if lines[i] and lines[i]:match("^##") then
+				header_start = i
+				break
+			end
+		end
+
+		if header_start then
+			for i = header_start + 1, #lines do
+				if lines[i] and lines[i]:match("^##") then
+					header_end = i - 1
+					break
+				end
+			end
+			if not header_end then
+				header_end = #lines
+			end
+		end
+
+		if header_start and header_end and current_line >= header_start and current_line <= header_end then
+			start_line = header_start
+			end_line = header_end
+			block_type = "header"
+		end
+	end
+
+	if not (start_line and end_line and start_line <= end_line) then
+		vim.notify("No code block found around cursor", vim.log.levels.WARN)
+		return
+	end
+
+	local selection_start, selection_end
+	if block_type == "fenced" then
+		selection_start = start_line + 1
+		selection_end = end_line - 1
+	else
+		selection_start = start_line
+		selection_end = end_line
+	end
+
+	if selection_start > selection_end then
+		vim.notify("Empty code block", vim.log.levels.WARN)
+		return
+	end
+
+	vim.api.nvim_win_set_cursor(0, { selection_start, 0 })
+	vim.cmd("normal! V")
+	vim.api.nvim_win_set_cursor(0, { selection_end, 0 })
+
+	pcall(vim.cmd, "ToggleTermSendVisualSelection")
+
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+
+	local next_block_start = nil
+	local search_start = end_line + 1
+
+	for i = search_start, #lines do
+		if lines[i] and lines[i]:match("^```{.*}") then
+			next_block_start = i + 1
+			break
+		end
+	end
+
+	if not next_block_start then
+		for i = search_start, #lines do
+			if lines[i] and lines[i]:match("^##") then
+				next_block_start = i
+				break
+			end
+		end
+	end
+
+	if next_block_start then
+		vim.api.nvim_win_set_cursor(0, { next_block_start, 0 })
+	end
+end
+
+---Yank the current fenced code chunk (excluding delimiter lines).
+---Supports Quarto (```{lang}) and Markdown fences (```lang / ```).
+local function yank_code_chunk()
+	local bufnr = vim.api.nvim_get_current_buf()
+	local cursor = vim.api.nvim_win_get_cursor(0)
+	local current_line = cursor[1]
+	local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+
+	local fenced_start = nil
+	local fenced_end = nil
+
+	local function is_opening_delimiter(line)
+		if not line then
+			return false
+		end
+		if line:match("^```{.*}") then
+			return true
+		end
+		return line:match("^```") ~= nil
+	end
+
+	local function is_closing_delimiter(line)
+		if not line then
+			return false
+		end
+		return line:match("^```%s*$") ~= nil
+	end
+
+	local is_on_opening = is_opening_delimiter(lines[current_line])
+	local is_on_closing = is_closing_delimiter(lines[current_line])
+
+	if is_on_opening then
+		fenced_start = current_line
+	elseif is_on_closing then
+		for i = current_line - 1, 1, -1 do
+			if is_opening_delimiter(lines[i]) then
+				fenced_start = i
+				break
+			end
+		end
+		if fenced_start then
+			fenced_end = current_line
+		end
+	else
+		for i = current_line, 1, -1 do
+			if is_opening_delimiter(lines[i]) then
+				fenced_start = i
+				break
+			end
+		end
+	end
+
+	if fenced_start and not fenced_end then
+		for i = fenced_start + 1, #lines do
+			if is_closing_delimiter(lines[i]) then
+				fenced_end = i
+				break
+			end
+		end
+	end
+
+	if not (fenced_start and fenced_end and fenced_start < fenced_end) then
+		vim.notify("No code chunk found around cursor", vim.log.levels.WARN)
+		return
+	end
+
+	local code_start = fenced_start + 1
+	local code_end = fenced_end - 1
+	if code_start > code_end then
+		vim.notify("Empty code chunk", vim.log.levels.WARN)
+		return
+	end
+
+	local code_lines = {}
+	for i = code_start, code_end do
+		table.insert(code_lines, lines[i])
+	end
+	local code_content = table.concat(code_lines, "\n") .. "\n"
+
+	vim.fn.setreg('"', code_content)
+	vim.fn.setreg("+", code_content)
+	vim.fn.setreg("*", code_content)
+
+	vim.notify(
+		("Yanked code chunk (%d lines)"):format(code_end - code_start + 1),
+		vim.log.levels.INFO
+	)
+end
+
+---Open ToggleTerm with a consistent direction/size.
+---@param direction "horizontal"|"vertical"|"float"
+---@param size integer|nil
+local function open_terminal(direction, size)
+	if direction == "horizontal" then
+		vim.cmd("ToggleTerm direction=horizontal size=" .. tostring(size or 15))
+		return
+	end
+
+	if direction == "vertical" then
+		local width = size or math.floor(vim.o.columns * 0.3)
+		vim.cmd("ToggleTerm direction=vertical size=" .. tostring(width))
+		return
+	end
+
+	vim.cmd("ToggleTerm direction=float")
+end
+
+map("n", "<C-t>", "<esc><cmd>ToggleTerm<CR>", { desc = "Toggle terminal" })
+map("t", "<C-t>", "<C-\\><C-N><cmd>ToggleTerm<CR>", { desc = "Toggle terminal from terminal" })
+map("t", "<Esc>", "<C-\\><C-N>", { desc = "Exit terminal mode" })
+
+map("n", "<C-i>", "<esc><cmd>ToggleTermSendCurrentLine<CR>j", { desc = "Send current line to terminal" })
+map("n", "<C-c>", send_current_code_block, { desc = "Send current code block to terminal" })
+map("v", "<C-s>", ":'<,'>ToggleTermSendVisualSelection<CR>", { desc = "Send selection to terminal" })
+
+map("n", "yic", yank_code_chunk, { desc = "Yank code chunk" })
+
+map({ "n", "t" }, "<A-1>", function()
+	open_terminal("horizontal", 15)
+end, { desc = "Terminal horizontal (15 lines)" })
+map({ "n", "t" }, "<A-2>", function()
+	open_terminal("vertical")
+end, { desc = "Terminal vertical" })
+map({ "n", "t" }, "<A-3>", function()
+	open_terminal("float")
+end, { desc = "Terminal float" })
+
+map({ "n", "t" }, "<M-1>", function()
+	open_terminal("horizontal", 15)
+end, { desc = "Terminal horizontal (15 lines, Meta)" })
+map({ "n", "t" }, "<M-2>", function()
+	open_terminal("vertical")
+end, { desc = "Terminal vertical (Meta)" })
+map({ "n", "t" }, "<M-3>", function()
+	open_terminal("float")
+end, { desc = "Terminal float (Meta)" })
+
 map({ "n", "t" }, "<leader>Tt", toggle_terminal_vertical_smart, { desc = "Toggle terminal (vertical)" })
 map({ "n", "t" }, "<leader>Th", function()
 	vim.cmd("ToggleTerm direction=horizontal size=15")
