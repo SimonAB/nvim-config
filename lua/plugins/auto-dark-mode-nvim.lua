@@ -7,13 +7,11 @@ if ok then
 		update_interval = 1000,
 		set_dark_mode = function()
 			vim.api.nvim_set_option("background", "dark")
-			-- vim.cmd.colorscheme("onedark")
-			vim.cmd.colorscheme("gruvbox")
+			vim.cmd.colorscheme("catppuccin")
 		end,
 		set_light_mode = function()
 			vim.api.nvim_set_option("background", "light")
-			-- vim.cmd.colorscheme("github_light_default")
-			vim.cmd.colorscheme("onehalflight")
+			vim.cmd.colorscheme("catppuccin")
 		end,
 	})
 end

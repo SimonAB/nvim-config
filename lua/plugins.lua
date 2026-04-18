@@ -57,6 +57,7 @@ local plugins = {
 	{ src = "https://github.com/projekt0n/github-nvim-theme", name = "github-nvim-theme" },
 	{ src = "https://github.com/navarasu/onedark.nvim", name = "onedark.nvim" },
 	{ src = "https://github.com/ellisonleao/gruvbox.nvim", name = "gruvbox.nvim" },
+	{ src = "https://github.com/catppuccin/nvim", name = "catppuccin" },
 	{ src = "https://github.com/rafi/awesome-vim-colorschemes", name = "awesome-vim-colorschemes" },
 }
 

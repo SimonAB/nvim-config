@@ -174,10 +174,11 @@ function ThemeManager.apply_global_opacity()
 	ThemeSettings.apply_all_window_blends()
 end
 
--- Get theme for current system appearance
+-- Get theme for current system appearance (sync `background`; Catppuccin stays Mocha via config).
 function ThemeManager.get_active_theme()
-    local appearance = ThemeManager.detect_system_theme()
-    return ThemeSettings.get_default_theme(appearance)
+	local appearance = ThemeManager.detect_system_theme()
+	vim.o.background = appearance
+	return ThemeSettings.get_default_theme(appearance)
 end
 
 -- Load and apply theme immediately (no defer)

@@ -69,9 +69,9 @@ function ThemeSettings.get_default_theme(appearance)
 	local config = ThemeSettings.get_active_config()
 	local defaults = config.defaults or {}
 	if appearance == "light" then
-		return defaults.light or "github_light_default"
+		return defaults.light or "catppuccin"
 	end
-	return defaults.dark or "gruvbox"
+	return defaults.dark or "catppuccin"
 end
 
 return ThemeSettings
