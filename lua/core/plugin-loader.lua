@@ -18,6 +18,7 @@ local MODULE_TO_PACK = {
 	["nvim-web-devicons"] = "nvim-web-devicons",
 	["blink-cmp"] = "blink.cmp",
 	["mason-nvim"] = "mason.nvim",
+	["mason-lspconfig-nvim"] = "mason-lspconfig.nvim",
 	["nvim-lspconfig"] = "nvim-lspconfig",
 	["nvim-treesitter"] = "nvim-treesitter",
 	["mini-nvim"] = "mini.nvim",
@@ -26,6 +27,9 @@ local MODULE_TO_PACK = {
 	["lualine-nvim"] = "lualine.nvim",
 	["nvim-tree"] = "nvim-tree.lua",
 	["telescope"] = "telescope.nvim",
+	["telescope-fzf-native-nvim"] = "telescope-fzf-native.nvim",
+	["telescope-frecency-nvim"] = "telescope-frecency.nvim",
+	["sqlite-lua"] = "sqlite.lua",
 	["trouble-nvim"] = "trouble.nvim",
 	["gitsigns-nvim"] = "gitsigns.nvim",
 	["toggleterm-nvim"] = "toggleterm.nvim",
@@ -61,14 +65,73 @@ local function ensure_packadd(module_name)
 	pcall(vim.cmd.packadd, pack_name)
 end
 
+---Notify about config drift between vim.pack specs and phased loader lists.
+---This helps catch "installed but never loaded" and "loader references missing plugin" issues.
+local function notify_drift()
+	local declared = {}
+	if type(_G.neovim_plugins) == "table" then
+		for _, spec in ipairs(_G.neovim_plugins) do
+			local name = (spec or {}).name
+			if type(name) == "string" and name ~= "" then
+				declared[name] = true
+			end
+		end
+	end
+
+	local referenced = {}
+	for _, pack_name in pairs(MODULE_TO_PACK) do
+		referenced[pack_name] = true
+	end
+
+	local missing_from_specs = {}
+	for pack_name in pairs(referenced) do
+		if not declared[pack_name] then
+			table.insert(missing_from_specs, pack_name)
+		end
+	end
+	table.sort(missing_from_specs)
+
+	local missing_from_loader = {}
+	for name in pairs(declared) do
+		if not referenced[name] then
+			table.insert(missing_from_loader, name)
+		end
+	end
+	table.sort(missing_from_loader)
+
+	if #missing_from_specs == 0 and #missing_from_loader == 0 then
+		return
+	end
+
+	local lines = { "vim.pack drift detected:" }
+	if #missing_from_specs > 0 then
+		table.insert(lines, "")
+		table.insert(lines, "In loader mapping but not in `lua/plugins.lua`:")
+		for _, name in ipairs(missing_from_specs) do
+			table.insert(lines, "  - " .. name)
+		end
+	end
+	if #missing_from_loader > 0 then
+		table.insert(lines, "")
+		table.insert(lines, "In `lua/plugins.lua` but not in phased loader mapping:")
+		for _, name in ipairs(missing_from_loader) do
+			table.insert(lines, "  - " .. name)
+		end
+	end
+
+	vim.notify(table.concat(lines, "\n"), vim.log.levels.WARN)
+end
+
 -- Optimized loading phases (reduced from 8 to 3)
 local LOAD_PHASES = {
 	-- Phase 1: IMMEDIATE (0ms) - Core essentials
 	immediate = {
 		"plenary-nvim",        -- Utility library
 		"nvim-web-devicons",   -- File icons
+		"catppuccin",          -- Catppuccin Mocha; must load before ThemeManager (~50ms)
 		"blink-cmp",          -- Completion engine
 		"mason-nvim",         -- LSP server manager
+		"mason-lspconfig-nvim", -- Mason-LSP bridge (used by mason-nvim config)
 		"nvim-lspconfig",     -- LSP configurations
 		"nvim-treesitter",    -- Syntax highlighting
 		"mini-nvim",          -- Dashboard and text objects
@@ -81,6 +144,9 @@ local LOAD_PHASES = {
 		"lualine-nvim",       -- Status line
 		"nvim-tree",          -- File explorer
 		"telescope",          -- Fuzzy finder
+		"telescope-fzf-native-nvim", -- Telescope native sorter (extension)
+		"telescope-frecency-nvim", -- Telescope frecency (extension)
+		"sqlite-lua",         -- SQLite dependency for frecency
 		"trouble-nvim",       -- Diagnostics viewer
 		"gitsigns-nvim",      -- Git integration
 		"toggleterm-nvim",    -- Terminal management
@@ -108,7 +174,6 @@ local LOAD_PHASES = {
 		"github-nvim-theme",
 		"awesome-vim-colorschemes",
 		"onedark-nvim",
-		"catppuccin",
 	}
 }
 
@@ -150,6 +215,8 @@ function PluginLoader.load_all()
 	if is_startup_debug() then
 		vim.notify("Loading plugins in optimized phases...", vim.log.levels.INFO)
 	end
+
+	notify_drift()
 
 	-- Phase 1: Immediate
 	PluginLoader.load_with_phase("immediate", LOAD_PHASES.immediate)
