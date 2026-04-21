@@ -231,47 +231,72 @@ function ThemeManager.update_which_key_highlights()
 		return string.format("#%06x", colour)
 	end
 
-	---Return a background colour from the active theme, preferring float groups.
-	---@return string|nil
-	local function get_theme_float_bg()
-		local groups_to_try = { "NormalFloat", "Pmenu", "Normal" }
-		for _, group in ipairs(groups_to_try) do
+	---Return a single "surface" palette for floating UIs, derived from the active theme.
+	---This keeps which-key's float, border, and title visually consistent without hard-coding theme names.
+	---@return { surface_bg: string, border_fg: string, title_fg: string, title_bold: boolean }
+	local function get_float_surface_palette()
+		local surface_bg = nil
+		for _, group in ipairs({ "NormalFloat", "Pmenu", "Normal" }) do
 			local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
 			if ok and hl and hl.bg then
-				return colour_to_hex(hl.bg)
+				surface_bg = colour_to_hex(hl.bg)
+				break
 			end
 		end
-		return nil
+
+		-- Sensible fallbacks when a colourscheme leaves float backgrounds unset.
+		if not surface_bg then
+			surface_bg = (background == "light") and "#f0f0f0" or "#2b2f3a"
+		end
+
+		local border_fg = nil
+		local ok_border, float_border_hl = pcall(vim.api.nvim_get_hl, 0, { name = "FloatBorder", link = false })
+		if ok_border and float_border_hl and float_border_hl.fg then
+			border_fg = colour_to_hex(float_border_hl.fg)
+		end
+		if not border_fg then
+			border_fg = (background == "light") and "#c0c0c0" or "#4b5263"
+		end
+
+		local title_fg = nil
+		local title_bold = true
+		local ok_title, float_title_hl = pcall(vim.api.nvim_get_hl, 0, { name = "FloatTitle", link = false })
+		if ok_title and float_title_hl then
+			if float_title_hl.fg then
+				title_fg = colour_to_hex(float_title_hl.fg)
+			end
+			if float_title_hl.bold ~= nil then
+				title_bold = float_title_hl.bold
+			end
+		end
+		if not title_fg then
+			title_fg = border_fg
+		end
+
+		return {
+			surface_bg = surface_bg,
+			border_fg = border_fg,
+			title_fg = title_fg,
+			title_bold = title_bold,
+		}
 	end
 
-	local which_key_bg = get_theme_float_bg() or ((background == "light") and "#f0f0f0" or "#2b2f3a")
-	local which_key_border = (background == "light") and "#c0c0c0" or "#4b5263"
+	local surface = get_float_surface_palette()
 
 	-- If the theme keeps FloatBorder background unset/transparent, the border can look like it has a
 	-- different background from an opaque which-key window. Setting a bg only when missing keeps
 	-- theme-provided borders intact while ensuring visual continuity.
 	local ok_border, float_border_hl = pcall(vim.api.nvim_get_hl, 0, { name = "FloatBorder", link = false })
 	if ok_border and float_border_hl and float_border_hl.bg == nil then
-		pcall(vim.api.nvim_set_hl, 0, "FloatBorder", { bg = which_key_bg })
+		pcall(vim.api.nvim_set_hl, 0, "FloatBorder", { bg = surface.surface_bg })
 	end
 	
 	-- Match the float title background to the popup background so the centred hint/title doesn't
 	-- appear as a separate "pill" on top of the border.
-	local ok_title, float_title_hl = pcall(vim.api.nvim_get_hl, 0, { name = "FloatTitle", link = false })
-	local which_key_title_fg = nil
-	local which_key_title_bold = true
-	if ok_title and float_title_hl then
-		if float_title_hl.fg then
-			which_key_title_fg = colour_to_hex(float_title_hl.fg)
-		end
-		if float_title_hl.bold ~= nil then
-			which_key_title_bold = float_title_hl.bold
-		end
-	end
 	vim.api.nvim_set_hl(0, "WhichKeyTitle", {
-		fg = which_key_title_fg or which_key_border,
-		bg = which_key_bg,
-		bold = which_key_title_bold,
+		fg = surface.title_fg,
+		bg = surface.surface_bg,
+		bold = surface.title_bold,
 	})
 
 	-- Theme-specific highlight configurations
@@ -281,8 +306,8 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { link = "Keyword" },
 			WhichKeyDesc = { link = "Comment" },
 			WhichKeySeparator = { link = "String" },
-			WhichKeyFloat = { bg = which_key_bg },
-			WhichKeyBorder = { fg = which_key_border, bg = which_key_bg },
+			WhichKeyFloat = { bg = surface.surface_bg },
+			WhichKeyBorder = { fg = surface.border_fg, bg = surface.surface_bg },
 		}
 	elseif theme:match("onedark") then
 		highlights = {
@@ -290,8 +315,8 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { fg = "#C678DD" },
 			WhichKeyDesc = { fg = "#5C6370" },
 			WhichKeySeparator = { fg = "#98C379" },
-			WhichKeyFloat = { bg = which_key_bg },
-			WhichKeyBorder = { fg = which_key_border, bg = which_key_bg },
+			WhichKeyFloat = { bg = surface.surface_bg },
+			WhichKeyBorder = { fg = surface.border_fg, bg = surface.surface_bg },
 		}
 	elseif theme:match("tokyonight") then
 		highlights = {
@@ -299,8 +324,8 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { link = "Keyword" },
 			WhichKeyDesc = { link = "Comment" },
 			WhichKeySeparator = { link = "String" },
-			WhichKeyFloat = { bg = which_key_bg },
-			WhichKeyBorder = { fg = which_key_border, bg = which_key_bg },
+			WhichKeyFloat = { bg = surface.surface_bg },
+			WhichKeyBorder = { fg = surface.border_fg, bg = surface.surface_bg },
 		}
 	else
 		-- Default fallback
@@ -309,8 +334,8 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { link = "Keyword" },
 			WhichKeyDesc = { link = "Comment" },
 			WhichKeySeparator = { link = "Delimiter" },
-			WhichKeyFloat = { bg = which_key_bg },
-			WhichKeyBorder = { fg = which_key_border, bg = which_key_bg },
+			WhichKeyFloat = { bg = surface.surface_bg },
+			WhichKeyBorder = { fg = surface.border_fg, bg = surface.surface_bg },
 		}
 	end
 
