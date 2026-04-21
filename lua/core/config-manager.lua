@@ -18,17 +18,17 @@ local ConfigManager = {
 -- Shared defaults consumed by ThemeManager/ThemePicker for system appearance + UI opacity.
 ConfigManager.themes.active = {
 	defaults = {
-		-- Catppuccin Mocha only (matches tmux / Ghostty).
+		-- Follow system appearance with a light/dark pair.
 		dark = "catppuccin",
-		light = "catppuccin",
+		light = "github_light_high_contrast",
 	},
 	opacity = 0.9,
 }
 
 ConfigManager.themes.catppuccin = {
-	flavour = "mocha",
+	flavour = "auto",
 	background = {
-		light = "mocha",
+		light = "latte",
 		dark = "mocha",
 	},
 	transparent_background = true,

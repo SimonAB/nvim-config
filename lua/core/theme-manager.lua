@@ -174,7 +174,7 @@ function ThemeManager.apply_global_opacity()
 	ThemeSettings.apply_all_window_blends()
 end
 
--- Get theme for current system appearance (sync `background`; Catppuccin stays Mocha via config).
+-- Get theme for current system appearance (sync `background`; theme may map flavours per background).
 function ThemeManager.get_active_theme()
 	local appearance = ThemeManager.detect_system_theme()
 	vim.o.background = appearance
@@ -196,6 +196,12 @@ function ThemeManager.setup_lazy_loading()
 	vim.api.nvim_create_autocmd("ColorSchemePre", {
 		pattern = { "tokyonight", "nord", "github_*" },
 		callback = function(ev)
+			-- GitHub theme exposes many `github_*` colourschemes but shares one setup module.
+			if ev.match:match("^github_") then
+				pcall(require, "plugins.github-nvim-theme")
+				return
+			end
+
 			local theme_name = ev.match:gsub("-", "_")
 			pcall(require, "plugins." .. theme_name)
 		end,
@@ -299,7 +305,7 @@ function ThemeManager.cycle_theme()
 		ThemePicker.cycle_theme()
 	else
 		-- Fallback to original cycling logic
-		local themes = { "catppuccin", "onedark", "tokyonight", "nord", "github_dark" }
+		local themes = { "catppuccin", "onedark", "tokyonight", "nord", "github_dark", "github_light_high_contrast" }
 		local current = vim.g.colors_name or "default"
 		local current_index = 1
 

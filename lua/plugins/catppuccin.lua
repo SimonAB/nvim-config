@@ -1,4 +1,4 @@
--- Catppuccin.nvim — Mocha only (tmux / Ghostty).
+-- Catppuccin.nvim — Mocha (dark) / Latte (light), synced via `background`.
 -- Canonical table: `core.config-manager` → `themes.catppuccin`.
 
 local ConfigManager = require("core.config-manager")

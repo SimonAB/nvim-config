@@ -8,7 +8,7 @@ if ok then
 		-- Available styles: "light", "dark_default", "dark_colorblind", "dark_tritanopia", "dark_dimmed"
 		-- Example: :colorscheme github_dark_default
 
-		light_style = "light_default", -- Choose between "light", "light_colorblind", "light_tritanopia", "light_high_contrast"
+		light_style = "light_high_contrast", -- Choose between "light", "light_colorblind", "light_tritanopia", "light_high_contrast"
 		terminal_colors = true, -- Configure the colors used when opening a `:terminal` in Neovim
 		styles = {
 			-- Style to be applied to different syntax groups
@@ -26,7 +26,7 @@ if ok then
 
 		-- New options structure (replaces deprecated options)
 		options = {
-			transparent = false, -- Enable this to disable setting the background color
+			transparent = true, -- Enable this to disable setting the background colour
 			hide_nc_statusline = false, -- Enabling this option, will hide inactive statuslines and replace them with a thin border instead
 			-- Sidebar darkening configuration
 			darken = {
