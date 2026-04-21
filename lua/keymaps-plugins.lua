@@ -413,6 +413,8 @@ local function kill_terminal()
 	print("Terminal killed")
 end
 
+local julia_repl_terminal = nil
+
 ---Open a Julia REPL in a ToggleTerm window.
 ---@param direction "horizontal"|"vertical"|"float"
 local function open_julia_repl(direction)
@@ -420,6 +422,7 @@ local function open_julia_repl(direction)
 	local julia_repl = create_terminal("julia --project=" .. project_path .. " --threads=auto", {
 		direction = direction,
 	})
+	julia_repl_terminal = julia_repl
 	julia_repl:toggle()
 end
 
@@ -619,6 +622,51 @@ map("n", "<leader>Gg", function()
 end, { desc = "LazyGit" })
 
 -- Terminal
+
+---Find a running Julia terminal job and return its channel id.
+---Prefers terminal buffers whose name includes "julia".
+---@return integer|nil
+local function get_julia_terminal_job_id()
+	if julia_repl_terminal and julia_repl_terminal.bufnr and vim.api.nvim_buf_is_valid(julia_repl_terminal.bufnr) then
+		local job_id = vim.b[julia_repl_terminal.bufnr].terminal_job_id
+		if type(job_id) == "number" and job_id > 0 then
+			return job_id
+		end
+	end
+
+	local fallback_job_id = nil
+
+	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+		if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buftype == "terminal" then
+			local job_id = vim.b[buf].terminal_job_id
+			if type(job_id) == "number" and job_id > 0 then
+				local name = vim.api.nvim_buf_get_name(buf) or ""
+				if name:match("julia") then
+					return job_id
+				end
+				fallback_job_id = fallback_job_id or job_id
+			end
+		end
+	end
+
+	return fallback_job_id
+end
+
+---Send text to the Julia REPL as bracketed paste.
+---This prevents REPL line-editing features from mutating the payload (e.g. auto-closing `[`).
+---@param text string
+local function send_to_julia_repl(text)
+	local job_id = get_julia_terminal_job_id()
+	if not job_id then
+		vim.notify("No Julia terminal found (open one with <leader>Jr*)", vim.log.levels.WARN)
+		return
+	end
+
+	-- Bracketed paste: https://invisible-island.net/xterm/ctlseqs/ctlseqs.html (2004/2005)
+	local payload = "\27[200~" .. text .. "\27[201~"
+	vim.api.nvim_chan_send(job_id, payload)
+end
+
 ---Send the current code block to ToggleTerm (best effort).
 ---Supports Quarto/R Markdown fences (```{...}) and header blocks (## ...).
 local function send_current_code_block()
@@ -703,13 +751,11 @@ local function send_current_code_block()
 		return
 	end
 
-	vim.api.nvim_win_set_cursor(0, { selection_start, 0 })
-	vim.cmd("normal! V")
-	vim.api.nvim_win_set_cursor(0, { selection_end, 0 })
-
-	pcall(vim.cmd, "ToggleTermSendVisualSelection")
-
-	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+	local code_lines = {}
+	for i = selection_start, selection_end do
+		code_lines[#code_lines + 1] = lines[i] or ""
+	end
+	send_to_julia_repl(table.concat(code_lines, "\n") .. "\n")
 
 	local next_block_start = nil
 	local search_start = end_line + 1
@@ -846,9 +892,25 @@ map("n", "<C-t>", "<esc><cmd>ToggleTerm<CR>", { desc = "Toggle terminal" })
 map("t", "<C-t>", "<C-\\><C-N><cmd>ToggleTerm<CR>", { desc = "Toggle terminal from terminal" })
 map("t", "<Esc>", "<C-\\><C-N>", { desc = "Exit terminal mode" })
 
-map("n", "<C-i>", "<esc><cmd>ToggleTermSendCurrentLine<CR>j", { desc = "Send current line to terminal" })
-map("n", "<C-c>", send_current_code_block, { desc = "Send current code block to terminal" })
-map("v", "<C-s>", ":'<,'>ToggleTermSendVisualSelection<CR>", { desc = "Send selection to terminal" })
+map("n", "<C-i>", function()
+	send_to_julia_repl(vim.api.nvim_get_current_line() .. "\n")
+	pcall(vim.cmd, "normal! j")
+end, { desc = "Send current line to Julia REPL" })
+map("n", "<C-c>", send_current_code_block, { desc = "Send current code block to Julia REPL" })
+map("v", "<C-s>", function()
+	local start_pos = vim.fn.getpos("'<")
+	local end_pos = vim.fn.getpos("'>")
+	local start_line = start_pos[2]
+	local end_line = end_pos[2]
+	if start_line < 1 or end_line < 1 or end_line < start_line then
+		vim.notify("Invalid selection", vim.log.levels.WARN)
+		return
+	end
+
+	local bufnr = vim.api.nvim_get_current_buf()
+	local selected = vim.api.nvim_buf_get_lines(bufnr, start_line - 1, end_line, false)
+	send_to_julia_repl(table.concat(selected, "\n") .. "\n")
+end, { desc = "Send selection to Julia REPL" })
 
 map("n", "yic", yank_code_chunk, { desc = "Yank code chunk" })
 
