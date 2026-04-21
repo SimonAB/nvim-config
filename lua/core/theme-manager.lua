@@ -1,13 +1,17 @@
 -- =============================================================================
 -- THEME MANAGER
--- PURPOSE: Centralized theme management with performance optimizations
+-- PURPOSE: Centralised theme management with performance optimisations
 -- =============================================================================
 
 local ThemeManager = {}
 local highlight_cache = {}
 local formatting_cache = {}
 local ThemePicker = nil -- Lazy load to avoid circular dependencies
-local ThemeSettings = require("core.theme-settings")
+local ok_settings, ThemeSettings = pcall(require, "core.theme-settings")
+if not ok_settings then
+	vim.notify("core.theme-settings not found", vim.log.levels.WARN)
+	return ThemeManager
+end
 
 ---Ensure floating highlight groups stay transparent after theme changes.
 local function ensure_transparent_highlights()
@@ -345,7 +349,7 @@ end
 -- Clear highlight cache (useful when reloading config)
 function ThemeManager.clear_highlight_cache()
 	highlight_cache = {}
-  formatting_cache = {}
+	formatting_cache = {}
 end
 
 -- Theme picker integration
@@ -412,52 +416,52 @@ end
 
 -- Setup auto-updating highlights when theme changes
 function ThemeManager.setup_highlight_autocmd()
-  local group = vim.api.nvim_create_augroup("ThemeManagerHighlights", { clear = true })
+	local group = vim.api.nvim_create_augroup("ThemeManagerHighlights", { clear = true })
 
-  -- Helper to apply all highlight customisations
-  local function apply_all_highlights()
-    ThemeManager.update_which_key_highlights()
-    ThemeManager.apply_formatting_parity()
-    ThemeManager.apply_spell_undercurl()
-    ThemeManager.apply_link_highlights()
-    ThemeManager.apply_tex_style_highlights()
-    ThemeManager.apply_global_opacity()
-  end
+	-- Helper to apply all highlight customisations
+	local function apply_all_highlights()
+		ThemeManager.update_which_key_highlights()
+		ThemeManager.apply_formatting_parity()
+		ThemeManager.apply_spell_undercurl()
+		ThemeManager.apply_link_highlights()
+		ThemeManager.apply_tex_style_highlights()
+		ThemeManager.apply_global_opacity()
+	end
 
-  -- Primary trigger: ColorScheme change
-  -- Use multiple deferred calls to ensure we run after treesitter and other plugins
-  vim.api.nvim_create_autocmd("ColorScheme", {
-    group = group,
-    callback = function()
-      ThemeManager.clear_highlight_cache()
-      -- First pass: quick application
-      vim.defer_fn(apply_all_highlights, 10)
-      -- Second pass: catch any plugins that apply highlights after us
-      vim.defer_fn(apply_all_highlights, 100)
-      -- Final pass: ensure everything is correct after all deferred operations
-      vim.defer_fn(apply_all_highlights, 300)
-    end,
-  })
+	-- Primary trigger: ColorScheme change
+	-- Use multiple deferred calls to ensure we run after treesitter and other plugins
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		group = group,
+		callback = function()
+			ThemeManager.clear_highlight_cache()
+			-- First pass: quick application
+			vim.defer_fn(apply_all_highlights, 10)
+			-- Second pass: catch any plugins that apply highlights after us
+			vim.defer_fn(apply_all_highlights, 100)
+			-- Final pass: ensure everything is correct after all deferred operations
+			vim.defer_fn(apply_all_highlights, 300)
+		end,
+	})
 
-  -- Secondary trigger: when background option changes (auto-dark-mode sets this first)
-  vim.api.nvim_create_autocmd("OptionSet", {
-    group = group,
-    pattern = "background",
-    callback = function()
-      ThemeManager.clear_highlight_cache()
-      vim.defer_fn(apply_all_highlights, 150)
-    end,
-  })
+	-- Secondary trigger: when background option changes (auto-dark-mode sets this first)
+	vim.api.nvim_create_autocmd("OptionSet", {
+		group = group,
+		pattern = "background",
+		callback = function()
+			ThemeManager.clear_highlight_cache()
+			vim.defer_fn(apply_all_highlights, 150)
+		end,
+	})
 
-  -- Tertiary trigger: re-apply when entering markdown buffers
-  -- This catches cases where treesitter re-highlights the buffer
-  vim.api.nvim_create_autocmd("FileType", {
-    group = group,
-    pattern = { "markdown", "quarto", "pandoc" },
-    callback = function()
-      vim.defer_fn(ThemeManager.apply_link_highlights, 50)
-    end,
-  })
+	-- Tertiary trigger: re-apply when entering markdown buffers
+	-- This catches cases where treesitter re-highlights the buffer
+	vim.api.nvim_create_autocmd("FileType", {
+		group = group,
+		pattern = { "markdown", "quarto", "pandoc" },
+		callback = function()
+			vim.defer_fn(ThemeManager.apply_link_highlights, 50)
+		end,
+	})
 end
 
 ---Keep opacity synced when new windows appear.
@@ -485,13 +489,13 @@ function ThemeManager.init()
 
 	-- Setup highlight management
 	ThemeManager.setup_highlight_autocmd()
-  ThemeManager.setup_opacity_autocmds()
+	ThemeManager.setup_opacity_autocmds()
 	ThemeManager.update_which_key_highlights()
-  ThemeManager.apply_formatting_parity()
-  ThemeManager.apply_spell_undercurl()
-  ThemeManager.apply_link_highlights()
-  ThemeManager.apply_tex_style_highlights()
-  ThemeManager.apply_global_opacity()
+	ThemeManager.apply_formatting_parity()
+	ThemeManager.apply_spell_undercurl()
+	ThemeManager.apply_link_highlights()
+	ThemeManager.apply_tex_style_highlights()
+	ThemeManager.apply_global_opacity()
 
 	vim.notify("Theme system initialized: " .. active_theme, vim.log.levels.INFO)
 end

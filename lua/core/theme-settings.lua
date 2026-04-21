@@ -3,7 +3,11 @@
 -- PURPOSE: Shared helpers for opacity and floating highlight preferences
 -- ============================================================================
 
-local ConfigManager = require("core.config-manager")
+local ok_config, ConfigManager = pcall(require, "core.config-manager")
+if not ok_config then
+	vim.notify("core.config-manager not found", vim.log.levels.WARN)
+	return {}
+end
 
 local ThemeSettings = {
 	float_highlights = {
