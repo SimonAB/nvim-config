@@ -223,7 +223,16 @@ ToggleTerm is configured with `open_mapping` `<C-t>` (see `lua/plugins/toggleter
 <Leader>Td      " Kill terminal
 ```
 
-Quarto code execution and Molten Jupyter bindings are under `<Leader>Q*` (see above); there are no global `<C-i>` / `<C-c>` “send to terminal” mappings in this configuration.
+### Send code to Julia REPL
+When a Julia REPL is open (via `<Leader>Jr*`), you can send code directly:
+
+```vim
+<C-i>           " Send current line to Julia REPL (normal mode)
+<C-c>           " Send current code block to Julia REPL (normal mode)
+<C-s>           " Send visual selection to Julia REPL (visual mode)
+```
+
+Note: these use bracketed paste to avoid REPL line-editing features mutating bracket characters.
 
 ## Git Operations
 
