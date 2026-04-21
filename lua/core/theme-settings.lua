@@ -9,8 +9,6 @@ local ThemeSettings = {
 	float_highlights = {
 		"NormalFloat",
 		"FloatBorder",
-		"WhichKeyFloat",
-		"WhichKeyBorder",
 	},
 }
 
@@ -48,6 +46,11 @@ function ThemeSettings.apply_window_blend(winid)
 	if not winid or not vim.api.nvim_win_is_valid(winid) then
 		return false
 	end
+	local bufnr = vim.api.nvim_win_get_buf(winid)
+	if vim.api.nvim_buf_is_valid(bufnr) and vim.bo[bufnr].filetype == "which_key" then
+		return pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = winid })
+	end
+
 	local ok = pcall(vim.api.nvim_set_option_value, "winblend", ThemeSettings.get_winblend(), { win = winid })
 	return ok
 end

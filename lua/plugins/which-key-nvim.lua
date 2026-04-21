@@ -3,9 +3,9 @@
 
 local ok, wk = pcall(require, "which-key")
 if ok then
-    wk.setup({
-        preset = "classic",
-        delay = 500,
+	wk.setup({
+		preset = "classic",
+		delay = 500,
 		plugins = {
 			marks = true,
 			registers = true,
@@ -29,7 +29,8 @@ if ok then
 			border = "rounded",
 			padding = { 1, 2 },
 			wo = {
-				winblend = 10,
+				winblend = 0,
+				winhl = "Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
 			},
 		},
 		layout = {

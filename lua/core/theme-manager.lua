@@ -211,13 +211,68 @@ end
 -- Optimized highlight management with caching
 function ThemeManager.update_which_key_highlights()
 	local theme = vim.g.colors_name or "default"
+	local background = vim.o.background or "dark"
+	local cache_key = theme .. "|" .. background
 
 	-- Return early if already cached
-	if highlight_cache[theme] then
+	if highlight_cache[cache_key] then
 		return
 	end
 
 	local highlights = {}
+
+	---Convert an integer highlight colour to hex (e.g. 0xff00ff -> "#ff00ff").
+	---@param colour integer|string|nil
+	---@return string|nil
+	local function colour_to_hex(colour)
+		if type(colour) ~= "number" then
+			return nil
+		end
+		return string.format("#%06x", colour)
+	end
+
+	---Return a background colour from the active theme, preferring float groups.
+	---@return string|nil
+	local function get_theme_float_bg()
+		local groups_to_try = { "NormalFloat", "Pmenu", "Normal" }
+		for _, group in ipairs(groups_to_try) do
+			local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
+			if ok and hl and hl.bg then
+				return colour_to_hex(hl.bg)
+			end
+		end
+		return nil
+	end
+
+	local which_key_bg = get_theme_float_bg() or ((background == "light") and "#f0f0f0" or "#2b2f3a")
+	local which_key_border = (background == "light") and "#c0c0c0" or "#4b5263"
+
+	-- If the theme keeps FloatBorder background unset/transparent, the border can look like it has a
+	-- different background from an opaque which-key window. Setting a bg only when missing keeps
+	-- theme-provided borders intact while ensuring visual continuity.
+	local ok_border, float_border_hl = pcall(vim.api.nvim_get_hl, 0, { name = "FloatBorder", link = false })
+	if ok_border and float_border_hl and float_border_hl.bg == nil then
+		pcall(vim.api.nvim_set_hl, 0, "FloatBorder", { bg = which_key_bg })
+	end
+	
+	-- Match the float title background to the popup background so the centred hint/title doesn't
+	-- appear as a separate "pill" on top of the border.
+	local ok_title, float_title_hl = pcall(vim.api.nvim_get_hl, 0, { name = "FloatTitle", link = false })
+	local which_key_title_fg = nil
+	local which_key_title_bold = true
+	if ok_title and float_title_hl then
+		if float_title_hl.fg then
+			which_key_title_fg = colour_to_hex(float_title_hl.fg)
+		end
+		if float_title_hl.bold ~= nil then
+			which_key_title_bold = float_title_hl.bold
+		end
+	end
+	vim.api.nvim_set_hl(0, "WhichKeyTitle", {
+		fg = which_key_title_fg or which_key_border,
+		bg = which_key_bg,
+		bold = which_key_title_bold,
+	})
 
 	-- Theme-specific highlight configurations
 	if theme:match("catppuccin") then
@@ -226,8 +281,8 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { link = "Keyword" },
 			WhichKeyDesc = { link = "Comment" },
 			WhichKeySeparator = { link = "String" },
-			WhichKeyFloat = { link = "NormalFloat" },
-			WhichKeyBorder = { link = "FloatBorder" },
+			WhichKeyFloat = { bg = which_key_bg },
+			WhichKeyBorder = { fg = which_key_border, bg = which_key_bg },
 		}
 	elseif theme:match("onedark") then
 		highlights = {
@@ -235,8 +290,8 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { fg = "#C678DD" },
 			WhichKeyDesc = { fg = "#5C6370" },
 			WhichKeySeparator = { fg = "#98C379" },
-			WhichKeyFloat = { bg = "#282C34" },
-			WhichKeyBorder = { fg = "#3E4451" },
+			WhichKeyFloat = { bg = which_key_bg },
+			WhichKeyBorder = { fg = which_key_border, bg = which_key_bg },
 		}
 	elseif theme:match("tokyonight") then
 		highlights = {
@@ -244,8 +299,8 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { link = "Keyword" },
 			WhichKeyDesc = { link = "Comment" },
 			WhichKeySeparator = { link = "String" },
-			WhichKeyFloat = { link = "NormalFloat" },
-			WhichKeyBorder = { link = "FloatBorder" },
+			WhichKeyFloat = { bg = which_key_bg },
+			WhichKeyBorder = { fg = which_key_border, bg = which_key_bg },
 		}
 	else
 		-- Default fallback
@@ -254,8 +309,8 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { link = "Keyword" },
 			WhichKeyDesc = { link = "Comment" },
 			WhichKeySeparator = { link = "Delimiter" },
-			WhichKeyFloat = { link = "NormalFloat" },
-			WhichKeyBorder = { link = "FloatBorder" },
+			WhichKeyFloat = { bg = which_key_bg },
+			WhichKeyBorder = { fg = which_key_border, bg = which_key_bg },
 		}
 	end
 
@@ -265,7 +320,7 @@ function ThemeManager.update_which_key_highlights()
 	end
 
 	-- Cache the result
-	highlight_cache[theme] = true
+	highlight_cache[cache_key] = true
 end
 
 -- Clear highlight cache (useful when reloading config)

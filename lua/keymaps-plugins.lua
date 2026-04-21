@@ -69,8 +69,28 @@ end
 -- Reuses a single terminal instance for subsequent compilations.
 local latex_compile_terminal = nil
 
----Compile the current .tex file using LuaLaTeX + biber.
-local function compile_lualatex_with_biber()
+---Return true if a .tex file appears to use biblatex (and therefore biber).
+---@param tex_path string
+---@return boolean
+local function tex_uses_biblatex(tex_path)
+	-- Heuristic (intentionally simple): biblatex projects typically contain one or more of:
+	-- - \usepackage{biblatex} (with or without options)
+	-- - \addbibresource{...}
+	-- - \printbibliography
+	local ok, lines = pcall(vim.fn.readfile, tex_path)
+	if not ok or type(lines) ~= "table" then
+		return false
+	end
+	local text = table.concat(lines, "\n")
+	return text:match("\\usepackage%s*(%b%[%])?%s*%{biblatex%}") ~= nil
+		or text:match("\\addbibresource%s*%b{}") ~= nil
+		or text:match("\\printbibliography") ~= nil
+end
+
+---Compile the current .tex file using LuaLaTeX and the correct bibliography tool.
+---- biblatex: latexmk → biber → latexmk × 2
+---- BibTeX:  lualatex → bibtex → lualatex × 2 (avoids latexmk non-stabilising loops)
+local function compile_lualatex_auto_bibtool()
 	local current_file = vim.fn.expand("%:p")
 	if current_file == "" then
 		vim.notify("No file is currently open", vim.log.levels.ERROR)
@@ -85,20 +105,37 @@ local function compile_lualatex_with_biber()
 	local file_dir = vim.fn.fnamemodify(current_file, ":h")
 	local file_base = vim.fn.fnamemodify(current_file, ":t:r")
 
-	local cmd = string.format(
-		'cd "%s"'
-			.. ' && latexmk -pdf -pdflatex=lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"'
-			.. ' && biber "%s"'
-			.. ' && latexmk -pdf -pdflatex=lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"'
-			.. ' && latexmk -pdf -pdflatex=lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"',
-		file_dir,
-		file_base,
-		file_base,
-		file_base,
-		file_base
-	)
-
-	vim.notify("Starting LuaLaTeX compilation: latexmk → biber → latexmk × 2", vim.log.levels.INFO)
+	local uses_biber = tex_uses_biblatex(current_file)
+	local cmd
+	if uses_biber then
+		cmd = string.format(
+			'cd "%s"'
+				.. ' && latexmk -pdf -pdflatex=lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"'
+				.. ' && biber "%s"'
+				.. ' && latexmk -pdf -pdflatex=lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"'
+				.. ' && latexmk -pdf -pdflatex=lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"',
+			file_dir,
+			file_base,
+			file_base,
+			file_base,
+			file_base
+		)
+		vim.notify("Starting LuaLaTeX compilation: latexmk → biber → latexmk × 2", vim.log.levels.INFO)
+	else
+		cmd = string.format(
+			'cd "%s"'
+				.. ' && lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"'
+				.. ' && bibtex "%s"'
+				.. ' && lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"'
+				.. ' && lualatex -synctex=1 -interaction=nonstopmode -file-line-error "%s.tex"',
+			file_dir,
+			file_base,
+			file_base,
+			file_base,
+			file_base
+		)
+		vim.notify("Starting LuaLaTeX compilation: lualatex → bibtex → lualatex × 2", vim.log.levels.INFO)
+	end
 
 	if latex_compile_terminal == nil then
 		local Terminal = require("toggleterm.terminal").Terminal
@@ -1110,7 +1147,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.cmd("silent! packadd vimtex")
 
 		map("n", "<localleader>ll", "<Plug>(vimtex-compile)", { buffer = bufnr, desc = "Compile" })
-		map("n", "<localleader>lb", compile_lualatex_with_biber, { buffer = bufnr, desc = "Compile LuaLaTeX+Biber" })
+		map("n", "<localleader>lb", compile_lualatex_auto_bibtool, { buffer = bufnr, desc = "Compile LuaLaTeX (auto BibTeX/biber)" })
 		map("n", "<localleader>lv", "<Plug>(vimtex-view)", { buffer = bufnr, desc = "View PDF" })
 		map("n", "<localleader>lk", "<Plug>(vimtex-stop)", { buffer = bufnr, desc = "Stop" })
 		map("n", "<localleader>lK", "<Plug>(vimtex-stop-all)", { buffer = bufnr, desc = "Stop all" })
