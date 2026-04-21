@@ -6,6 +6,10 @@ if ok then
 	wk.setup({
 		preset = "classic",
 		delay = 500,
+		-- Disable the internal footer helper window ("esc close / back") to avoid any
+		-- bleed-through in terminal UIs while keeping the popup body/border fully transparent.
+		show_help = false,
+		show_keys = false,
 		plugins = {
 			marks = true,
 			registers = true,

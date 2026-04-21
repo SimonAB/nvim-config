@@ -23,19 +23,19 @@ local last_detection_time = 0
 
 function ThemeManager.detect_system_theme()
 	local current_time = vim.loop.hrtime() / 1000000 -- Convert to milliseconds
-	
+
 	-- Return cached result if still valid
 	if system_theme_cache and (current_time - last_detection_time) < cache_timeout then
 		return system_theme_cache
 	end
-	
+
 	local ok, result = pcall(vim.fn.system, { "defaults", "read", "-g", "AppleInterfaceStyle" })
 	if ok and result then
 		system_theme_cache = result:match("Dark") and "dark" or "light"
 		last_detection_time = current_time
 		return system_theme_cache
 	end
-	
+
 	system_theme_cache = "dark" -- fallback
 	last_detection_time = current_time
 	return system_theme_cache
@@ -107,14 +107,14 @@ local function get_link_colour()
     "Special",               -- Often blue in many themes
     "Function",              -- Commonly blue
   }
-  
+
   for _, group_name in ipairs(groups_to_check) do
     local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group_name, link = false })
     if ok and hl and hl.fg then
       return hl.fg
     end
   end
-  
+
   return nil
 end
 
@@ -122,7 +122,7 @@ end
 -- Note: No caching - this is fast and must re-apply reliably after theme changes
 function ThemeManager.apply_link_highlights()
   local link_colour = get_link_colour()
-  
+
   -- Build highlight options: always underline, use theme colour if found
   local hl_opts = { underline = true }
   if link_colour then
@@ -134,10 +134,10 @@ function ThemeManager.apply_link_highlights()
   pcall(vim.api.nvim_set_hl, 0, "markdownLinkText", hl_opts)
   pcall(vim.api.nvim_set_hl, 0, "markdownUrl", hl_opts)
   pcall(vim.api.nvim_set_hl, 0, "markdownUrlTitle", hl_opts)
-  
+
   -- Wiki link highlight (for Obsidian-style [[links]])
   pcall(vim.api.nvim_set_hl, 0, "markdownWikiLink", hl_opts)
-  
+
   -- Treesitter link highlights (ensures consistency with modern syntax highlighting)
   pcall(vim.api.nvim_set_hl, 0, "@markup.link", hl_opts)
   pcall(vim.api.nvim_set_hl, 0, "@markup.link.url", hl_opts)
@@ -283,19 +283,10 @@ function ThemeManager.update_which_key_highlights()
 
 	local surface = get_float_surface_palette()
 
-	-- If the theme keeps FloatBorder background unset/transparent, the border can look like it has a
-	-- different background from an opaque which-key window. Setting a bg only when missing keeps
-	-- theme-provided borders intact while ensuring visual continuity.
-	local ok_border, float_border_hl = pcall(vim.api.nvim_get_hl, 0, { name = "FloatBorder", link = false })
-	if ok_border and float_border_hl and float_border_hl.bg == nil then
-		pcall(vim.api.nvim_set_hl, 0, "FloatBorder", { bg = surface.surface_bg })
-	end
-	
-	-- Match the float title background to the popup background so the centred hint/title doesn't
-	-- appear as a separate "pill" on top of the border.
+	-- Keep the title text unboxed: do not paint a background.
 	vim.api.nvim_set_hl(0, "WhichKeyTitle", {
 		fg = surface.title_fg,
-		bg = surface.surface_bg,
+		bg = "none",
 		bold = surface.title_bold,
 	})
 
@@ -306,8 +297,8 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { link = "Keyword" },
 			WhichKeyDesc = { link = "Comment" },
 			WhichKeySeparator = { link = "String" },
-			WhichKeyFloat = { bg = surface.surface_bg },
-			WhichKeyBorder = { fg = surface.border_fg, bg = surface.surface_bg },
+			WhichKeyFloat = { bg = "none" },
+			WhichKeyBorder = { fg = surface.border_fg, bg = "none" },
 		}
 	elseif theme:match("onedark") then
 		highlights = {
@@ -315,8 +306,8 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { fg = "#C678DD" },
 			WhichKeyDesc = { fg = "#5C6370" },
 			WhichKeySeparator = { fg = "#98C379" },
-			WhichKeyFloat = { bg = surface.surface_bg },
-			WhichKeyBorder = { fg = surface.border_fg, bg = surface.surface_bg },
+			WhichKeyFloat = { bg = "none" },
+			WhichKeyBorder = { fg = surface.border_fg, bg = "none" },
 		}
 	elseif theme:match("tokyonight") then
 		highlights = {
@@ -324,8 +315,8 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { link = "Keyword" },
 			WhichKeyDesc = { link = "Comment" },
 			WhichKeySeparator = { link = "String" },
-			WhichKeyFloat = { bg = surface.surface_bg },
-			WhichKeyBorder = { fg = surface.border_fg, bg = surface.surface_bg },
+			WhichKeyFloat = { bg = "none" },
+			WhichKeyBorder = { fg = surface.border_fg, bg = "none" },
 		}
 	else
 		-- Default fallback
@@ -334,8 +325,8 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { link = "Keyword" },
 			WhichKeyDesc = { link = "Comment" },
 			WhichKeySeparator = { link = "Delimiter" },
-			WhichKeyFloat = { bg = surface.surface_bg },
-			WhichKeyBorder = { fg = surface.border_fg, bg = surface.surface_bg },
+			WhichKeyFloat = { bg = "none" },
+			WhichKeyBorder = { fg = surface.border_fg, bg = "none" },
 		}
 	end
 
@@ -343,6 +334,9 @@ function ThemeManager.update_which_key_highlights()
 	for group, opts in pairs(highlights) do
 		vim.api.nvim_set_hl(0, group, opts)
 	end
+
+	-- Footer parity: footer window uses `Normal:WhichKeyNormal`.
+	vim.api.nvim_set_hl(0, "WhichKeyNormal", { bg = "none" })
 
 	-- Cache the result
 	highlight_cache[cache_key] = true
@@ -419,7 +413,7 @@ end
 -- Setup auto-updating highlights when theme changes
 function ThemeManager.setup_highlight_autocmd()
   local group = vim.api.nvim_create_augroup("ThemeManagerHighlights", { clear = true })
-  
+
   -- Helper to apply all highlight customisations
   local function apply_all_highlights()
     ThemeManager.update_which_key_highlights()
@@ -429,12 +423,13 @@ function ThemeManager.setup_highlight_autocmd()
     ThemeManager.apply_tex_style_highlights()
     ThemeManager.apply_global_opacity()
   end
-  
+
   -- Primary trigger: ColorScheme change
   -- Use multiple deferred calls to ensure we run after treesitter and other plugins
   vim.api.nvim_create_autocmd("ColorScheme", {
     group = group,
     callback = function()
+      ThemeManager.clear_highlight_cache()
       -- First pass: quick application
       vim.defer_fn(apply_all_highlights, 10)
       -- Second pass: catch any plugins that apply highlights after us
@@ -443,16 +438,17 @@ function ThemeManager.setup_highlight_autocmd()
       vim.defer_fn(apply_all_highlights, 300)
     end,
   })
-  
+
   -- Secondary trigger: when background option changes (auto-dark-mode sets this first)
   vim.api.nvim_create_autocmd("OptionSet", {
     group = group,
     pattern = "background",
     callback = function()
+      ThemeManager.clear_highlight_cache()
       vim.defer_fn(apply_all_highlights, 150)
     end,
   })
-  
+
   -- Tertiary trigger: re-apply when entering markdown buffers
   -- This catches cases where treesitter re-highlights the buffer
   vim.api.nvim_create_autocmd("FileType", {

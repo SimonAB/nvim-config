@@ -47,7 +47,9 @@ function ThemeSettings.apply_window_blend(winid)
 		return false
 	end
 	local bufnr = vim.api.nvim_win_get_buf(winid)
-	if vim.api.nvim_buf_is_valid(bufnr) and vim.bo[bufnr].filetype == "which_key" then
+	-- which-key.nvim uses filetype = "wk" for both its popup and footer helper windows.
+	-- Keep these fully opaque to prevent any buffer glyph bleed-through in terminals.
+	if vim.api.nvim_buf_is_valid(bufnr) and vim.bo[bufnr].filetype == "wk" then
 		return pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = winid })
 	end
 
