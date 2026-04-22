@@ -5,6 +5,7 @@ local plugins = {
 	-- Core functionality
 	{ src = "https://github.com/nvim-lua/plenary.nvim", name = "plenary.nvim" },
 	{ src = "https://github.com/nvim-tree/nvim-web-devicons", name = "nvim-web-devicons" },
+	{ src = "https://github.com/Saghen/blink.lib", name = "blink.lib" },
 	{ src = "https://github.com/Saghen/blink.cmp", name = "blink.cmp", data = { build = "cargo build --release" } },
 
 	-- LSP / language tooling

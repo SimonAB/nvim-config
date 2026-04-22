@@ -16,6 +16,7 @@ end
 local MODULE_TO_PACK = {
 	["plenary-nvim"] = "plenary.nvim",
 	["nvim-web-devicons"] = "nvim-web-devicons",
+	["blink-lib"] = "blink.lib",
 	["blink-cmp"] = "blink.cmp",
 	["mason-nvim"] = "mason.nvim",
 	["mason-lspconfig-nvim"] = "mason-lspconfig.nvim",
@@ -129,6 +130,7 @@ local LOAD_PHASES = {
 		"plenary-nvim",        -- Utility library
 		"nvim-web-devicons",   -- File icons
 		"catppuccin",          -- Catppuccin Mocha; must load before ThemeManager (~50ms)
+		"blink-lib",          -- blink.cmp v2 dependency
 		"blink-cmp",          -- Completion engine
 		"mason-nvim",         -- LSP server manager
 		"mason-lspconfig-nvim", -- Mason-LSP bridge (used by mason-nvim config)

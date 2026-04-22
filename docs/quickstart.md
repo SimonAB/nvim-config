@@ -123,10 +123,11 @@ nvim
 
 **First launch sequence:**
 
-1. vim.pack installs plugins (~2 minutes)
-2. System theme detected and applied
-3. Mason prompts for language server installation
-4. Dashboard displays recent files
+1. vim.pack installs plugins (~2 minutes), including `blink.lib` then `blink.cmp`
+2. `blink.cmp` may compile its native fuzzy matcher (needs Cargo; ~30 seconds)
+3. System theme detected and applied
+4. Mason prompts for language server installation
+5. Dashboard displays recent files
 
 ## Essential Keymaps
 

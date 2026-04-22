@@ -2,7 +2,7 @@
 
 [![Documentation](https://img.shields.io/badge/docs-vitepress-blue?style=flat&logo=readthedocs)](https://simonab.github.io/nvim-config/)
 
-Neovim configuration optimised for academic research and scientific computing. Document processing: LaTeX (VimTeX, SyncTeX), Markdown (preview, Obsidian), Quarto (R/Python/Julia execution), Typst (preview). Scientific computing: Julia REPL (multi-threaded), Python LSP (pyright), R execution. Development: LSP (15+ languages via Mason), completion (blink.cmp), terminal integration, Git integration. Modular architecture. vim.pack plugin management. Neovim 0.12+ required.
+Neovim configuration optimised for academic research and scientific computing. Document processing: LaTeX (VimTeX, SyncTeX), Markdown (preview, Obsidian), Quarto (R/Python/Julia execution), Typst (preview). Scientific computing: Julia REPL (multi-threaded), Python LSP (pyright), R execution. Development: LSP (15+ languages via Mason), completion ([blink.cmp](https://github.com/Saghen/blink.cmp) with [blink.lib](https://github.com/Saghen/blink.lib)), terminal integration, Git integration. Modular architecture. vim.pack plugin management. Neovim 0.12+ required.
 
 ## Features
 
@@ -19,7 +19,7 @@ Neovim configuration optimised for academic research and scientific computing. D
 
 ### Development Environment
 - LSP: 15+ languages (Mason)
-- Completion: blink.cmp
+- Completion: blink.cmp (with blink.lib dependency)
 - Terminal: Code block detection
 - Git: GitSigns, LazyGit
 
@@ -31,7 +31,7 @@ Neovim configuration optimised for academic research and scientific computing. D
   - **Arch Linux**: pacman (built-in) and yay/paru for AUR packages
 - Neovim 0.12+ (required for vim.pack plugin management)
 - Git
-- Cargo (for blink.cmp compilation)
+- Cargo (recommended: builds blink.cmp native fuzzy matcher from source)
 - ripgrep, fd (for Telescope fuzzy finding)
 
 ### Document Processing

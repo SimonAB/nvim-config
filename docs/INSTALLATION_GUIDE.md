@@ -110,7 +110,7 @@ brew install git
 # LazyGit (for Git interface)
 brew install lazygit
 
-# Cargo (for blink.cmp compilation)
+# Cargo (for blink.cmp native fuzzy matcher; optional but recommended)
 brew install rust
 ```
 
@@ -132,7 +132,7 @@ yay -S lazygit
 # or
 paru -S lazygit
 
-# Cargo (for blink.cmp compilation)
+# Cargo (for blink.cmp native fuzzy matcher; optional but recommended)
 sudo pacman -S rust
 ```
 
@@ -165,12 +165,16 @@ nvim
 
 # Expected behaviour:
 # 1. vim.pack clones plugins from GitHub (~2-3 minutes)
-# 2. blink.cmp compiles (~30 seconds)
-# 3. Dashboard appears
+# 2. blink.lib installs (small companion plugin required by current blink.cmp)
+# 3. blink.cmp compiles its native fuzzy matcher (~30 seconds, needs Cargo)
+# 4. Dashboard appears
 ```
 
 Notes:
 - `vim.pack` manages plugins and writes a lockfile to `~/.config/nvim/nvim-pack-lock.json`.
+- Current upstream `blink.cmp` expects [`blink.lib`](https://github.com/Saghen/blink.lib) on the
+  runtime path; this configuration declares both in `lua/plugins.lua` and loads `blink.lib` before
+  `blink.cmp` in `lua/core/plugin-loader.lua`.
 - If a native build fails (for example `telescope-fzf-native.nvim`), restart Neovim after fixing
   your toolchain and run a plugin update again.
 
@@ -647,21 +651,31 @@ nvim -c "lua require('core.plugin-manager').install_all_plugins()" -c "q"
 nvim -c "messages" -c "q"
 ```
 
-### blink.cmp Compilation Failure
+### blink.cmp or blink.lib startup / build issues
 
-**Symptom**: Completion not working
+**Symptom**: Errors on startup mentioning `blink.lib`, `loop or previous error loading module 'blink.cmp'`,
+or completion not working after an update.
+
+**Cause**: Recent `blink.cmp` releases depend on the separate `blink.lib` plugin. If `blink.lib` is
+missing or not on the runtime path before `blink.cmp`, Neovim can fail while loading completion.
 
 **Solution**:
 ```bash
-# Ensure Cargo is installed
+# Ensure both plugins are present (paths match vim.pack opt layout)
+ls ~/.local/share/nvim/site/pack/core/opt/blink.lib
+ls ~/.local/share/nvim/site/pack/core/opt/blink.cmp
+
+# Pull latest plugins (from Neovim)
+# :lua vim.pack.update(nil, { force = true })
+
+# Ensure Cargo is installed if you build the native fuzzy matcher from source
 cargo --version
 
-# Manually compile
+# Manually compile blink.cmp native library
 cd ~/.local/share/nvim/site/pack/core/opt/blink.cmp
 cargo build --release
 
-# Alternative: Use nvim-cmp instead
-# Edit lua/plugins.lua to disable blink.cmp
+# Alternative: disable blink.cmp in lua/plugins.lua if you must work offline without Rust
 ```
 
 ### LSP Not Starting

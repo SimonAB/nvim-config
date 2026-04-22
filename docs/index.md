@@ -31,7 +31,7 @@ features:
 
   - icon: 🔧
     title: LSP Support
-    details: 15+ languages via Mason. Completion (blink.cmp). Diagnostics.
+    details: 15+ languages via Mason. Completion (blink.cmp + blink.lib). Diagnostics.
 
   - icon: 🎨
     title: Interface
@@ -71,7 +71,7 @@ features:
   - **Arch Linux**: pacman (built-in) and yay/paru for AUR
 - Neovim 0.12+ (required for vim.pack)
 - Git
-- Cargo (for blink.cmp compilation)
+- Cargo (recommended: blink.cmp native fuzzy matcher); blink.lib installs via vim.pack
 - ripgrep, fd (for Telescope)
 
 ### Document Processing

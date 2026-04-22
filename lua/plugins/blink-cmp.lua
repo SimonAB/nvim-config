@@ -56,10 +56,6 @@ if ok then
 				enabled = true,
 				path = frecency_path,
 			},
-			prebuilt_binaries = {
-				download = false, -- Do not auto-download binaries
-				ignore_version_mismatch = true, -- Ignore version mismatch warnings
-			},
 		},
 	})
 end
