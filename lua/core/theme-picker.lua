@@ -196,18 +196,6 @@ function ThemePicker.show_fallback_picker(themes)
 		return string.format("🎨 Select Theme (Live Preview) — [%s]", label)
 	end
 
-	-- Use an explicit opaque background for this picker to prevent terminal bleedthrough.
-	-- `NormalFloat` is kept transparent globally in this config, so we derive from `Normal`.
-	local function ensure_picker_highlight()
-		local ok_hl, normal_hl = pcall(vim.api.nvim_get_hl, 0, { name = "Normal", link = false })
-		local bg = ok_hl and normal_hl and normal_hl.bg or nil
-		if not bg then
-			bg = (vim.o.background == "light") and 0xf0f0f0 or 0x2b2f3a
-		end
-		pcall(vim.api.nvim_set_hl, 0, "ThemePickerFloat", { bg = bg })
-	end
-	ensure_picker_highlight()
-
 	local win = vim.api.nvim_open_win(buf, true, {
 		relative = "editor",
 		row = row,
@@ -225,7 +213,7 @@ function ThemePicker.show_fallback_picker(themes)
 	pcall(
 		vim.api.nvim_set_option_value,
 		"winhl",
-		"Normal:ThemePickerFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
+		"Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
 		{ win = win }
 	)
 
