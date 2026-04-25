@@ -206,6 +206,15 @@ function PluginManager.show_status()
 
 		local win = vim.api.nvim_open_win(buf, true, win_opts)
 
+		-- Match which-key float styling (opaque + shared float highlight mapping).
+		pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = win })
+		pcall(
+			vim.api.nvim_set_option_value,
+			"winhl",
+			"Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
+			{ win = win }
+		)
+
 		-- Close window on any key
 		vim.api.nvim_buf_set_keymap(buf, "n", "<Esc>", ":close<CR>", { noremap = true, silent = true })
 		vim.api.nvim_buf_set_keymap(buf, "n", "q", ":close<CR>", { noremap = true, silent = true })

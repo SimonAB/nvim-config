@@ -31,11 +31,29 @@ if ok then
 		status_formatter = nil,
 		max_file_length = 40000,
 		preview_config = {
-			border = "single",
+			border = "rounded",
 			style = "minimal",
 			relative = "cursor",
 			row = 0,
 			col = 1,
 		},
+	})
+
+	-- Ensure gitsigns preview floats match which-key styling.
+	local group = vim.api.nvim_create_augroup("GitsignsUIStyle", { clear = true })
+	vim.api.nvim_create_autocmd("FileType", {
+		group = group,
+		pattern = "gitsigns",
+		desc = "Style gitsigns preview floats to match which-key",
+		callback = function()
+			local winid = vim.api.nvim_get_current_win()
+			pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = winid })
+			pcall(
+				vim.api.nvim_set_option_value,
+				"winhl",
+				"Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
+				{ win = winid }
+			)
+		end,
 	})
 end

@@ -13,6 +13,34 @@ local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = false
 capabilities.textDocument.completion.completionItem.resolveSupport = nil
 
+-- Match which-key float styling for built-in LSP/diagnostic popups.
+do
+	local float_winhl = "Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle"
+
+	vim.diagnostic.config({
+		float = {
+			border = "rounded",
+			winhl = float_winhl,
+		},
+	})
+
+	-- Neovim 0.12 deprecates `vim.lsp.with()` and no longer routes hover/signature
+	-- through global handlers in the same way. Styling the shared preview opener
+	-- keeps borders/highlights consistent without per-keymap wrappers.
+	if not vim.g._which_key_float_preview_wrapped then
+		vim.g._which_key_float_preview_wrapped = true
+		local default_open = vim.lsp.util.open_floating_preview
+		vim.lsp.util.open_floating_preview = function(contents, syntax, opts, ...)
+			opts = opts or {}
+			opts = vim.tbl_deep_extend("force", opts, {
+				border = "rounded",
+				winhl = float_winhl,
+			})
+			return default_open(contents, syntax, opts, ...)
+		end
+	end
+end
+
 -- Enhance capabilities only for specific servers that need them
 local blink_ok, blink_lsp = pcall(require, "blink.cmp.lsp")
 if blink_ok then
