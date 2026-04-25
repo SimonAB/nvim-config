@@ -28,3 +28,7 @@ docs/.vitepress/cache/
 package-lock.json
 
 /.luarc.json
+
+# Editor / IDE metadata
+.cursor/
+.vscode/
