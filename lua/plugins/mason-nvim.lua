@@ -80,6 +80,68 @@ if ok then
 			},
 		},
 	})
+
+	-- ============================================================================
+	-- UI styling parity with which-key
+	-- ============================================================================
+
+	---Apply Mason highlight links so its UI matches which-key's float palette.
+	local function apply_mason_highlights()
+		local links = {
+			MasonNormal = "WhichKeyFloat",
+			MasonBorder = "WhichKeyBorder",
+			MasonHeader = "WhichKeyTitle",
+			MasonHeading = "WhichKeyTitle",
+			MasonMuted = "Comment",
+			MasonHighlight = "WhichKey",
+			MasonHighlightBlock = "WhichKeyGroup",
+			MasonHighlightBlockBold = "WhichKeyGroup",
+			MasonHighlightSecondary = "WhichKeySeparator",
+			MasonHighlightBlockSecondary = "WhichKeySeparator",
+			MasonError = "DiagnosticError",
+			MasonWarning = "DiagnosticWarn",
+		}
+
+		for group, target in pairs(links) do
+			pcall(vim.api.nvim_set_hl, 0, group, { link = target })
+		end
+	end
+
+	---Force Mason windows to use which-key's float winhl mapping.
+	---@param winid integer
+	local function style_mason_window(winid)
+		if not winid or not vim.api.nvim_win_is_valid(winid) then
+			return
+		end
+
+		pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = winid })
+		pcall(
+			vim.api.nvim_set_option_value,
+			"winhl",
+			"Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
+			{ win = winid }
+		)
+	end
+
+	local group = vim.api.nvim_create_augroup("MasonUIStyle", { clear = true })
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		group = group,
+		desc = "Reapply Mason UI highlight links after theme changes",
+		callback = function()
+			apply_mason_highlights()
+		end,
+	})
+	vim.api.nvim_create_autocmd("FileType", {
+		group = group,
+		pattern = "mason",
+		desc = "Style Mason window to match which-key float appearance",
+		callback = function()
+			apply_mason_highlights()
+			style_mason_window(vim.api.nvim_get_current_win())
+		end,
+	})
+
+	apply_mason_highlights()
 else
 	vim.notify("❌ Mason not available - LSP server management will be limited", vim.log.levels.WARN)
 end
