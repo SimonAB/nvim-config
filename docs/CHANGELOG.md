@@ -10,6 +10,7 @@
 
 ### Configuration
 - **toggleterm.nvim**: Set `open_mapping` to `<C-t>` so behaviour matches documented quick toggle.
+- **Popup UI parity**: Made update/progress popups, Mason UI, and other floats (diagnostics/LSP previews, gitsigns preview, plugin status) match the which-key popup border/highlight style for a more consistent look.
 
 ---
 
