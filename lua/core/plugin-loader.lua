@@ -23,6 +23,7 @@ local MODULE_TO_PACK = {
 	["nvim-lspconfig"] = "nvim-lspconfig",
 	["nvim-treesitter"] = "nvim-treesitter",
 	["mini-nvim"] = "mini.nvim",
+	["codecompanion-nvim"] = "codecompanion.nvim",
 
 	["bufferline-nvim"] = "bufferline.nvim",
 	["lualine-nvim"] = "lualine.nvim",
@@ -146,6 +147,7 @@ local LOAD_PHASES = {
 		"lualine-nvim",       -- Status line
 		"nvim-tree",          -- File explorer
 		"telescope",          -- Fuzzy finder
+		"codecompanion-nvim", -- AI chat (ACP + HTTP)
 		"telescope-fzf-native-nvim", -- Telescope native sorter (extension)
 		"telescope-frecency-nvim", -- Telescope frecency (extension)
 		"sqlite-lua",         -- SQLite dependency for frecency

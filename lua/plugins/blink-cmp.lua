@@ -27,7 +27,14 @@ if ok then
 			nerd_font_variant = "mono", -- Use monospaced nerd font icons
 		},
 		sources = {
-			default = { "lsp", "path", "snippets", "buffer" }, -- Completion sources
+			default = { "lsp", "path", "snippets", "buffer", "codecompanion" }, -- Completion sources
+			providers = {
+				codecompanion = {
+					name = "CodeCompanion",
+					module = "codecompanion.providers.completion.blink",
+					enabled = true,
+				},
+			},
 		},
 		completion = {
 			accept = {

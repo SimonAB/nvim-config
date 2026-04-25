@@ -201,6 +201,8 @@ if ok then
 	wk.add({
 		-- Buffer operations
 		{ "<leader>B", group = "Buffer" },
+		-- AI / CodeCompanion
+		{ "<leader>A", group = "AI" },
 		-- Configuration
 		{ "<leader>C", group = "Config" },
 		-- Frecency operations (capital F for group with sub-commands)
@@ -241,39 +243,39 @@ if ok then
 		{ "<leader>J", group = "Julia" },
 		{ "<leader>Jl", "<cmd>JuliaLspUpdate<cr>", desc = "Update LanguageServer.jl" },
 		-- Mason operations (enhanced with batch operations)
-	{ "<leader>M", group = "Mason" },
-	{ "<leader>MA", function()
-		local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
-		if ok then
-			MasonUI.install_academic_servers()
-		else
-			vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
-		end
-	end, desc = "Install Academic LSP Servers" },
-	{ "<leader>MR", function()
-		local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
-		if ok then
-			MasonUI.install_all_recommended()
-		else
-			vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
-		end
-	end, desc = "Install All Recommended Servers" },
-	{ "<leader>MU", function()
-		local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
-		if ok then
-			MasonUI.update_all_packages()
-		else
-			vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
-		end
-	end, desc = "Update All Packages" },
-	{ "<leader>MS", function()
-		local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
-		if ok then
-			MasonUI.check_status()
-		else
-			vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
-		end
-	end, desc = "Mason Status" },
+		{ "<leader>M", group = "Mason" },
+		{ "<leader>MA", function()
+			local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
+			if ok then
+				MasonUI.install_academic_servers()
+			else
+				vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
+			end
+		end, desc = "Install Academic LSP Servers" },
+		{ "<leader>MR", function()
+			local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
+			if ok then
+				MasonUI.install_all_recommended()
+			else
+				vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
+			end
+		end, desc = "Install All Recommended Servers" },
+		{ "<leader>MU", function()
+			local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
+			if ok then
+				MasonUI.update_all_packages()
+			else
+				vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
+			end
+		end, desc = "Update All Packages" },
+		{ "<leader>MS", function()
+			local ok, MasonUI = pcall(require, "plugins.mason-enhanced")
+			if ok then
+				MasonUI.check_status()
+			else
+				vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
+			end
+		end, desc = "Mason Status" },
 		-- Forge task & project manager
 		{ "<leader>R", group = "Frecency" },
 		-- Markdown group (preview + list operations)

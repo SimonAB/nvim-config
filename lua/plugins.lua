@@ -20,6 +20,7 @@ local plugins = {
 	{ src = "https://github.com/nvim-lualine/lualine.nvim", name = "lualine.nvim" },
 	{ src = "https://github.com/nvim-tree/nvim-tree.lua", name = "nvim-tree.lua" },
 	{ src = "https://github.com/nvim-telescope/telescope.nvim", name = "telescope.nvim" },
+	{ src = "https://github.com/olimorris/codecompanion.nvim", name = "codecompanion.nvim" },
 	{
 		src = "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
 		name = "telescope-fzf-native.nvim",

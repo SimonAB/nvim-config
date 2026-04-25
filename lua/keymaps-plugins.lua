@@ -549,7 +549,6 @@ map("n", "<leader>Bq", buffer_operation("BufferLineClose", "bdelete"), { desc = 
 map("n", "<leader>Bl", "<cmd>ls!<CR>", { desc = "List all buffers (including unlisted)" })
 
 -- Toggle Zen Mode
-map("n", "<leader>z", toggle_zen_mode, { desc = "Toggle Zen Mode" })
 map("n", "<leader>Yz", toggle_zen_mode, { desc = "Toggle Zen Mode" })
 
 -- Theme management (deferred)
@@ -597,6 +596,12 @@ map("n", "<leader>YTs", function()
 	local current = vim.g.colors_name or "default"
 	vim.notify("Current theme: " .. current, vim.log.levels.INFO)
 end, { desc = "Show current theme" })
+
+-- CodeCompanion / AI (<leader>A)
+map("n", "<leader>Ac", safe_cmd("CodeCompanionChat"), { desc = "AI: Chat (default adapter)" })
+map("n", "<leader>At", safe_cmd("CodeCompanionChat Toggle"), { desc = "AI: Toggle chat" })
+map("n", "<leader>Ad", safe_cmd("CodeCompanionChat Debug"), { desc = "AI: Chat debug" })
+map("n", "<leader>Ao", safe_cmd("CodeCompanionChat adapter=ollama"), { desc = "AI: Chat (Ollama)" })
 
 -- File tree / Telescope / Search
 map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file tree" })
