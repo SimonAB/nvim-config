@@ -212,7 +212,7 @@ function ThemePicker.show_fallback_picker(themes)
 	pcall(
 		vim.api.nvim_set_option_value,
 		"winhl",
-		"Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
+		"Normal:NormalFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
 		{ win = win }
 	)
 
