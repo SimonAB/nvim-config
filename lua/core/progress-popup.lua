@@ -37,6 +37,15 @@ function ProgressPopup.create(title, opts)
 
 	local winid = vim.api.nvim_open_win(bufnr, true, win_opts)
 
+	-- Match which-key's popup appearance for consistency across float UIs.
+	pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = winid })
+	pcall(
+		vim.api.nvim_set_option_value,
+		"winhl",
+		"Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
+		{ win = winid }
+	)
+
 	vim.keymap.set("n", "q", function()
 		ProgressPopup.close({ bufnr = bufnr, winid = winid })
 	end, { buffer = bufnr, silent = true })
