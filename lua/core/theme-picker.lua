@@ -148,6 +148,9 @@ end
 function ThemePicker.show_fallback_picker(themes)
 	local current_index = 1
 	local current_preview_theme = nil
+	local top_padding = 1
+	local bottom_padding = 1
+	local left_padding = "  "
 
 	-- Create theme display entries with filtering
 	local theme_entries = {}
@@ -185,7 +188,7 @@ function ThemePicker.show_fallback_picker(themes)
 
 	-- Create floating window
 	local width = 50
-	local height = math.min(#theme_entries, 15)
+	local height = math.min(#theme_entries + top_padding + bottom_padding, 15 + top_padding + bottom_padding)
 	local row = math.floor((vim.o.lines - height) / 2)
 	local col = math.floor((vim.o.columns - width) / 2)
 
@@ -195,18 +198,6 @@ function ThemePicker.show_fallback_picker(themes)
 			or (current_filter_mode == FilterMode.LIGHT and "Light") or "All"
 		return string.format("🎨 Select Theme (Live Preview) — [%s]", label)
 	end
-
-	-- Use an explicit opaque background for this picker to prevent terminal bleedthrough.
-	-- `NormalFloat` is kept transparent globally in this config, so we derive from `Normal`.
-	local function ensure_picker_highlight()
-		local ok_hl, normal_hl = pcall(vim.api.nvim_get_hl, 0, { name = "Normal", link = false })
-		local bg = ok_hl and normal_hl and normal_hl.bg or nil
-		if not bg then
-			bg = (vim.o.background == "light") and 0xf0f0f0 or 0x2b2f3a
-		end
-		pcall(vim.api.nvim_set_hl, 0, "ThemePickerFloat", { bg = bg })
-	end
-	ensure_picker_highlight()
 
 	local win = vim.api.nvim_open_win(buf, true, {
 		relative = "editor",
@@ -225,15 +216,21 @@ function ThemePicker.show_fallback_picker(themes)
 	pcall(
 		vim.api.nvim_set_option_value,
 		"winhl",
-		"Normal:ThemePickerFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
+		"Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
 		{ win = win }
 	)
 
 	-- Set buffer content helpers
 	local function update_buffer_lines()
 		local lines = {}
+		for _ = 1, top_padding do
+			table.insert(lines, "")
+		end
 		for _, entry in ipairs(theme_entries) do
-			table.insert(lines, entry.display)
+			table.insert(lines, left_padding .. entry.display)
+		end
+		for _ = 1, bottom_padding do
+			table.insert(lines, "")
 		end
 		local was_modifiable = vim.bo[buf].modifiable
 		if not was_modifiable then
@@ -249,7 +246,7 @@ function ThemePicker.show_fallback_picker(themes)
 	-- Highlight current selection
 	local function update_highlight()
 		vim.api.nvim_buf_clear_namespace(buf, -1, 0, -1)
-		local line = math.max(1, math.min(current_index, #theme_entries)) - 1
+		local line = (math.max(1, math.min(current_index, #theme_entries)) - 1) + top_padding
 		vim.api.nvim_buf_add_highlight(buf, -1, "CursorLine", line, 0, -1)
 
 		-- Live preview
