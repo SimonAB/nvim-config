@@ -13,6 +13,15 @@ local plugins = {
 	{ src = "https://github.com/mason-org/mason-lspconfig.nvim", name = "mason-lspconfig.nvim" },
 	{ src = "https://github.com/neovim/nvim-lspconfig", name = "nvim-lspconfig" },
 	{ src = "https://github.com/nvim-treesitter/nvim-treesitter", name = "nvim-treesitter" },
+	{
+		src = "https://github.com/olimorris/codecompanion.nvim",
+		name = "codecompanion.nvim",
+		data = {
+			-- Pin to releases to avoid breaking changes.
+			-- See: https://codecompanion.olimorris.dev/installation
+			version = vim.version.range("^19.0.0"),
+		},
+	},
 
 	-- UI and workflow
 	{ src = "https://github.com/folke/trouble.nvim", name = "trouble.nvim" },
