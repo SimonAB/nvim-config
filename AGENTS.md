@@ -377,7 +377,7 @@ end, { desc = "Description" })
 |--------|-------|---------|
 | `<leader>B` | Buffer operations | `<leader>Bn` = Next buffer |
 | `<leader>C` | Configuration | `<leader>Cs` = Reload configuration |
-| `<leader>F` | Forge (tasks / project) | `<leader>Fn` = Next actions |
+| `<leader>F` | Forge (kanban / projects) | `<leader>Fs` = Status |
 | `<leader>R` | Frecency (recent files) | `<leader>Rf` = Find files (frecency) |
 | `<leader>G` | Git operations | `<leader>Gs` = Git status |
 | `<leader>J` | Julia operations | `<leader>Jrh` = Julia REPL horizontal |

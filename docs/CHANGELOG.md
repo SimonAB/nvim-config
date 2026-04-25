@@ -1,6 +1,24 @@
 # Changelog
 
-## [Latest] - Documentation aligned with keymaps
+## [Latest] - Forge kanban workflow refresh
+
+### Forge (keymaps, commands, dashboard)
+- **Forge positioning**: Reframed Forge as a **kanban/projects** workflow (Finder tags) rather than a GTD task manager.
+- **Keymaps** (`<leader>F*`):
+  - `<leader>Fs` now shows **Forge status** (replaces the old “next actions” emphasis).
+  - Added **project operations**: move current project to a column (`<leader>Fm`), add/remove tags (`<leader>Fa` / `<leader>Fr`).
+  - Added **read-only views**: calendar (`<leader>Ft`), tags for current project (`<leader>Fp`).
+  - Telescope helpers: find Forge files (`<leader>Ff`), grep Forge files (`<leader>Fg`).
+- **Commands**: Added `:ForgeStatus` and kept `:ForgeNext` as a backwards-compatible alias; added project/tag commands (`:ForgeMove`, `:ForgeProjectTags`, `:ForgeProjectTagAdd`, `:ForgeProjectTagRemove`) and `:ForgeCalendar`.
+- **Dashboard**: Updated the mini.nvim dashboard Forge shortcuts to match the new command set.
+
+### Documentation
+- **docs/reference/keymaps.md** and **AGENTS.md**: Forge descriptions updated to match the kanban/projects workflow and the new `<leader>F*` mappings.
+- **scripts/generate-docs.lua**: Leader group summary updated (Forge wording).
+
+---
+
+## [Previous] - Documentation aligned with keymaps
 
 ### Documentation
 - **README**, **docs/reference/keymaps.md**, **docs/index.md**: Frecency under `<leader>R*`; Forge under `<leader>F*`; Typst `<localleader>t*` (preview, sync, `typst c`, `typst w`); removed references to unbound “send to terminal” keys.

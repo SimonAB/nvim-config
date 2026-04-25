@@ -276,7 +276,7 @@ if ok then
 				vim.notify("Mason Enhanced UI not available", vim.log.levels.WARN)
 			end
 		end, desc = "Mason Status" },
-		-- Forge task & project manager
+		-- Forge kanban / project manager
 		{ "<leader>R", group = "Frecency" },
 		-- Markdown group (preview + list operations)
 		{ "<leader>K", group = "Markdown" },

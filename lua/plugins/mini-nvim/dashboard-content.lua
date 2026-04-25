@@ -203,8 +203,8 @@ function M.create_forge_items()
 			section = "Forge",
 		},
 		{
-			name = keys[2] .. ".  Next actions",
-			action = "ForgeNext",
+			name = keys[2] .. ".  Status",
+			action = "ForgeStatus",
 			section = "Forge",
 		},
 		{
@@ -213,8 +213,8 @@ function M.create_forge_items()
 			section = "Forge",
 		},
 		{
-			name = keys[4] .. ".  Review",
-			action = "ForgeReview",
+			name = keys[4] .. ".  Move project",
+			action = "ForgeMove",
 			section = "Forge",
 		},
 	}

@@ -54,8 +54,8 @@ Complete keybinding reference for BabaVim, organised by functionality.
 <Leader>e       " Toggle file explorer (NvimTree)
 ```
 
-### Forge (tasks / project)
-See `lua/plugins/forge-nvim.lua` for the full `<Leader>F*` map set (e.g. `<Leader>Fn` next actions, `<Leader>Fb` board).
+### Forge (kanban / projects)
+See `lua/plugins/forge-nvim.lua` for the full `<Leader>F*` map set (e.g. `<Leader>Fs` status, `<Leader>Fb` board, `<Leader>Fm` move).
 
 ## LSP Operations
 

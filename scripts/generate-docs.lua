@@ -48,7 +48,7 @@ function DocGenerator.generate_keymaps_summary()
 
 - **B**: Buffer operations
 - **C**: Configuration management
-- **F**: Forge (tasks / project)
+- **F**: Forge (kanban / projects)
 - **R**: Frecency (recent files)
 - **G**: Git operations
 - **J**: Julia development
