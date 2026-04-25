@@ -301,7 +301,7 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { link = "Keyword" },
 			WhichKeyDesc = { link = "Comment" },
 			WhichKeySeparator = { link = "String" },
-			WhichKeyFloat = { bg = surface.surface_bg },
+			WhichKeyFloat = { bg = "none" },
 			WhichKeyBorder = { fg = surface.border_fg, bg = "none" },
 		}
 	elseif theme:match("onedark") then
@@ -310,7 +310,7 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { fg = "#C678DD" },
 			WhichKeyDesc = { fg = "#5C6370" },
 			WhichKeySeparator = { fg = "#98C379" },
-			WhichKeyFloat = { bg = surface.surface_bg },
+			WhichKeyFloat = { bg = "none" },
 			WhichKeyBorder = { fg = surface.border_fg, bg = "none" },
 		}
 	elseif theme:match("tokyonight") then
@@ -319,7 +319,7 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { link = "Keyword" },
 			WhichKeyDesc = { link = "Comment" },
 			WhichKeySeparator = { link = "String" },
-			WhichKeyFloat = { bg = surface.surface_bg },
+			WhichKeyFloat = { bg = "none" },
 			WhichKeyBorder = { fg = surface.border_fg, bg = "none" },
 		}
 	else
@@ -329,7 +329,7 @@ function ThemeManager.update_which_key_highlights()
 			WhichKeyGroup = { link = "Keyword" },
 			WhichKeyDesc = { link = "Comment" },
 			WhichKeySeparator = { link = "Delimiter" },
-			WhichKeyFloat = { bg = surface.surface_bg },
+			WhichKeyFloat = { bg = "none" },
 			WhichKeyBorder = { fg = surface.border_fg, bg = "none" },
 		}
 	end
