@@ -18,6 +18,7 @@ local MODULE_TO_PACK = {
 	["nvim-web-devicons"] = "nvim-web-devicons",
 	["blink-lib"] = "blink.lib",
 	["blink-cmp"] = "blink.cmp",
+	["codecompanion-nvim"] = "codecompanion.nvim",
 	["mason-nvim"] = "mason.nvim",
 	["mason-lspconfig-nvim"] = "mason-lspconfig.nvim",
 	["nvim-lspconfig"] = "nvim-lspconfig",
@@ -152,6 +153,7 @@ local LOAD_PHASES = {
 		"trouble-nvim",       -- Diagnostics viewer
 		"gitsigns-nvim",      -- Git integration
 		"toggleterm-nvim",    -- Terminal management
+		"codecompanion-nvim", -- AI chat buffer (ACP via Cursor CLI)
 		"markdown-preview-nvim", -- Markdown preview
 		"zen-mode-nvim",      -- Distraction-free writing for prose
 		"vimtex",             -- LaTeX support

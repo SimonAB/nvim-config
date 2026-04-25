@@ -540,6 +540,12 @@ end
 
 local filetype_keymaps_group = vim.api.nvim_create_augroup("FiletypeKeymaps", { clear = true })
 
+-- AI / CodeCompanion (<leader>A)
+map("n", "<leader>Ac", "<cmd>CodeCompanionChat<CR>", { desc = "AI: Open chat" })
+map("n", "<leader>At", "<cmd>CodeCompanionChat Toggle<CR>", { desc = "AI: Toggle chat" })
+map({ "n", "v" }, "<leader>Aa", "<cmd>CodeCompanionActions<CR>", { desc = "AI: Action palette" })
+map("v", "<leader>A+", "<cmd>CodeCompanionChat Add<CR>", { desc = "AI: Add selection to chat" })
+
 -- Buffer Operations (<leader>B)
 map("n", "<leader>Bf", "<cmd>Telescope buffers<CR>", { desc = "Find buffers (Telescope)" })
 map("n", "<leader>Bp", "<cmd>BufferLinePick<CR>", { desc = "Pick buffer" })

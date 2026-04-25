@@ -28,6 +28,10 @@
       "rev": "426dbebe06b5c69fd846ceb17b42e12f890aedf1",
       "src": "https://github.com/catppuccin/nvim"
     },
+    "codecompanion.nvim": {
+      "rev": "bc82fbca915f28467a2e2e74e11845ce20d8017c",
+      "src": "https://github.com/olimorris/codecompanion.nvim"
+    },
     "github-nvim-theme": {
       "rev": "c106c9472154d6b2c74b74565616b877ae8ed31d",
       "src": "https://github.com/projekt0n/github-nvim-theme"
