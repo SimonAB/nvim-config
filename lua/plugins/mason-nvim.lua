@@ -49,7 +49,7 @@ if ok then
 			border = "rounded",
 
 			-- The backdrop opacity. 0 is fully opaque, 100 is fully transparent
-			backdrop = 60,
+			backdrop = 0,
 
 			-- Width of the window (0.8 = 80% of screen width)
 			width = 0.8,

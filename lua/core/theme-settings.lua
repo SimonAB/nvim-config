@@ -51,10 +51,16 @@ function ThemeSettings.apply_window_blend(winid)
 		return false
 	end
 	local bufnr = vim.api.nvim_win_get_buf(winid)
-	-- which-key.nvim uses filetype = "wk" for both its popup and footer helper windows.
-	-- Keep these fully opaque to prevent any buffer glyph bleed-through in terminals.
-	if vim.api.nvim_buf_is_valid(bufnr) and vim.bo[bufnr].filetype == "wk" then
-		return pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = winid })
+	if vim.api.nvim_buf_is_valid(bufnr) then
+		local ft = vim.bo[bufnr].filetype
+		-- which-key.nvim uses filetype = "wk" for both its popup and footer helper windows.
+		-- Keep these fully opaque to prevent any buffer glyph bleed-through in terminals.
+		--
+		-- Mason's UI is also best kept opaque so it visually matches which-key and avoids
+		-- terminal blur/backdrop artefacts.
+		if ft == "wk" or ft == "mason" then
+			return pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = winid })
+		end
 	end
 
 	local ok = pcall(vim.api.nvim_set_option_value, "winblend", ThemeSettings.get_winblend(), { win = winid })
