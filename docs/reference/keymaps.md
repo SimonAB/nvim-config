@@ -1,6 +1,6 @@
 # Keymaps Reference
 
-Complete keybinding reference for BabaVim, organised by functionality.
+Complete keymap reference for process-nvim, organised by functionality.
 
 ## Leader Keys
 
@@ -272,7 +272,6 @@ Note: these use bracketed paste to avoid REPL line-editing features mutating bra
 <Leader>Ys      " Toggle spell check
 <Leader>Yse     " Set spell language to English (British)
 <Leader>Ysf     " Set spell language to French
-<Leader>z       " Toggle Zen Mode (quick shortcut)
 ```
 
 ## Window Management
@@ -390,7 +389,7 @@ vim.keymap.set("n", "<leader>f", ":MyCustomFinder<CR>", {
 
 ### Keymap Conflicts
 1. Check for conflicting mappings: `:verbose map <key>`
-2. Use `:WhichKey` to visualize conflicts
+2. Use `:WhichKey` to visualise conflicts
 3. Override in `user.lua` if needed
 
 ### Slow Keymaps

@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-BabaVim: Neovim setup for research workflows.
+process-nvim is a Neovim configuration for research workflows.
 
 ## Prerequisites
 
@@ -110,7 +110,7 @@ yay -S r
 ### Clone Configuration
 
 ```bash
-git clone https://github.com/SimonAB/nvim-config.git ~/.config/nvim
+git clone https://github.com/SimonAB/process-nvim.git ~/.config/nvim
 cd ~/.config/nvim
 ```
 
@@ -176,7 +176,7 @@ K                    " Show documentation
 
 " Markdown
 <Space>Kp            " Start preview
-<Space>Kt            " Toggle preview (or wait for table operations menu)
+<Space>Kv            " Toggle preview
 <Space>Ktf           " Format table
 <Space>Ktn/Ktp       " Navigate table cells
 <Space>Kto/KtO      " Insert row below/above
@@ -184,7 +184,7 @@ K                    " Show documentation
 
 " Quarto
 <Space>Qp            " Preview document
-<Space>Qr            " Render document
+<Space>QRh/QRp/QRw   " Render to HTML/PDF/Word
 
 " Typst
 \tp                  " Toggle preview
@@ -213,7 +213,6 @@ Julia REPLs: `--threads=auto`
 <Space>Yc            " Cycle through themes
 <Space>YTs           " Show current theme
 <Space>Yz            " Toggle Zen Mode (markdown writing mode)
-<Space>z             " Quick Zen Mode toggle
 ```
 
 Themes: Catppuccin, OneDark, Tokyo Night, Nord, GitHub Dark/Light.
@@ -431,7 +430,7 @@ Press `<Space>` (500ms delay) to view commands grouped by functionality:
 
 1. Install language servers: `<Space>MA`
 2. Configure theme: `<Space>YTp`
-3. Setup LaTeX: Configure Skim for bidirectional sync
+3. Set up LaTeX: Configure Skim for bidirectional sync
 4. Customise: Add core keymaps to `lua/keymaps-core.lua` (plugin-free) and plugin keymaps to `lua/keymaps-plugins.lua`
 5. Explore: Press `<Space>` to view command groups
 
@@ -459,7 +458,7 @@ local plugins = {
 
 ## Resources
 
-- [Complete Keymaps Reference](reference/keymaps.md)
+- [Keymaps Reference](reference/keymaps.md)
 - [Installation Guide](INSTALLATION_GUIDE.md)
 - [Troubleshooting Guide](TROUBLESHOOTING_GUIDE.md)
 

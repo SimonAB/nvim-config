@@ -1,6 +1,6 @@
-# BabaVim
+# process-nvim
 
-[![Documentation](https://img.shields.io/badge/docs-vitepress-blue?style=flat&logo=readthedocs)](https://simonab.github.io/nvim-config/)
+[![Documentation](https://img.shields.io/badge/docs-vitepress-blue?style=flat&logo=readthedocs)](https://simonab.github.io/process-nvim/)
 
 Neovim configuration optimised for academic research and scientific computing. Document processing: LaTeX (VimTeX, SyncTeX), Markdown (preview, Obsidian), Quarto (R/Python/Julia execution), Typst (preview). Scientific computing: Julia REPL (multi-threaded), Python LSP (pyright), R execution. Development: LSP (15+ languages via Mason), completion ([blink.cmp](https://github.com/Saghen/blink.cmp) with [blink.lib](https://github.com/Saghen/blink.lib)), terminal integration, Git integration. Modular architecture. vim.pack plugin management. Neovim 0.12+ required.
 
@@ -54,7 +54,7 @@ See [Installation Guide](docs/INSTALLATION_GUIDE.md).
 
 ```bash
 # Clone configuration
-git clone https://github.com/SimonAB/nvim-config.git ~/.config/nvim
+git clone https://github.com/SimonAB/process-nvim.git ~/.config/nvim
 cd ~/.config/nvim
 
 # First launch (plugins auto-install)

@@ -12,7 +12,7 @@ Mason manages LSP servers. Settings configured for research and document prepara
 
 ```vim
 :lua require("plugins.mason-enhanced").install_academic_servers()
-" or use the keybinding
+" or use the keymap
 <Space>MA
 ```
 
@@ -29,7 +29,7 @@ This installs the core academic servers:
 
 ```vim
 :lua require("plugins.mason-enhanced").install_all_recommended()
-" or use the keybinding
+" or use the keymap
 <Space>MR
 ```
 

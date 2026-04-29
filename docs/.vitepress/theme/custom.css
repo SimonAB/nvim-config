@@ -1,0 +1,17 @@
+.VPHome .VPHero {
+	padding-bottom: 20px;
+}
+
+.VPHome .VPFeatures {
+	padding-top: 12px;
+}
+
+.vp-doc h2 {
+	margin-top: 2rem;
+	padding-bottom: 0.35rem;
+	border-bottom: 1px solid var(--vp-c-divider);
+}
+
+.vp-doc ul li {
+	margin: 0.35rem 0;
+}

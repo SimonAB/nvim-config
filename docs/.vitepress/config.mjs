@@ -1,14 +1,24 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'BabaVim',
+  title: 'process-nvim',
   description: 'Neovim configuration for academic research, scientific computing, and document preparation',
-  base: '/nvim-config/',
-  
+  base: '/process-nvim/',
+  cleanUrls: true,
+
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
+      { text: 'Install', link: '/INSTALLATION_GUIDE' },
       { text: 'Quick Start', link: '/quickstart' },
+      {
+        text: 'Guides',
+        items: [
+          { text: 'Troubleshooting', link: '/TROUBLESHOOTING_GUIDE' },
+          { text: 'Performance', link: '/PERFORMANCE_OPTIMISATIONS' },
+          { text: 'LSP Setup', link: '/advanced/lsp-setup' }
+        ]
+      },
       { text: 'Reference', link: '/reference/keymaps' }
     ],
 
@@ -16,13 +26,20 @@ export default defineConfig({
       {
         text: 'Getting Started',
         items: [
+          { text: 'Overview', link: '/' },
           { text: 'Quick Start', link: '/quickstart' },
-          { text: 'Installation Guide', link: '/INSTALLATION_GUIDE' },
-          { text: 'Troubleshooting', link: '/TROUBLESHOOTING_GUIDE' }
+          { text: 'Installation Guide', link: '/INSTALLATION_GUIDE' }
         ]
       },
       {
-        text: 'Reference',
+        text: 'Operations',
+        items: [
+          { text: 'Troubleshooting', link: '/TROUBLESHOOTING_GUIDE' },
+          { text: 'Performance Optimisations', link: '/PERFORMANCE_OPTIMISATIONS' }
+        ]
+      },
+      {
+        text: 'Reference and Advanced',
         items: [
           { text: 'Keymaps Reference', link: '/reference/keymaps' },
           { text: 'LSP Setup', link: '/advanced/lsp-setup' },
@@ -32,16 +49,21 @@ export default defineConfig({
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/SimonAB/nvim-config' }
+      { icon: 'github', link: 'https://github.com/SimonAB/process-nvim' }
     ],
 
     search: {
       provider: 'local'
     },
 
+    outline: {
+      level: [2, 3],
+      label: 'On this page'
+    },
+
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'BabaVim'
+      copyright: 'process-nvim'
     }
   },
 
@@ -50,6 +72,6 @@ export default defineConfig({
   },
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/nvim-config/favicon.svg' }]
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/process-nvim/favicon.svg' }]
   ]
 })

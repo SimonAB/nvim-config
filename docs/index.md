@@ -2,149 +2,92 @@
 layout: home
 
 hero:
-  name: BabaVim
-  text: Neovim Configuration for Academic Workflows
-  tagline: LaTeX, Markdown, Quarto, Typst. Terminal integration. LSP support.
-  actions:
-    - theme: brand
-      text: Quick Start
-      link: /quickstart
-    - theme: alt
-      text: Installation Guide
-      link: /INSTALLATION_GUIDE
-    - theme: alt
-      text: View on GitHub
-      link: https://github.com/SimonAB/nvim-config
+  name: process-nvim
+  text: Neovim for research and scientific workflows
+  tagline: LaTeX, Markdown, Quarto, Typst, Julia, and LSP in one maintainable setup.
 
 features:
+  - icon: 🚀
+    title: Fast Setup
+    details: Neovim 0.12+, vim.pack plugin management, and clear install paths for macOS and Arch Linux.
   - icon: 📄
-    title: Document Processing
-    details: LaTeX (VimTeX, SyncTeX), Markdown (Zen Mode, live preview), Quarto, Typst.
-
+    title: Writing and Publishing
+    details: VimTeX with SyncTeX, Markdown preview, Quarto rendering, and Typst preview/compile workflows.
   - icon: 🧪
     title: Scientific Computing
-    details: Julia REPL (multi-threaded), Python (pyright LSP), R. Terminal code execution.
-
-  - icon: ⚡
-    title: Architecture
-    details: Deferred plugin loading. Caching. Research workflow configuration.
-
+    details: Julia REPL integration, Python and R support, and terminal-first code execution.
   - icon: 🔧
-    title: LSP Support
-    details: 15+ languages via Mason. Completion (blink.cmp + blink.lib). Diagnostics.
-
-  - icon: 🎨
-    title: Interface
-    details: Multiple themes. Auto dark mode. Telescope. WhichKey. NvimTree.
-
-  - icon: 📚
-    title: Research Tools
-    details: Obsidian integration. Bibliography management. Code block detection. Academic keymaps.
+    title: Language Tooling
+    details: 15+ LSP servers through Mason, diagnostics, formatting, and completion via blink.cmp.
+  - icon: 🧭
+    title: Discoverable Keymaps
+    details: Which-key guided leader mappings with consistent groups for editing, docs, terminal, and LSP.
+  - icon: ⚙️
+    title: Maintainable Design
+    details: Modular Lua architecture with deferred loading and practical defaults for daily use.
 ---
 
-## Keymap Examples
+## Start Here
+
+process-nvim is built for Neovim 0.12+ and uses the native `vim.pack` package manager rather than
+third-party plugin managers. It combines fast startup, modular Lua configuration, and practical
+research tooling in one setup: writing workflows (LaTeX, Markdown, Quarto, Typst), terminal-first
+execution, and strong LSP support for day-to-day scientific and technical work.
+
+- [Installation Guide](/INSTALLATION_GUIDE) - platform dependencies and first launch
+- [Quick Start](/quickstart) - essential keymaps and first workflow checks
+- [Keymaps Reference](/reference/keymaps) - complete leader/localleader map catalogue
+- [Troubleshooting](/TROUBLESHOOTING_GUIDE) - fixes for plugin, LSP, terminal, and SyncTeX issues
+
+## Core Workflows
+
+### Writing and publishing
+- **LaTeX**: `\ll` compile, `\lv` forward search, Skim/Zathura inverse search
+- **Markdown**: `<Leader>Kp` preview, plus table editing mappings under `<Leader>Kt`
+- **Quarto**: `<Leader>Qp` preview and `<Leader>QR*` rendering shortcuts
+- **Typst**: `<localleader>tp` preview toggle and `<localleader>tc` PDF compile
+
+### Scientific coding
+- **Julia REPL**: `<Leader>Jrh`, `<Leader>Jrv`, `<Leader>Jrf` launch layouts
+- **Code send**: `<C-i>`, `<C-c>`, `<C-s>` for line, block, and selection
+- **LSP controls**: `gd`, `K`, `<Leader>Lf`, `<Leader>Ll`, `<Leader>Lr`
+
+### Terminal-first workflow
+- `<C-t>` toggles the default terminal instance
+- `<Leader>Tt`, `<Leader>Th`, `<Leader>Tv`, `<Leader>Tf` provide managed terminal layouts
+- ToggleTerm and REPL mappings are designed to keep editing and execution in one view
+
+## Essential Keymaps
 
 ```vim
-# Terminal Integration
-<C-t>             # Toggle terminal (ToggleTerm)
-<Leader>Tt        # Terminal toggle (vertical, smart)
-<Leader>Th/Tv/Tf  # Horizontal/Vertical/Float terminal
+" Navigation and search
+<Space>f            " Find files
+<Space>g            " Grep in project
+<Space>e            " Toggle file tree
 
-# Document Processing (VimTeX / Typst use <localleader>, often \ )
-<localleader>lv   # LaTeX forward search
-<localleader>ll   # Compile LaTeX
-<localleader>tp   # Typst preview toggle
-<Leader>Kp        # Markdown preview
-<Leader>Qp        # Quarto preview
+" LSP
+gd                  " Go to definition
+K                   " Hover documentation
+<Space>Lf           " Format document
 
-# Julia Development
-<Leader>Jrv       # Julia REPL (vertical)
-<Leader>Jp        # Project status
-<Leader>Ji        # Instantiate project
+" Terminal
+<C-t>               " Toggle terminal
+<Space>Tt           " Smart vertical terminal
+
+" Writing workflows
+\ll                 " Compile LaTeX
+\lv                 " Forward search in PDF
+<Space>Kp           " Markdown preview
+<Space>Qp           " Quarto preview
+<localleader>tp     " Typst preview
 ```
 
-## Requirements
+## Documentation Map
 
-### Essential
-- **Package Manager**:
-  - **macOS**: Homebrew ([install here](https://brew.sh/))
-  - **Arch Linux**: pacman (built-in) and yay/paru for AUR
-- Neovim 0.12+ (required for vim.pack)
-- Git
-- Cargo (recommended: blink.cmp native fuzzy matcher); blink.lib installs via vim.pack
-- ripgrep, fd (for Telescope)
-
-### Document Processing
-- **LaTeX**: 
-  - **macOS**: MacTeX or BasicTeX, Skim PDF viewer
-  - **Arch Linux**: texlive-most, Zathura PDF viewer
-- **Typst**: 
-  - **macOS**: `brew install typst`
-  - **Arch Linux**: `yay -S typst` (AUR)
-- **Markdown**: Node.js (for preview)
-
-### Language Support
-- **Julia**: 1.9+ with LanguageServer.jl
-- **Python**: 3.8+ with pyright LSP
-- **R**: 4.0+ with languageserver package
-
-## Installation
-
-```bash
-# Clone configuration
-git clone https://github.com/SimonAB/nvim-config.git ~/.config/nvim
-cd ~/.config/nvim
-
-# First launch - plugins install automatically
-nvim
-
-# Verify installation
-nvim
-```
-
-See [Installation Guide](/INSTALLATION_GUIDE).
-
-## Components
-
-### Terminal Integration
-
-Terminal integration:
-- Toggle: `<C-t>` (ToggleTerm), `<Leader>Tt` (vertical smart toggle)
-- Layouts: `<Leader>Th` / `<Leader>Tv` / `<Leader>Tf`
-- Julia REPL: `--threads=auto` (`<Leader>Jrh` / `Jrv` / `Jrf`)
-
-### Document Workflows
-
-LaTeX: bidirectional SyncTeX
-- Forward search: Neovim → PDF (`\lv`)
-- Inverse search: PDF → Neovim 
-  - **macOS**: Skim (Cmd+Shift+Click)
-  - **Arch Linux**: Zathura (Ctrl+Click)
-- Compilation: latexmk
-- Bibliography management
-
-Quarto: code execution, preview
-- R, Python, Julia code blocks
-- Output: PDF, HTML, Word
-
-### Theme Management
-
-Theme selection and preview:
-- `<Leader>YTp`: Theme picker (Telescope)
-- `<Leader>Yc`: Cycle themes
-- Auto dark mode (system preference)
-- Themes: Catppuccin, OneDark, Tokyo Night, Nord, GitHub
-
-## Design Principles
-
-1. Discoverability: WhichKey integration
-2. Consistency: British spelling, logical keymap organisation
-3. Research workflows: Academic document preparation
-4. Maintainability: Modular architecture, documented code
-
-## Documentation
-
-1. [Quick Start](/quickstart)
-2. [Installation Guide](/INSTALLATION_GUIDE)
-3. [Keymaps Reference](/reference/keymaps)
-4. [LSP Setup](/advanced/lsp-setup)
+- [Installation Guide](/INSTALLATION_GUIDE)
+- [Quick Start](/quickstart)
+- [Keymaps Reference](/reference/keymaps)
+- [LSP Setup](/advanced/lsp-setup)
+- [Performance Optimisations](/PERFORMANCE_OPTIMISATIONS)
+- [Troubleshooting](/TROUBLESHOOTING_GUIDE)
+- [Changelog](/CHANGELOG)

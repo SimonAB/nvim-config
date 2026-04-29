@@ -1,6 +1,6 @@
 # Installation Guide
 
-Installation instructions for BabaVim on macOS and Arch Linux.
+Installation instructions for process-nvim on macOS and Arch Linux.
 
 ## System Requirements
 
@@ -153,7 +153,7 @@ cargo --version  # cargo 1.70.0+
 mv ~/.config/nvim ~/.config/nvim.backup
 
 # Clone this configuration
-git clone https://github.com/SimonAB/nvim-config.git ~/.config/nvim
+git clone https://github.com/SimonAB/process-nvim.git ~/.config/nvim
 cd ~/.config/nvim
 ```
 
@@ -553,9 +553,16 @@ yay -S obsidian
 paru -S obsidian
 ```
 
-Configure vault path in `lua/keymaps.lua`:
+Configure the Obsidian workspace path in `lua/plugins/obsidian-nvim.lua`:
 ```lua
-local obsidian_path = "/path/to/your/vault"
+obsidian.setup({
+  workspaces = {
+    {
+      name = "notebook",
+      path = "/path/to/your/vault",
+    },
+  },
+})
 ```
 
 ### Database Tools
