@@ -1,23 +1,26 @@
 # process-nvim
 
-[![Documentation](https://img.shields.io/badge/docs-vitepress-blue?style=flat&logo=readthedocs)](https://simonab.github.io/process-nvim/)
+[Documentation](https://simonab.github.io/process-nvim/)
 
 Neovim configuration optimised for academic research and scientific computing. Document processing: LaTeX (VimTeX, SyncTeX), Markdown (preview, Obsidian), Quarto (R/Python/Julia execution), Typst (preview). Scientific computing: Julia REPL (multi-threaded), Python LSP (pyright), R execution. Development: LSP (15+ languages via Mason), completion ([blink.cmp](https://github.com/Saghen/blink.cmp) with [blink.lib](https://github.com/Saghen/blink.lib)), terminal integration, Git integration. Modular architecture. vim.pack plugin management. Neovim 0.12+ required.
 
 ## Features
 
 ### Document Processing
+
 - LaTeX: VimTeX, bidirectional SyncTeX (Skim)
 - Markdown: Live preview, Obsidian integration
 - Quarto: Code execution (R, Python, Julia)
 - Typst: Preview (typst-preview), CLI compile/watch (`typst c` / `typst w`)
 
 ### Scientific Computing
+
 - Julia: REPL integration, multi-threaded execution
 - Python: LSP (pyright)
 - R: Code execution, project management
 
 ### Development Environment
+
 - LSP: 15+ languages (Mason)
 - Completion: blink.cmp (with blink.lib dependency)
 - Terminal: Code block detection
@@ -26,6 +29,7 @@ Neovim configuration optimised for academic research and scientific computing. D
 ## Requirements
 
 ### Essential
+
 - **Package Manager**:
   - **macOS**: Homebrew ([install here](https://brew.sh/))
   - **Arch Linux**: pacman (built-in) and yay/paru for AUR packages
@@ -35,6 +39,7 @@ Neovim configuration optimised for academic research and scientific computing. D
 - ripgrep, fd (for Telescope fuzzy finding)
 
 ### Document Processing
+
 - **LaTeX**: 
   - **macOS**: MacTeX or BasicTeX, Skim PDF viewer
   - **Arch Linux**: texlive-most, Zathura PDF viewer
@@ -44,6 +49,7 @@ Neovim configuration optimised for academic research and scientific computing. D
 - **Markdown**: Node.js (for preview plugin)
 
 ### Language Support
+
 - **Julia**: Julia 1.9+ with LanguageServer.jl
 - **Python**: Python 3.8+ with pyright LSP
 - **R**: R 4.0+ with languageserver package
@@ -70,50 +76,60 @@ Plugins install automatically on first launch (vim.pack). Mason prompts for lang
 
 ### Leader: `<Space>`
 
-| Key | Action |
-|-----|--------|
-| `<leader>f` | Find files (Telescope) |
-| `<leader>g` | Live grep in project |
-| `<leader>R` / `<leader>Rf` | Find files (frecency) |
-| `<leader>e` | Toggle file explorer |
-| `<leader>w` | Save file |
+
+| Key                        | Action                 |
+| -------------------------- | ---------------------- |
+| `<leader>f`                | Find files (Telescope) |
+| `<leader>g`                | Live grep in project   |
+| `<leader>R` / `<leader>Rf` | Find files (frecency)  |
+| `<leader>e`                | Toggle file explorer   |
+| `<leader>w`                | Save file              |
+
 
 ### Terminal Integration
 
-| Key | Action |
-|-----|--------|
-| `<C-t>` | Toggle terminal (ToggleTerm `open_mapping`) |
-| `<leader>Tt` | Terminal toggle (vertical, smart) |
-| `<leader>Th/Tv/Tf` | Horizontal/Vertical/Float terminal |
+
+| Key                | Action                                      |
+| ------------------ | ------------------------------------------- |
+| `<C-t>`            | Toggle terminal (ToggleTerm `open_mapping`) |
+| `<leader>Tt`       | Terminal toggle (vertical, smart)           |
+| `<leader>Th/Tv/Tf` | Horizontal/Vertical/Float terminal          |
+
 
 ### Document Workflows
 
-| Key | Action |
-|-----|--------|
-| `<localleader>lv` | LaTeX forward search (VimTeX) |
-| `<localleader>ll` | Compile LaTeX (VimTeX) |
-| `<localleader>lb` | LuaLaTeX + Biber (custom terminal workflow) |
+
+| Key                                 | Action                                       |
+| ----------------------------------- | -------------------------------------------- |
+| `<localleader>lv`                   | LaTeX forward search (VimTeX)                |
+| `<localleader>ll`                   | Compile LaTeX (VimTeX)                       |
+| `<localleader>lb`                   | LuaLaTeX + Biber (custom terminal workflow)  |
 | `<localleader>tp`–`<localleader>tw` | Typst preview / sync / `typst c` / `typst w` |
-| `<leader>Kp` | Markdown preview |
-| `<leader>Qp` | Quarto preview |
+| `<leader>Kp`                        | Markdown preview                             |
+| `<leader>Qp`                        | Quarto preview                               |
+
 
 ### Julia Development
 
-| Key | Action |
-|-----|--------|
+
+| Key               | Action                                 |
+| ----------------- | -------------------------------------- |
 | `<leader>Jrh/v/f` | Julia REPL (horizontal/vertical/float) |
-| `<leader>Jp` | Project status |
-| `<leader>Ji` | Instantiate project |
+| `<leader>Jp`      | Project status                         |
+| `<leader>Ji`      | Instantiate project                    |
+
 
 Julia REPLs launch with `--threads=auto` for parallel computing.
 
 ### Theme Management
 
-| Key | Action |
-|-----|--------|
-| `<leader>Yc` | Cycle themes |
+
+| Key           | Action                   |
+| ------------- | ------------------------ |
+| `<leader>Yc`  | Cycle themes             |
 | `<leader>YTp` | Theme picker (Telescope) |
-| `<leader>YTs` | Show current theme |
+| `<leader>YTs` | Show current theme       |
+
 
 See [Keymaps Reference](docs/reference/keymaps.md).
 
@@ -192,15 +208,16 @@ Install language servers via Mason:
 <leader>Lr            " Restart LSP
 ```
 
-
 ### LaTeX SyncTeX
 
 **macOS (Skim)**:
+
 - Verify Skim preferences: Sync → Custom command
 - Check script path: Use absolute path, no tilde (~)
 - Debug log: `tail -f /tmp/inverse_search.log`
 
 **Arch Linux (Zathura)**:
+
 - VimTeX may configure this automatically
 - If needed, configure in `~/.config/zathura/zathurarc`: `set synctex-editor-command "nvim --headless -c \"VimtexInverseSearch %{line} '%{input}'\""`
 - See Installation Guide for detailed setup
