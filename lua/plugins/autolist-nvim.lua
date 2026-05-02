@@ -76,6 +76,26 @@ if ok then
 		group = augroup,
 		pattern = { "markdown", "text", "gitcommit", "tex", "plaintex" },
 		callback = function()
+			---Split the current line at the insert cursor without using `:normal! a<CR>`.
+			---Using Normal-mode `a` breaks when invoked from Insert mode because the cursor is
+			---positioned on the character *after* the insert caret, which splits one character too late.
+			---@param split_bufnr integer
+			---@return integer new_line_1idx 1-indexed line number of the newly created line
+			local function split_line_at_cursor(split_bufnr)
+				local cursor = vim.api.nvim_win_get_cursor(0)
+				local line_1idx = cursor[1]
+				local col_0idx = cursor[2]
+
+				local line_0idx = line_1idx - 1
+				local line_text = vim.api.nvim_buf_get_lines(split_bufnr, line_0idx, line_0idx + 1, false)[1] or ""
+
+				local suffix = vim.fn.strpart(line_text, col_0idx, vim.fn.strlen(line_text), true)
+
+				vim.api.nvim_buf_set_text(split_bufnr, line_0idx, col_0idx, line_0idx, #line_text, { "", suffix })
+
+				return line_1idx + 1
+			end
+
 			-- Custom function to handle Enter key with colon detection
 			-- Inserts an extra newline before bullet list when line ends with colon
 			-- This ensures markdown renders the list correctly (requires blank line before list)
@@ -88,15 +108,14 @@ if ok then
 				-- Check if the line ends with a colon (ignoring trailing whitespace)
 				local trimmed_line = line:match("^%s*(.-)%s*$")
 				if trimmed_line:match(":$") then
-					-- Save the indentation from the colon line
-					local colon_indent = line:match("^%s*")
 					-- Use 2 spaces for first bullet point indentation (hardcoded for markdown)
 					local tab = "  "
 					-- Get preferred bullet marker from colon config
 					local preferred = autolist_config.colon.preferred or "-"
 					
-					-- Line ends with colon: insert Enter to create new line
-					vim.cmd("normal! a\r")
+					-- Line ends with colon: split at the insert cursor (same semantics as pressing <CR>)
+					local new_line_1idx = split_line_at_cursor(bufnr)
+					vim.api.nvim_win_set_cursor(0, { new_line_1idx, 0 })
 					-- Schedule the blank line insertion and bullet creation
 					vim.schedule(function()
 						local current_cursor = vim.api.nvim_win_get_cursor(0)
@@ -123,8 +142,9 @@ if ok then
 						vim.api.nvim_win_set_cursor(0, { bullet_line_1idx, #bullet })
 					end)
 				else
-					-- Normal behavior: Enter + AutolistNewBullet
-					vim.cmd("normal! a\r")
+					-- Normal behaviour: split at the insert cursor, then continue the list on the new line.
+					local new_line_1idx = split_line_at_cursor(bufnr)
+					vim.api.nvim_win_set_cursor(0, { new_line_1idx, 0 })
 					vim.cmd("AutolistNewBullet")
 				end
 			end
