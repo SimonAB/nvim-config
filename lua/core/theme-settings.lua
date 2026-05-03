@@ -14,6 +14,8 @@ local ThemeSettings = {
 		"NormalFloat",
 		"FloatBorder",
 	},
+	---Window-local highlight map shared with which-key, Mason, and other float UIs.
+	which_key_float_winhl = "Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
 }
 
 ---Return the active theme configuration block.
@@ -43,6 +45,23 @@ function ThemeSettings.get_float_highlight_groups()
 	return vim.deepcopy(ThemeSettings.float_highlights)
 end
 
+---Opaque float window + which-key float chrome (border/title/body link targets).
+---@param winid integer
+---@return boolean applied
+function ThemeSettings.style_float_like_which_key(winid)
+	if not winid or not vim.api.nvim_win_is_valid(winid) then
+		return false
+	end
+	pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = winid })
+	pcall(
+		vim.api.nvim_set_option_value,
+		"winhl",
+		ThemeSettings.which_key_float_winhl,
+		{ win = winid }
+	)
+	return true
+end
+
 ---Apply winblend to a specific window, safeguarding against invalid IDs.
 ---@param winid integer|nil
 ---@return boolean applied
@@ -60,6 +79,10 @@ function ThemeSettings.apply_window_blend(winid)
 		-- terminal blur/backdrop artefacts.
 		if ft == "wk" or ft == "mason" then
 			return pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = winid })
+		end
+		-- Floating ToggleTerm windows: same opaque + winhl parity as Mason/which-key.
+		if vim.bo[bufnr].buftype == "terminal" and vim.fn.win_gettype(winid) == "popup" then
+			return ThemeSettings.style_float_like_which_key(winid)
 		end
 	end
 
