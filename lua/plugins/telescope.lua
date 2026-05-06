@@ -1,6 +1,23 @@
 -- Configuration for telescope.nvim
 -- Fuzzy finder with enhanced features
 
+local ok_ts, ThemeSettings = pcall(require, "core.theme-settings")
+
+---Apply opaque which-key float chrome to Telescope float windows.
+---@param winid integer
+local function style_telescope_float_window(winid)
+	if not ok_ts or not ThemeSettings.style_float_like_which_key then
+		return
+	end
+	if not winid or not vim.api.nvim_win_is_valid(winid) then
+		return
+	end
+	if vim.fn.win_gettype(winid) ~= "popup" then
+		return
+	end
+	ThemeSettings.style_float_like_which_key(winid)
+end
+
 local ok, telescope = pcall(require, "telescope")
 if ok then
 	-- Safely get sorters
@@ -74,4 +91,15 @@ if ok then
 	-- Load telescope extensions
 	pcall(telescope.load_extension, "fzf")
 	pcall(telescope.load_extension, "frecency")
+
+	-- Telescope uses multiple floating windows (prompt/results/preview). Restyle on attach.
+	local augroup = vim.api.nvim_create_augroup("TelescopeFloatStyle", { clear = true })
+	vim.api.nvim_create_autocmd("FileType", {
+		group = augroup,
+		pattern = { "TelescopePrompt", "TelescopeResults", "TelescopePreview" },
+		desc = "Align Telescope floats with which-key styling",
+		callback = function()
+			style_telescope_float_window(vim.api.nvim_get_current_win())
+		end,
+	})
 end
