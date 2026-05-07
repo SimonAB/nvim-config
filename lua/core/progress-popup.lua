@@ -4,6 +4,7 @@
 -- =============================================================================
 
 local ProgressPopup = {}
+local ok_ts, ThemeSettings = pcall(require, "core.theme-settings")
 
 local DEFAULT_WIDTH = 72
 local DEFAULT_HEIGHT = 18
@@ -38,13 +39,9 @@ function ProgressPopup.create(title, opts)
 	local winid = vim.api.nvim_open_win(bufnr, true, win_opts)
 
 	-- Match which-key's popup appearance for consistency across float UIs.
-	pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = winid })
-	pcall(
-		vim.api.nvim_set_option_value,
-		"winhl",
-		"Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
-		{ win = winid }
-	)
+	if ok_ts and ThemeSettings and ThemeSettings.style_float_like_which_key then
+		ThemeSettings.style_float_like_which_key(winid)
+	end
 
 	vim.keymap.set("n", "q", function()
 		ProgressPopup.close({ bufnr = bufnr, winid = winid })
