@@ -18,6 +18,12 @@ local ThemeSettings = {
 	which_key_float_winhl = "Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
 }
 
+---Return the shared which-key float `winhl` mapping.
+---@return string
+function ThemeSettings.get_which_key_float_winhl()
+	return ThemeSettings.which_key_float_winhl
+end
+
 ---Return the active theme configuration block.
 ---@return table
 function ThemeSettings.get_active_config()

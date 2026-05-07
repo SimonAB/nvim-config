@@ -4,7 +4,8 @@
 local ok, wk = pcall(require, "which-key")
 if ok then
 	local ok_ts, ThemeSettings = pcall(require, "core.theme-settings")
-	local float_winhl = (ok_ts and ThemeSettings and ThemeSettings.which_key_float_winhl)
+	local float_winhl = (ok_ts and ThemeSettings and ThemeSettings.get_which_key_float_winhl)
+		and ThemeSettings.get_which_key_float_winhl()
 		or "Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle"
 
 	wk.setup({
