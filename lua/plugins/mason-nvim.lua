@@ -85,6 +85,8 @@ if ok then
 	-- UI styling parity with which-key
 	-- ============================================================================
 
+	local ok_ts, ThemeSettings = pcall(require, "core.theme-settings")
+
 	---Apply Mason highlight links so its UI matches which-key's float palette.
 	local function apply_mason_highlights()
 		local links = {
@@ -114,13 +116,9 @@ if ok then
 			return
 		end
 
-		pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = winid })
-		pcall(
-			vim.api.nvim_set_option_value,
-			"winhl",
-			"Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
-			{ win = winid }
-		)
+		if ok_ts and ThemeSettings and ThemeSettings.style_float_like_which_key then
+			ThemeSettings.style_float_like_which_key(winid)
+		end
 	end
 
 	local group = vim.api.nvim_create_augroup("MasonUIStyle", { clear = true })

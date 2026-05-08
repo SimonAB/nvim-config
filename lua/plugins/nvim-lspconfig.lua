@@ -15,7 +15,10 @@ capabilities.textDocument.completion.completionItem.resolveSupport = nil
 
 -- Match which-key float styling for built-in LSP/diagnostic popups.
 do
-	local float_winhl = "Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle"
+	local ok_ts, ThemeSettings = pcall(require, "core.theme-settings")
+	local float_winhl = (ok_ts and ThemeSettings and ThemeSettings.get_which_key_float_winhl)
+		and ThemeSettings.get_which_key_float_winhl()
+		or "Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle"
 
 	vim.diagnostic.config({
 		float = {

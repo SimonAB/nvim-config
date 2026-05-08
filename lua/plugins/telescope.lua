@@ -102,4 +102,38 @@ if ok then
 			style_telescope_float_window(vim.api.nvim_get_current_win())
 		end,
 	})
+
+	-- The preview window's buffer filetype is usually the *previewed* filetype, not "TelescopePreview".
+	-- Restyle the window(s) displaying the preview buffer when Telescope loads it.
+	vim.api.nvim_create_autocmd("User", {
+		group = augroup,
+		pattern = { "TelescopePreviewerLoaded", "TelescopePreviewLoaded" },
+		desc = "Align Telescope grep preview with which-key styling",
+		callback = function(args)
+			-- In most versions, Telescope provides args.data.{bufnr,bufname,filetype}.
+			-- Fall back to the current buffer/window if the payload is missing.
+			local bufnr = nil
+			if args and args.data then
+				if args.data.bufnr and type(args.data.bufnr) == "number" then
+					bufnr = args.data.bufnr
+				elseif args.data.bufname and type(args.data.bufname) == "string" then
+					bufnr = vim.fn.bufnr(args.data.bufname)
+				end
+			end
+
+			if not bufnr or bufnr < 1 or not vim.api.nvim_buf_is_valid(bufnr) then
+				bufnr = vim.api.nvim_get_current_buf()
+			end
+
+			-- Style the current window first (often the preview window at event time).
+			style_telescope_float_window(vim.api.nvim_get_current_win())
+
+			-- Also style any window(s) currently displaying the preview buffer.
+			for _, winid in ipairs(vim.api.nvim_list_wins()) do
+				if vim.api.nvim_win_is_valid(winid) and vim.api.nvim_win_get_buf(winid) == bufnr then
+					style_telescope_float_window(winid)
+				end
+			end
+		end,
+	})
 end
