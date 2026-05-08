@@ -13,6 +13,28 @@ local ThemeSettings = {
 	float_highlights = {
 		"NormalFloat",
 		"FloatBorder",
+		"FloatTitle",
+
+		-- Shared float chrome targets (used via winhl mappings).
+		"WhichKeyFloat",
+		"WhichKeyBorder",
+		"WhichKeyTitle",
+
+		-- Common plugin float groups (defensive; some themes set backgrounds here).
+		"MasonNormal",
+		"MasonBorder",
+		"LazyNormal",
+		"LazyBorder",
+
+		-- Telescope float groups.
+		"TelescopeNormal",
+		"TelescopeBorder",
+		"TelescopePromptNormal",
+		"TelescopePromptBorder",
+		"TelescopeResultsNormal",
+		"TelescopeResultsBorder",
+		"TelescopePreviewNormal",
+		"TelescopePreviewBorder",
 	},
 	---Window-local highlight map shared with which-key, Mason, and other float UIs.
 	which_key_float_winhl = "Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",

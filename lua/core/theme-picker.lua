@@ -212,9 +212,13 @@ function ThemePicker.show_fallback_picker(themes)
 	})
 
 	-- Match which-key float styling (opaque + shared float highlight mapping).
-	if ThemeSettings and ThemeSettings.style_float_like_which_key then
-		ThemeSettings.style_float_like_which_key(win)
-	end
+	pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = win })
+	pcall(
+		vim.api.nvim_set_option_value,
+		"winhl",
+		"Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
+		{ win = win }
+	)
 
 	-- Set buffer content helpers
 	local function update_buffer_lines()

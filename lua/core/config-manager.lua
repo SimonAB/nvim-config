@@ -19,8 +19,8 @@ local ConfigManager = {
 ConfigManager.themes.active = {
 	defaults = {
 		-- Follow system appearance with a light/dark pair.
-		dark = "catppuccin",
-		light = "github_light_high_contrast",
+		dark = "flexoki-dark",
+		light = "flexoki-light",
 	},
 	opacity = 0.9,
 }

@@ -52,6 +52,7 @@ local MODULE_TO_PACK = {
 	["tokyonight-nvim"] = "tokyonight.nvim",
 	["nord-vim"] = "nord-vim",
 	["github-nvim-theme"] = "github-nvim-theme",
+	["flexoki-nvim"] = "flexoki-neovim",
 	["awesome-vim-colorschemes"] = "awesome-vim-colorschemes",
 	["onedark-nvim"] = "onedark.nvim",
 	["catppuccin"] = "catppuccin",
@@ -131,6 +132,7 @@ local LOAD_PHASES = {
 		"plenary-nvim",        -- Utility library
 		"nvim-web-devicons",   -- File icons
 		"catppuccin",          -- Catppuccin Mocha; must load before ThemeManager (~50ms)
+		"flexoki-nvim",        -- Flexoki (transparent base + float styling)
 		"blink-lib",          -- blink.cmp v2 dependency
 		"blink-cmp",          -- Completion engine
 		"mason-nvim",         -- LSP server manager

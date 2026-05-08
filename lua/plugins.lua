@@ -54,6 +54,7 @@ local plugins = {
 	-- Misc
 	{ src = "https://github.com/f-person/auto-dark-mode.nvim", name = "auto-dark-mode.nvim" },
 	{ src = "https://github.com/JuliaEditorSupport/julia-vim", name = "julia-vim" },
+	{ src = "https://github.com/kepano/flexoki-neovim", name = "flexoki-neovim" },
 	{ src = "https://github.com/folke/tokyonight.nvim", name = "tokyonight.nvim" },
 	{ src = "https://github.com/arcticicestudio/nord-vim", name = "nord-vim" },
 	{ src = "https://github.com/projekt0n/github-nvim-theme", name = "github-nvim-theme" },

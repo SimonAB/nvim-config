@@ -122,6 +122,80 @@ local function get_link_colour()
   return nil
 end
 
+---Darken an RGB channel towards black.
+---@param channel integer
+---@param factor number
+---@return integer
+local function darken_channel(channel, factor)
+	if factor <= 0 then
+		return channel
+	end
+	if factor >= 1 then
+		return 0
+	end
+	return math.floor(channel * (1 - factor) + 0.5)
+end
+
+---Darken a highlight group's foreground colour (if set).
+---@param group string
+---@param factor number
+---@return boolean applied
+local function darken_hl_fg(group, factor)
+	local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = group, link = false })
+	if not ok or not hl or not hl.fg then
+		return false
+	end
+
+	local colour = hl.fg
+	if type(colour) ~= "number" then
+		return false
+	end
+
+	local r = bit.rshift(bit.band(colour, 0xFF0000), 16)
+	local g = bit.rshift(bit.band(colour, 0x00FF00), 8)
+	local b = bit.band(colour, 0x0000FF)
+
+	r = darken_channel(r, factor)
+	g = darken_channel(g, factor)
+	b = darken_channel(b, factor)
+
+	local hex = string.format("#%02x%02x%02x", r, g, b)
+	pcall(vim.api.nvim_set_hl, 0, group, { fg = hex })
+	return true
+end
+
+---Increase contrast for Flexoki in light mode.
+---Flexoki's light palette can render some “secondary” text too lightly for a
+---transparent terminal background; this nudges those groups darker.
+---@return nil
+function ThemeManager.apply_flexoki_light_contrast()
+	if (vim.g.colors_name or "") ~= "flexoki" then
+		return
+	end
+	if (vim.o.background or "dark") ~= "light" then
+		return
+	end
+
+	-- Increase contrast for secondary UI text, but keep it clearly “secondary”.
+	-- Tuned halfway between “subtle” and “too dark”.
+	local base_factor = 0.34
+
+	-- Dashboard section labels (mini.starter): "Shortcuts", "Forge", "Projects", etc.
+	-- These tend to use MiniStarterSection.
+	darken_hl_fg("MiniStarterSection", 0.28)
+
+	-- General secondary UI text.
+	for _, group in ipairs({
+		"Comment",
+		"@comment",
+		"LineNr",
+		"NonText",
+		"Folded",
+	}) do
+		darken_hl_fg(group, base_factor)
+	end
+end
+
 -- Apply link highlighting (blue and underlined) for markdown links, wiki links, and URLs
 -- Note: No caching - this is fast and must re-apply reliably after theme changes
 function ThemeManager.apply_link_highlights()
@@ -423,6 +497,7 @@ function ThemeManager.setup_highlight_autocmd()
 		ThemeManager.update_which_key_highlights()
 		ThemeManager.apply_formatting_parity()
 		ThemeManager.apply_spell_undercurl()
+		ThemeManager.apply_flexoki_light_contrast()
 		ThemeManager.apply_link_highlights()
 		ThemeManager.apply_tex_style_highlights()
 		ThemeManager.apply_global_opacity()

@@ -1,8 +1,6 @@
 -- Configuration for gitsigns.nvim
 -- Git integration with enhanced visual indicators
 
-local ok_ts, ThemeSettings = pcall(require, "core.theme-settings")
-
 local ok, gitsigns = pcall(require, "gitsigns")
 if ok then
 	gitsigns.setup({
@@ -49,9 +47,13 @@ if ok then
 		desc = "Style gitsigns preview floats to match which-key",
 		callback = function()
 			local winid = vim.api.nvim_get_current_win()
-			if ok_ts and ThemeSettings and ThemeSettings.style_float_like_which_key then
-				ThemeSettings.style_float_like_which_key(winid)
-			end
+			pcall(vim.api.nvim_set_option_value, "winblend", 0, { win = winid })
+			pcall(
+				vim.api.nvim_set_option_value,
+				"winhl",
+				"Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
+				{ win = winid }
+			)
 		end,
 	})
 end

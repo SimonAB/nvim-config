@@ -100,6 +100,17 @@ function M.setup()
 			pcall(vim.api.nvim_set_hl, 0, "MiniStarterHeader", { fg = config.DASHBOARD.HEADER_COLOUR, bold = true })
 		end,
 	})
+
+	-- Ensure theme post-processing (e.g. Flexoki light contrast tweaks) runs after
+	-- mini.starter has created its highlight groups and rendered content.
+	vim.api.nvim_create_autocmd("User", {
+		pattern = "MiniStarterOpened",
+		callback = function()
+			pcall(function()
+				require("core.theme-manager").apply_flexoki_light_contrast()
+			end)
+		end,
+	})
 end
 
 -- Refresh dashboard content

@@ -3,11 +3,6 @@
 
 local ok, wk = pcall(require, "which-key")
 if ok then
-	local ok_ts, ThemeSettings = pcall(require, "core.theme-settings")
-	local float_winhl = (ok_ts and ThemeSettings and ThemeSettings.get_which_key_float_winhl)
-		and ThemeSettings.get_which_key_float_winhl()
-		or "Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle"
-
 	wk.setup({
 		preset = "classic",
 		delay = 500,
@@ -39,7 +34,7 @@ if ok then
 			padding = { 1, 2 },
 			wo = {
 				winblend = 0,
-				winhl = float_winhl,
+				winhl = "Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
 			},
 		},
 		layout = {
