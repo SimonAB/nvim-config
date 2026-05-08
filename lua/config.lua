@@ -24,7 +24,7 @@ opt.hlsearch = true -- Highlight search matches
 opt.incsearch = true -- Incremental search
 
 -- Visual
-opt.cursorline = true -- Highlight current line
+opt.cursorline = false -- Disable current line highlight
 opt.wrap = true      -- Enable line wrapping
 opt.linebreak = true -- Wrap at word boundaries
 opt.scrolloff = 8 -- Scroll offset

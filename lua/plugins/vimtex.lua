@@ -46,6 +46,21 @@ let g:vimtex_toc_custom_matchers = [
 -- TOC syntax: VimTeX only highlights todo prefixes that match uppercase keys (TODO:, ADD:).
 -- Our proofreading entries display as "Add:", "Tighten:", etc. Add a rule so they get the same green.
 local vimtex_toc_hl_group = vim.api.nvim_create_augroup("VimtexTocProofHighlight", { clear = true })
+
+---Make VimTeX TOC “help key” hints (single-letter shortcuts) readable without a background block.
+---Some themes give these keys a solid background; we prefer bold red text on transparency.
+local function apply_vimtex_toc_help_key_highlights()
+	for _, group in ipairs({
+		-- Common VimTeX groups (vary by VimTeX version)
+		"VimtexTocHelpKey",
+		"VimtexTocHelpKeys",
+		"VimtexTocHelpKeyName",
+		"VimtexTocHelp",
+	}) do
+		pcall(vim.api.nvim_set_hl, 0, group, { fg = "#c74a4a", bg = "none", bold = false })
+	end
+end
+
 vim.api.nvim_create_autocmd("User", {
 	group = vimtex_toc_hl_group,
 	pattern = "VimtexEventTocCreated",
@@ -56,6 +71,17 @@ vim.api.nvim_create_autocmd("User", {
       syntax cluster VimtexTocTitleStuff add=VimtexTocProofTodo
       highlight link VimtexTocProofTodo VimtexTocTodo
     ]])
+
+		apply_vimtex_toc_help_key_highlights()
+	end,
+})
+
+-- Re-apply after theme changes so colourschemes can’t reintroduce key backgrounds.
+vim.api.nvim_create_autocmd("ColorScheme", {
+	group = vimtex_toc_hl_group,
+	desc = "Reapply VimTeX TOC help key highlight after theme changes",
+	callback = function()
+		vim.defer_fn(apply_vimtex_toc_help_key_highlights, 50)
 	end,
 })
 

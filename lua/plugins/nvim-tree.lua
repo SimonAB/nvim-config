@@ -23,4 +23,29 @@ if ok then
 	},
 	-- You can add more config here (e.g., actions, git integration, etc.)
 	})
+
+	-- Keep the tree background transparent to match the rest of the UI.
+	local function apply_transparent_tree_highlights()
+		for _, group in ipairs({
+			"NvimTreeNormal",
+			"NvimTreeNormalNC",
+			"NvimTreeEndOfBuffer",
+			"NvimTreeWinSeparator",
+			"NvimTreeStatusLine",
+			"NvimTreeStatusLineNC",
+		}) do
+			pcall(vim.api.nvim_set_hl, 0, group, { bg = "none" })
+		end
+	end
+
+	apply_transparent_tree_highlights()
+
+	local augroup = vim.api.nvim_create_augroup("NvimTreeTransparency", { clear = true })
+	vim.api.nvim_create_autocmd("ColorScheme", {
+		group = augroup,
+		desc = "Reapply nvim-tree transparency after theme changes",
+		callback = function()
+			vim.defer_fn(apply_transparent_tree_highlights, 20)
+		end,
+	})
 end
