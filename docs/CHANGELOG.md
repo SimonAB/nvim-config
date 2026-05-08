@@ -16,6 +16,12 @@
 - **docs/reference/keymaps.md** and **AGENTS.md**: Forge descriptions updated to match the kanban/projects workflow and the new `<leader>F*` mappings.
 - **scripts/generate-docs.lua**: Leader group summary updated (Forge wording).
 
+### Theme/UI
+- **Cursor line highlight**: Disabled `cursorline` by default for a calmer editing surface.
+- **nvim-tree transparency**: Forced `NvimTree*` background groups to use `bg=none`, and reapply on `ColorScheme` so the file explorer matches the rest of the transparent UI.
+- **VimTeX TOC help keys**: Restyled single-letter hints (e.g. `L` in `vimtex#toc#open()`) to use muted red text on a transparent background, avoiding theme-provided background blocks.
+- **Flexoki defaults**: Switched theme defaults to `flexoki-dark` / `flexoki-light` and added light-mode contrast nudges for secondary UI groups when running with a transparent terminal backdrop.
+
 ---
 
 ## [Previous] - Documentation aligned with keymaps
