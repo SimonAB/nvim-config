@@ -36,6 +36,19 @@ local ThemeSettings = {
 		"TelescopePreviewNormal",
 		"TelescopePreviewBorder",
 	},
+	---Cmdline / wildmenu popup (`wildoptions` pum) and legacy wildmenu row highlights.
+	---Backgrounds cleared in the theme manager while preserving fg and selection attrs.
+	completion_menu_highlights = {
+		"WildMenu",
+		"Pmenu",
+		"PmenuSel",
+		"PmenuSbar",
+		"PmenuThumb",
+		"PmenuKind",
+		"PmenuKindSel",
+		"PmenuExtra",
+		"PmenuExtraSel",
+	},
 	---Window-local highlight map shared with which-key, Mason, and other float UIs.
 	which_key_float_winhl = "Normal:WhichKeyFloat,FloatBorder:WhichKeyBorder,FloatTitle:WhichKeyTitle",
 }
@@ -71,6 +84,12 @@ end
 ---@return string[]
 function ThemeSettings.get_float_highlight_groups()
 	return vim.deepcopy(ThemeSettings.float_highlights)
+end
+
+---Return completion menu / wildmenu groups that should use a transparent background.
+---@return string[]
+function ThemeSettings.get_completion_menu_highlight_groups()
+	return vim.deepcopy(ThemeSettings.completion_menu_highlights)
 end
 
 ---Opaque float window + which-key float chrome (border/title/body link targets).

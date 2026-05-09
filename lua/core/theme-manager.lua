@@ -13,11 +13,24 @@ if not ok_settings then
 	return ThemeManager
 end
 
+---Strip GUI/cterm background from a highlight group while keeping other attrs (Vim merge rules).
+---Using `:highlight` avoids `nvim_set_hl` clearing unspecified fields (e.g. PmenuSel fg).
+---@param group string
+local function merge_highlight_transparent_bg(group)
+	pcall(vim.cmd, string.format("silent! highlight %s guibg=NONE ctermbg=NONE", group))
+end
+
 ---Ensure floating highlight groups stay transparent after theme changes.
 local function ensure_transparent_highlights()
 	for _, group in ipairs(ThemeSettings.get_float_highlight_groups()) do
 		pcall(vim.api.nvim_set_hl, 0, group, { bg = "none" })
 	end
+	for _, group in ipairs(ThemeSettings.get_completion_menu_highlight_groups()) do
+		merge_highlight_transparent_bg(group)
+	end
+	-- MsgArea covers the command-line / message row(s) below the status line; themes
+	-- often keep a solid Normal-like bg there while the editor body is transparent.
+	pcall(vim.api.nvim_set_hl, 0, "MsgArea", { bg = "none" })
 end
 
 -- Detect system appearance with caching
