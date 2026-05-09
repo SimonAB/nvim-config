@@ -130,6 +130,9 @@ Julia REPLs launch with `--threads=auto` for parallel computing.
 | `<leader>YTp` | Theme picker (Telescope) |
 | `<leader>YTs` | Show current theme       |
 
+This configuration uses Flexoki from the fork [`SimonAB/flexoki-neovim`](https://github.com/SimonAB/flexoki-neovim)
+to provide transparent UI surfaces and a `light_high_contrast` light variant.
+
 
 See [Keymaps Reference](docs/reference/keymaps.md).
 

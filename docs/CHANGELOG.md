@@ -20,7 +20,7 @@
 - **Cursor line highlight**: Disabled `cursorline` by default for a calmer editing surface.
 - **nvim-tree transparency**: Forced `NvimTree*` background groups to use `bg=none`, and reapply on `ColorScheme` so the file explorer matches the rest of the transparent UI.
 - **VimTeX TOC help keys**: Restyled single-letter hints (e.g. `L` in `vimtex#toc#open()`) to use muted red text on a transparent background, avoiding theme-provided background blocks.
-- **Flexoki defaults**: Switched theme defaults to `flexoki-dark` / `flexoki-light` and added light-mode contrast nudges for secondary UI groups when running with a transparent terminal backdrop.
+- **Flexoki defaults**: Switched theme defaults to `flexoki-dark` / `flexoki-light`, and now rely on the forked [`SimonAB/flexoki-neovim`](https://github.com/SimonAB/flexoki-neovim) for built-in transparency options and a light high-contrast variant.
 
 ---
 
