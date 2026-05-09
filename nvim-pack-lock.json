@@ -33,8 +33,8 @@
       "src": "https://github.com/olimorris/codecompanion.nvim"
     },
     "flexoki-neovim": {
-      "rev": "c3e2251e813d29d885a7cbbe9808a7af234d845d",
-      "src": "https://github.com/kepano/flexoki-neovim"
+      "rev": "46cdc9f6b87874289f17d3fddb10e187da7a64e4",
+      "src": "https://github.com/SimonAB/flexoki-neovim"
     },
     "github-nvim-theme": {
       "rev": "c106c9472154d6b2c74b74565616b877ae8ed31d",

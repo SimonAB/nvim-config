@@ -14,17 +14,13 @@ local function setup()
 	end
 
 	flexoki.setup({
-		-- Use the same background for code + floats, then we force bg=none below.
-		float_window_style = "solid",
-		highlight_groups = {
-			Normal = { bg = "none" },
-			NormalNC = { bg = "none" },
-			SignColumn = { bg = "none" },
-			EndOfBuffer = { bg = "none" },
-
-			NormalFloat = { bg = "none" },
-			FloatBorder = { bg = "none" },
-			FloatTitle = { bg = "none" },
+		light_variant = "light_high_contrast",
+		transparent = {
+			editor = true,
+			floats = true,
+			float_border = true,
+			ui = true,
+			menus = true,
 		},
 	})
 end
