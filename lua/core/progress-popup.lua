@@ -22,7 +22,12 @@ function ProgressPopup.create(title, opts)
 	local bufnr = vim.api.nvim_create_buf(false, true)
 	vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
 	vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-	vim.api.nvim_buf_set_option(bufnr, "filetype", "markdown")
+	-- Plain text: avoids markdown treesitter colouring unlike Mason/which-key chrome.
+	vim.api.nvim_buf_set_option(bufnr, "filetype", "progresspopup")
+
+	if ok_ts and ThemeSettings and ThemeSettings.mark_progress_popup_buffer then
+		ThemeSettings.mark_progress_popup_buffer(bufnr)
+	end
 
 	local win_opts = {
 		relative = "editor",

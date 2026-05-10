@@ -9,6 +9,9 @@ if not ok_config then
 	return {}
 end
 
+---Buffer-local flag used so opacity autocmds keep plugin-update / progress floats opaque.
+local PROGRESS_POPUP_BUF_VAR = "_nvim_progress_popup"
+
 local ThemeSettings = {
 	float_highlights = {
 		"NormalFloat",
@@ -92,6 +95,22 @@ function ThemeSettings.get_completion_menu_highlight_groups()
 	return vim.deepcopy(ThemeSettings.completion_menu_highlights)
 end
 
+---Mark a buffer as the core progress popup (`core.progress-popup`) so window-blend logic
+---matches Mason / which-key / floating terminal instead of editor transparency.
+---@param bufnr integer
+function ThemeSettings.mark_progress_popup_buffer(bufnr)
+	if bufnr and vim.api.nvim_buf_is_valid(bufnr) then
+		pcall(vim.api.nvim_buf_set_var, bufnr, PROGRESS_POPUP_BUF_VAR, true)
+	end
+end
+
+---@param bufnr integer
+---@return boolean
+local function buffer_is_progress_popup(bufnr)
+	local ok, value = pcall(vim.api.nvim_buf_get_var, bufnr, PROGRESS_POPUP_BUF_VAR)
+	return ok and value == true
+end
+
 ---Opaque float window + which-key float chrome (border/title/body link targets).
 ---@param winid integer
 ---@return boolean applied
@@ -118,6 +137,10 @@ function ThemeSettings.apply_window_blend(winid)
 	end
 	local bufnr = vim.api.nvim_win_get_buf(winid)
 	if vim.api.nvim_buf_is_valid(bufnr) then
+		if buffer_is_progress_popup(bufnr) then
+			return ThemeSettings.style_float_like_which_key(winid)
+		end
+
 		local ft = vim.bo[bufnr].filetype
 		-- which-key.nvim uses filetype = "wk" for both its popup and footer helper windows.
 		-- Keep these fully opaque to prevent any buffer glyph bleed-through in terminals.
