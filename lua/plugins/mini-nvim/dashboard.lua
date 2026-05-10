@@ -66,8 +66,23 @@ function M.setup()
 		return ascii ..  "\n" .. prefix
 	end
 
+	-- Exclude hjkl from query filtering so they move the current item (mini.starter
+	-- otherwise binds every query_updater character to MiniStarter.add_to_query).
+	local reserved_nav = { h = true, j = true, k = true, l = true }
+	local query_updaters_no_hjkl = (function()
+		local out = {}
+		for b = string.byte("a"), string.byte("z") do
+			local c = string.char(b)
+			if not reserved_nav[c] then
+				table.insert(out, c)
+			end
+		end
+		return table.concat(out) .. "0123456789_-."
+	end)()
+
 	starter.setup({
 		evaluate_single = true,
+		query_updaters = query_updaters_no_hjkl,
 		header = build_header(),
 		items = items,
 		content_hooks = (function()
@@ -133,10 +148,16 @@ end
 
 -- Setup dashboard keymaps
 function M.setup_keymaps()
-	vim.api.nvim_create_autocmd("FileType", {
-		pattern = "ministarter",
-		callback = function(args)
-			local buf = args.buf
+	-- mini.starter sets `filetype=ministarter` with `:noautocmd`, so `FileType`
+	-- never fires. Use `User MiniStarterOpened` (see mini.starter docs).
+	vim.api.nvim_create_autocmd("User", {
+		pattern = "MiniStarterOpened",
+		nested = true,
+		callback = function()
+			local buf = vim.api.nvim_get_current_buf()
+			if vim.bo[buf].filetype ~= "ministarter" then
+				return
+			end
 			local items = (_G.MiniStarter and _G.MiniStarter.config and _G.MiniStarter.config.items) or {}
 			local projects = {}
 			local recent_files = {}
@@ -191,6 +212,23 @@ function M.setup_keymaps()
 					exec_action(forge_items[i].action)
 				end, { buffer = buf, nowait = true, silent = true, desc = "Forge: " .. config.DASHBOARD.FORGE_KEYS[i] })
 			end
+
+			-- Vim-style movement (mini.starter defaults to arrows / <C-n> / <M-j>).
+			local function map_nav(key, dir, description)
+				vim.keymap.set("n", key, function()
+					pcall(function()
+						local ms = _G.MiniStarter
+						if ms and ms.update_current_item then
+							ms.update_current_item(dir)
+						end
+					end)
+				end, { buffer = buf, nowait = true, silent = true, desc = description })
+			end
+
+			map_nav("h", "prev", "Dashboard: previous item")
+			map_nav("k", "prev", "Dashboard: previous item")
+			map_nav("j", "next", "Dashboard: next item")
+			map_nav("l", "next", "Dashboard: next item")
 		end,
 	})
 end

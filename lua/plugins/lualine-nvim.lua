@@ -3,6 +3,27 @@
 
 local ok, lualine = pcall(require, "lualine")
 if ok then
+	-- Flexoki: only remap V-BLOCK to the replace strip (purple). V-LINE and char-wise VISUAL keep
+	-- lualine’s default `_visual` row — distinct from INSERT (cyan) and COMMAND (blue). Mapping
+	-- V-LINE to `_command` made it identical to COMMAND mode.
+	do
+		local hl_mod = require("lualine.highlight")
+		if not vim.g._lualine_flexoki_visual_mode_suffix then
+			vim.g._lualine_flexoki_visual_mode_suffix = true
+			local orig_get_mode_suffix = hl_mod.get_mode_suffix
+			function hl_mod.get_mode_suffix()
+				if vim.g.colors_name == "flexoki" then
+					local api_mode = vim.api.nvim_get_mode().mode
+					local mode_name = require("lualine.utils.mode").get_mode()
+					if api_mode == "\22" or api_mode == "\22s" or mode_name == "V-BLOCK" then
+						return "_replace"
+					end
+				end
+				return orig_get_mode_suffix()
+			end
+		end
+	end
+
 	-- Custom component for pretty path formatting (similar to LazyVim)
 	--- Formats file paths intelligently, showing only necessary parent directories
 	---@param opts table Component options
@@ -82,7 +103,8 @@ if ok then
 
 	---Return lualine theme: Flexoki (light or dark) uses the same orange normal-mode strip
 	---(#DA702C / ink on `a`; section `b` uses each mode’s `ui` surface).
-	---Other modes keep `auto` semantics (insert cyan, replace purple, visual muted, command blue).
+	---V-BLOCK uses the replace strip via `get_mode_suffix` (see above); V-LINE uses default `visual`.
+	---Other modes keep `auto` semantics (insert cyan, char VISUAL / V-LINE muted, command blue).
 	---@return string|table
 	local function lualine_theme()
 		if vim.g.colors_name ~= "flexoki" then
