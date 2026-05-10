@@ -94,8 +94,6 @@ end
 
 -- Create shortcuts section with deferred plugin manager
 function M.create_shortcuts()
-	local cfg_path = utils.get_config_directory()
-
 	return {
 		{
 			name = "Find files",
@@ -108,8 +106,8 @@ function M.create_shortcuts()
 			section = "Shortcuts",
 		},
 		{
-			name = "Settings",
-			action = string.format("lua require('telescope.builtin').find_files({ cwd = [[%s]] })", cfg_path),
+			name = "Quit",
+			action = "confirm qall",
 			section = "Shortcuts",
 		},
 		{

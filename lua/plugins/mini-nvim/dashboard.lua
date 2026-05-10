@@ -66,14 +66,15 @@ function M.setup()
 		return ascii ..  "\n" .. prefix
 	end
 
-	-- Exclude hjkl from query filtering so they move the current item (mini.starter
-	-- otherwise binds every query_updater character to MiniStarter.add_to_query).
-	local reserved_nav = { h = true, j = true, k = true, l = true }
+	-- Exclude hjkl from query filtering so they move the current item; exclude q so
+	-- it can quit Neovim (mini.starter otherwise binds every query_updater
+	-- character to MiniStarter.add_to_query).
+	local reserved_dashboard_keys = { h = true, j = true, k = true, l = true, q = true }
 	local query_updaters_no_hjkl = (function()
 		local out = {}
 		for b = string.byte("a"), string.byte("z") do
 			local c = string.char(b)
-			if not reserved_nav[c] then
+			if not reserved_dashboard_keys[c] then
 				table.insert(out, c)
 			end
 		end
@@ -229,6 +230,10 @@ function M.setup_keymaps()
 			map_nav("k", "prev", "Dashboard: previous item")
 			map_nav("j", "next", "Dashboard: next item")
 			map_nav("l", "next", "Dashboard: next item")
+
+			vim.keymap.set("n", "q", function()
+				pcall(vim.cmd, "confirm qall")
+			end, { buffer = buf, nowait = true, silent = true, desc = "Dashboard: quit Neovim" })
 		end,
 	})
 end
