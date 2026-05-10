@@ -17,6 +17,7 @@
 - **scripts/generate-docs.lua**: Leader group summary updated (Forge wording).
 
 ### Theme/UI
+- **Progress / plugin-update popup**: `core.progress-popup` buffers are flagged so global opacity autocmds still apply the shared which-key float chrome (`winblend` 0, `winhl` parity). Previously the update window could look blended next to Mason or which-key because `WinEnter` reapplied editor transparency.
 - **Cursor line highlight**: Disabled `cursorline` by default for a calmer editing surface.
 - **nvim-tree transparency**: Forced `NvimTree*` background groups to use `bg=none`, and reapply on `ColorScheme` so the file explorer matches the rest of the transparent UI.
 - **VimTeX TOC help keys**: Restyled single-letter hints (e.g. `L` in `vimtex#toc#open()`) to use muted red text on a transparent background, avoiding theme-provided background blocks.
