@@ -80,9 +80,30 @@ if ok then
 		return table.concat(result, path_sep)
 	end
 
+	---Return lualine theme: Flexoki (light or dark) uses the same orange normal-mode strip
+	---(#DA702C / ink on `a`; section `b` uses each mode’s `ui` surface).
+	---Other modes keep `auto` semantics (insert cyan, replace purple, visual muted, command blue).
+	---@return string|table
+	local function lualine_theme()
+		if vim.g.colors_name ~= "flexoki" then
+			return "auto"
+		end
+		package.loaded["lualine.themes.auto"] = nil
+		local auto = require("lualine.themes.auto")
+		local theme = vim.deepcopy(auto)
+		-- orange-400 / flexoki-black — same accent for light and dark (SimonAB/flexoki-neovim palette)
+		theme.normal.a = { bg = "#DA702C", fg = "#100F0F", gui = "bold" }
+		if vim.o.background == "light" then
+			theme.normal.b = { bg = "#E6E4D9", fg = "#DA702C" }
+		else
+			theme.normal.b = { bg = "#282726", fg = "#DA702C" }
+		end
+		return theme
+	end
+
 	lualine.setup({
 		options = {
-			theme = "auto",
+			theme = lualine_theme,
 			component_separators = "┃",
 			section_separators = { left = '', right = '' },
 		},

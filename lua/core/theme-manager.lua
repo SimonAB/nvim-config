@@ -209,6 +209,35 @@ function ThemeManager.apply_flexoki_light_contrast()
 	end
 end
 
+---Reapply Flexoki cursor highlights from the active palette variant.
+---Ensures `Cursor`/`TermCursor` match ink and paper after colours load; some terminals
+---leave the cell cursor black if highlights race transparency or deferred loads.
+---@return nil
+function ThemeManager.apply_flexoki_cursor_highlights()
+	if (vim.g.colors_name or "") ~= "flexoki" then
+		return
+	end
+
+	local ok, flexoki_palette = pcall(require, "flexoki.palette")
+	if not ok or type(flexoki_palette) ~= "table" or type(flexoki_palette.palette) ~= "function" then
+		return
+	end
+
+	local ok_palette, c = pcall(flexoki_palette.palette)
+	if not ok_palette or type(c) ~= "table" or not c["bg"] or not c["tx"] then
+		return
+	end
+
+	local cursor = { fg = c["bg"], bg = c["tx"] }
+	pcall(vim.api.nvim_set_hl, 0, "Cursor", cursor)
+	pcall(vim.api.nvim_set_hl, 0, "lCursor", cursor)
+	pcall(vim.api.nvim_set_hl, 0, "CursorIM", cursor)
+	pcall(vim.api.nvim_set_hl, 0, "TermCursor", cursor)
+
+	local term_nc = { fg = c["bg"], bg = c["tx-3"] }
+	pcall(vim.api.nvim_set_hl, 0, "TermCursorNC", term_nc)
+end
+
 -- Apply link highlighting (blue and underlined) for markdown links, wiki links, and URLs
 -- Note: No caching - this is fast and must re-apply reliably after theme changes
 function ThemeManager.apply_link_highlights()
@@ -511,6 +540,7 @@ function ThemeManager.setup_highlight_autocmd()
 		ThemeManager.apply_formatting_parity()
 		ThemeManager.apply_spell_undercurl()
 		ThemeManager.apply_flexoki_light_contrast()
+		ThemeManager.apply_flexoki_cursor_highlights()
 		ThemeManager.apply_link_highlights()
 		ThemeManager.apply_tex_style_highlights()
 		ThemeManager.apply_global_opacity()
@@ -581,6 +611,7 @@ function ThemeManager.init()
 	ThemeManager.update_which_key_highlights()
 	ThemeManager.apply_formatting_parity()
 	ThemeManager.apply_spell_undercurl()
+	ThemeManager.apply_flexoki_cursor_highlights()
 	ThemeManager.apply_link_highlights()
 	ThemeManager.apply_tex_style_highlights()
 	ThemeManager.apply_global_opacity()

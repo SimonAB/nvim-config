@@ -29,11 +29,11 @@
       "src": "https://github.com/catppuccin/nvim"
     },
     "codecompanion.nvim": {
-      "rev": "dcc2bcb563fed0cbd88f2ee1a88e76da9cc2f0e4",
+      "rev": "405bc7245755acf3b709e4e8c5c09ec9d1825350",
       "src": "https://github.com/olimorris/codecompanion.nvim"
     },
     "flexoki-neovim": {
-      "rev": "46cdc9f6b87874289f17d3fddb10e187da7a64e4",
+      "rev": "c11fa9137969ce097b09d34158ca18e2b0777708",
       "src": "https://github.com/SimonAB/flexoki-neovim"
     },
     "github-nvim-theme": {
