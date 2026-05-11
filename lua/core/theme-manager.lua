@@ -22,6 +22,21 @@ end
 
 ---Ensure floating highlight groups stay transparent after theme changes.
 local function ensure_transparent_highlights()
+	-- If the user has configured any non-opaque UI opacity, treat that as intent to
+	-- keep the editor background transparent (bg=none) across themes and machines.
+	-- Some colourschemes set `Normal`/`NormalNC` solid even when they support
+	-- transparent floats, leading to device-specific differences.
+	if ThemeSettings.get_opacity() < 1 then
+		for _, group in ipairs({
+			"Normal",
+			"NormalNC",
+			"SignColumn",
+			"FoldColumn",
+		}) do
+			pcall(vim.api.nvim_set_hl, 0, group, { bg = "none" })
+		end
+	end
+
 	for _, group in ipairs(ThemeSettings.get_float_highlight_groups()) do
 		pcall(vim.api.nvim_set_hl, 0, group, { bg = "none" })
 	end

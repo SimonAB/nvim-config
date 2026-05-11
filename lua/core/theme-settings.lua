@@ -137,6 +137,12 @@ function ThemeSettings.apply_window_blend(winid)
 	end
 	local bufnr = vim.api.nvim_win_get_buf(winid)
 	if vim.api.nvim_buf_is_valid(bufnr) then
+		-- Treat any popup/floating window as intentional UI chrome and keep it aligned with which-key.
+		-- This prevents `WinEnter` opacity sync from re-blending Telescope/FZF and similar float UIs.
+		if vim.fn.win_gettype(winid) == "popup" then
+			return ThemeSettings.style_float_like_which_key(winid)
+		end
+
 		if buffer_is_progress_popup(bufnr) then
 			return ThemeSettings.style_float_like_which_key(winid)
 		end
