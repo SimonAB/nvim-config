@@ -3,8 +3,8 @@
 
 local ok, lualine = pcall(require, "lualine")
 if ok then
-	-- Lualine refresh-queue poll (default 16 ms); higher = fewer wakeups, slightly lazier UI.
-	local refresh_check_ms = 50
+	-- Lualine refresh-queue poll (default 16 ms). Higher = fewer wakeups next to the cursor.
+	local refresh_check_ms = 200
 	-- Flexoki: only remap V-BLOCK to the replace strip (purple). V-LINE and char-wise VISUAL keep
 	-- lualine’s default `_visual` row — distinct from INSERT (cyan) and COMMAND (blue). Mapping
 	-- V-LINE to `_command` made it identical to COMMAND mode.
@@ -159,9 +159,9 @@ if ok then
 			section_separators = { left = '', right = '' },
 			refresh = {
 				refresh_time = refresh_check_ms,
-				statusline = 1000,
-				tabline = 1000,
-				winbar = 1000,
+				statusline = 3000,
+				tabline = 3000,
+				winbar = 3000,
 			},
 		},
 		sections = {

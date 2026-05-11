@@ -229,8 +229,15 @@ end
 ---Reapply Flexoki cursor highlights from the active palette variant.
 ---Ensures `Cursor`/`TermCursor` match ink and paper after colours load; some terminals
 ---leave the cell cursor black if highlights race transparency or deferred loads.
+---@param opts { force?: boolean }|nil When `force` is true, clears the highlight signature
+---	cache so the next apply always runs (e.g. after `FocusGained` when updates were skipped
+---	while unfocused).
 ---@return nil
-function ThemeManager.apply_flexoki_cursor_highlights()
+function ThemeManager.apply_flexoki_cursor_highlights(opts)
+	opts = opts or {}
+	if opts.force then
+		flexoki_cursor_hl_sig = nil
+	end
 	if (vim.g.colors_name or "") ~= "flexoki" then
 		flexoki_cursor_hl_sig = nil
 		return
@@ -264,6 +271,17 @@ function ThemeManager.apply_flexoki_cursor_highlights()
 
 	local term_nc = { fg = c["bg"], bg = c["tx-3"] }
 	pcall(vim.api.nvim_set_hl, 0, "TermCursorNC", term_nc)
+end
+
+---Soften `CursorLine` after colourschemes that paint a solid row (e.g. Flexoki `c.ui`).
+---`vim.o.cursorline` stays off, but plugins such as VimTeX TOC use `setlocal cursorline`,
+---which would otherwise show a full-width stripe.
+---@return nil
+function ThemeManager.apply_cursorline_suppression()
+	if vim.o.cursorline then
+		return
+	end
+	pcall(vim.api.nvim_set_hl, 0, "CursorLine", { bg = "none", blend = 0 })
 end
 
 -- Apply link highlighting (blue and underlined) for markdown links, wiki links, and URLs
@@ -321,7 +339,9 @@ function ThemeManager.apply_global_opacity(opts)
 	vim.o.winblend = blend -- Transparency for floating windows (enables blur if terminal supports it)
 	vim.o.pumblend = blend -- Transparency for popup menus/completion (enables blur if terminal supports it)
 	ensure_transparent_highlights()
-	if opts.apply_window_blends ~= false then
+	-- Per-window `winblend` touches every split; skip while the OS window is unfocused so
+	-- transparent hosts (e.g. Ghostty) do not keep recompositing the buffer cursor cell.
+	if opts.apply_window_blends ~= false and vim.g._nvim_os_window_focused ~= 0 then
 		ThemeSettings.apply_all_window_blends()
 	end
 end
@@ -573,6 +593,12 @@ function ThemeManager.setup_highlight_autocmd()
 		opts = opts or {}
 		local apply_cursor = opts.apply_cursor ~= false
 		local apply_window_blends = opts.apply_window_blends ~= false
+		-- OS-unfocused: avoid repeated `Cursor`/`TermCursor` overrides (see `apply_global_opacity`
+		-- for winblend); together these aggravate buffer cursor flicker in transparent terminals.
+		if vim.g._nvim_os_window_focused == 0 then
+			apply_cursor = false
+			apply_window_blends = false
+		end
 		ThemeManager.update_which_key_highlights()
 		ThemeManager.apply_formatting_parity()
 		ThemeManager.apply_spell_undercurl()
@@ -583,6 +609,7 @@ function ThemeManager.setup_highlight_autocmd()
 		ThemeManager.apply_link_highlights()
 		ThemeManager.apply_tex_style_highlights()
 		ThemeManager.apply_global_opacity({ apply_window_blends = apply_window_blends })
+		ThemeManager.apply_cursorline_suppression()
 	end
 
 	-- Primary trigger: ColorScheme change
@@ -631,6 +658,11 @@ function ThemeManager.setup_opacity_autocmds()
 	vim.api.nvim_create_autocmd({ "WinNew", "WinEnter", "BufWinEnter", "TermOpen" }, {
 		group = group,
 		callback = function(event)
+			-- Skip while the OS window is unfocused: repeated blends + redraws aggravate cursor
+			-- flicker in transparent terminals (e.g. Ghostty) without improving the UI.
+			if vim.g._nvim_os_window_focused == 0 then
+				return
+			end
 			if event and event.win and vim.api.nvim_win_is_valid(event.win) then
 				ThemeSettings.apply_window_blend(event.win)
 			else
@@ -654,10 +686,13 @@ function ThemeManager.init()
 	ThemeManager.update_which_key_highlights()
 	ThemeManager.apply_formatting_parity()
 	ThemeManager.apply_spell_undercurl()
-	ThemeManager.apply_flexoki_cursor_highlights()
+	if vim.g._nvim_os_window_focused ~= 0 then
+		ThemeManager.apply_flexoki_cursor_highlights()
+	end
 	ThemeManager.apply_link_highlights()
 	ThemeManager.apply_tex_style_highlights()
 	ThemeManager.apply_global_opacity()
+	ThemeManager.apply_cursorline_suppression()
 
 	vim.notify("Theme system initialized: " .. active_theme, vim.log.levels.INFO)
 end

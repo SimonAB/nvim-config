@@ -145,9 +145,9 @@ local LOAD_PHASES = {
 
 	-- Phase 2: DEFERRED (100ms) - UI and functionality
 	deferred = {
+		"nvim-tree",          -- File explorer (before bufferline so sidebar offsets see the tree)
 		"bufferline-nvim",    -- Buffer tabs
 		"lualine-nvim",       -- Status line
-		"nvim-tree",          -- File explorer
 		"telescope",          -- Fuzzy finder
 		"codecompanion-nvim", -- AI chat (ACP + HTTP)
 		"telescope-fzf-native-nvim", -- Telescope native sorter (extension)

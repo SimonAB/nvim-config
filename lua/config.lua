@@ -169,31 +169,72 @@ local function create_optimised_autocmds()
   vim.g._nvim_os_window_focused = vim.g._nvim_os_window_focused or 1
 
   local guicursor_saved_os_focus = nil
+  ---Saved while the OS window is unfocused so we can restore bufferline hover (`mousemoveevent`).
+  local mousemove_saved_os_focus = nil
+  ---Saved while unfocused; `lazyredraw` coalesces screen updates during background churn.
+  local lazyredraw_saved_os_focus = nil
 
   vim.api.nvim_create_autocmd("FocusLost", {
     group = augroup,
-    desc = "Unfocused: trim statusline churn, pause GUI cursor blink",
+    desc = "Unfocused: trim Lualine segments, pause GUI cursor blink (idempotent for focus spam)",
     callback = function()
+      -- Ghostty / some hosts can emit repeated FocusLost; avoid tearing Lualine down repeatedly.
+      if vim.g._nvim_os_window_focused == 0 then
+        return
+      end
       vim.g._nvim_os_window_focused = 0
+      -- `mousemoveevent` drives bufferline’s `<MouseMove>` hover path; the terminal can keep
+      -- delivering moves while the window looks unfocused, which retriggers tabline redraws and
+      -- makes the block cursor appear to strobe in transparent terminals.
+      if mousemove_saved_os_focus == nil then
+        mousemove_saved_os_focus = vim.o.mousemoveevent
+      end
+      vim.o.mousemoveevent = false
+      if lazyredraw_saved_os_focus == nil then
+        lazyredraw_saved_os_focus = vim.o.lazyredraw
+      end
+      vim.o.lazyredraw = true
       if guicursor_saved_os_focus == nil then
         guicursor_saved_os_focus = vim.o.guicursor
       end
       if not vim.o.guicursor:find("blinkon0", 1, true) then
         vim.cmd("set guicursor+=a:blinkon0")
       end
+      -- Drop any in-flight bufferline hover state so the tabline does not keep refreshing.
+      pcall(vim.api.nvim_exec_autocmds, "User", { pattern = "BufferLineHoverOut", data = {} })
     end,
   })
 
   vim.api.nvim_create_autocmd("FocusGained", {
     group = augroup,
-    desc = "Focused: restore cursor blink and Lualine segments",
+    desc = "Focused: restore cursor blink and Lualine segments (idempotent for focus spam)",
     callback = function()
+      if vim.g._nvim_os_window_focused == 1 then
+        return
+      end
       vim.g._nvim_os_window_focused = 1
+      if lazyredraw_saved_os_focus ~= nil then
+        vim.o.lazyredraw = lazyredraw_saved_os_focus
+        lazyredraw_saved_os_focus = nil
+      end
+      if mousemove_saved_os_focus ~= nil then
+        vim.o.mousemoveevent = mousemove_saved_os_focus
+        mousemove_saved_os_focus = nil
+      end
       if guicursor_saved_os_focus ~= nil then
         vim.o.guicursor = guicursor_saved_os_focus
         guicursor_saved_os_focus = nil
       end
       vim.schedule(function()
+        pcall(function()
+          local ok_tm, theme_manager = pcall(require, "core.theme-manager")
+          if ok_tm and theme_manager then
+            -- Re-sync cursor hl and per-window blends after skipping them while unfocused.
+            theme_manager.apply_flexoki_cursor_highlights({ force = true })
+            theme_manager.apply_global_opacity()
+            theme_manager.apply_cursorline_suppression()
+          end
+        end)
         pcall(function()
           require("lualine").refresh({
             force = true,

@@ -7,6 +7,8 @@ if ok then
 	view = {
 		side = "left", -- Show tree on the left
 		width = 30, -- Set width of the tree window
+		-- Match global `cursorline` off; avoids a solid `NvimTreeCursorLine` row under Flexoki.
+		cursorline = false,
 	},
 	renderer = {
 		icons = {
@@ -33,6 +35,8 @@ if ok then
 			"NvimTreeWinSeparator",
 			"NvimTreeStatusLine",
 			"NvimTreeStatusLineNC",
+			"NvimTreeCursorLine",
+			"NvimTreeCursorLineNr",
 		}) do
 			pcall(vim.api.nvim_set_hl, 0, group, { bg = "none" })
 		end
