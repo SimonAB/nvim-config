@@ -165,6 +165,45 @@ local augroup = vim.api.nvim_create_augroup("Config", { clear = true })
 
 -- Optimised autocmd patterns for better performance
 local function create_optimised_autocmds()
+  -- `g:_nvim_os_window_focused`: Lualine `cond` for noisy segments; needs tmux `focus-events on`.
+  vim.g._nvim_os_window_focused = vim.g._nvim_os_window_focused or 1
+
+  local guicursor_saved_os_focus = nil
+
+  vim.api.nvim_create_autocmd("FocusLost", {
+    group = augroup,
+    desc = "Unfocused: trim statusline churn, pause GUI cursor blink",
+    callback = function()
+      vim.g._nvim_os_window_focused = 0
+      if guicursor_saved_os_focus == nil then
+        guicursor_saved_os_focus = vim.o.guicursor
+      end
+      if not vim.o.guicursor:find("blinkon0", 1, true) then
+        vim.cmd("set guicursor+=a:blinkon0")
+      end
+    end,
+  })
+
+  vim.api.nvim_create_autocmd("FocusGained", {
+    group = augroup,
+    desc = "Focused: restore cursor blink and Lualine segments",
+    callback = function()
+      vim.g._nvim_os_window_focused = 1
+      if guicursor_saved_os_focus ~= nil then
+        vim.o.guicursor = guicursor_saved_os_focus
+        guicursor_saved_os_focus = nil
+      end
+      vim.schedule(function()
+        pcall(function()
+          require("lualine").refresh({
+            force = true,
+            place = { "statusline" },
+          })
+        end)
+      end)
+    end,
+  })
+
   -- Highlight yanked text
   vim.api.nvim_create_autocmd("TextYankPost", {
     group = augroup,

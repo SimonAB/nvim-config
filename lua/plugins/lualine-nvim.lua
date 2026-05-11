@@ -3,6 +3,8 @@
 
 local ok, lualine = pcall(require, "lualine")
 if ok then
+	-- Lualine refresh-queue poll (default 16 ms); higher = fewer wakeups, slightly lazier UI.
+	local refresh_check_ms = 50
 	-- Flexoki: only remap V-BLOCK to the replace strip (purple). V-LINE and char-wise VISUAL keep
 	-- lualine’s default `_visual` row — distinct from INSERT (cyan) and COMMAND (blue). Mapping
 	-- V-LINE to `_command` made it identical to COMMAND mode.
@@ -123,17 +125,57 @@ if ok then
 		return theme
 	end
 
+	---Volatile Lualine segments (branch, diff, diagnostics, LSP) only when the terminal
+	---window is focused; see `g:_nvim_os_window_focused` in `config.lua`.
+	---@return boolean
+	local function lualine_when_os_window_focused()
+		return (vim.g._nvim_os_window_focused or 1) ~= 0
+	end
+
+	---Diff counts from gitsigns (sync). Default `diff` uses async `git diff`, which flickers.
+	---@return { added: integer, modified: integer, removed: integer }
+	local function lualine_diff_from_gitsigns()
+		local ok_gs, gs = pcall(require, "gitsigns")
+		if not ok_gs or gs.get_hunks == nil then
+			return { added = 0, modified = 0, removed = 0 }
+		end
+		local bufnr = vim.api.nvim_get_current_buf()
+		local hunks = gs.get_hunks(bufnr)
+		if hunks == nil then
+			return { added = 0, modified = 0, removed = 0 }
+		end
+		local summary = require("gitsigns.hunks").get_summary(hunks)
+		return {
+			added = summary.added,
+			modified = summary.changed,
+			removed = summary.removed,
+		}
+	end
+
 	lualine.setup({
 		options = {
 			theme = lualine_theme,
 			component_separators = "┃",
 			section_separators = { left = '', right = '' },
+			refresh = {
+				refresh_time = refresh_check_ms,
+				statusline = 1000,
+				tabline = 1000,
+				winbar = 1000,
+			},
 		},
 		sections = {
 			lualine_a = { "mode" },
-			lualine_b = { "branch", "diff", "diagnostics" },
+			lualine_b = {
+				{ "branch", cond = lualine_when_os_window_focused },
+				{ "diff", source = lualine_diff_from_gitsigns, cond = lualine_when_os_window_focused },
+				{ "diagnostics", cond = lualine_when_os_window_focused },
+			},
 			lualine_c = { { pretty_path, path = 1 } },
-			lualine_x = { "filetype", "lsp_status" },
+			lualine_x = {
+				"filetype",
+				{ "lsp_status", cond = lualine_when_os_window_focused },
+			},
 			lualine_y = { "progress" },
 			lualine_z = { "location" },
 		},
