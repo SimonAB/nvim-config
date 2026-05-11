@@ -6,6 +6,8 @@
 local ThemeManager = {}
 local highlight_cache = {}
 local formatting_cache = {}
+---Last `Cursor`/`TermCursor` palette signature applied by `apply_flexoki_cursor_highlights` (avoids redundant `nvim_set_hl`).
+local flexoki_cursor_hl_sig = nil
 local ThemePicker = nil -- Lazy load to avoid circular dependencies
 local ok_settings, ThemeSettings = pcall(require, "core.theme-settings")
 if not ok_settings then
@@ -230,6 +232,7 @@ end
 ---@return nil
 function ThemeManager.apply_flexoki_cursor_highlights()
 	if (vim.g.colors_name or "") ~= "flexoki" then
+		flexoki_cursor_hl_sig = nil
 		return
 	end
 
@@ -242,6 +245,16 @@ function ThemeManager.apply_flexoki_cursor_highlights()
 	if not ok_palette or type(c) ~= "table" or not c["bg"] or not c["tx"] then
 		return
 	end
+
+	local sig = table.concat({
+		tostring(c["bg"]),
+		tostring(c["tx"]),
+		tostring(c["tx-3"] or ""),
+	}, "\1")
+	if sig == flexoki_cursor_hl_sig then
+		return
+	end
+	flexoki_cursor_hl_sig = sig
 
 	local cursor = { fg = c["bg"], bg = c["tx"] }
 	pcall(vim.api.nvim_set_hl, 0, "Cursor", cursor)
@@ -301,12 +314,16 @@ end
 ---Apply the configured UI opacity across Neovim.
 ---Note: Blur effects are handled by the terminal emulator/window manager when transparency is enabled.
 ---On macOS, the window manager automatically applies blur to transparent windows.
-function ThemeManager.apply_global_opacity()
+---@param opts { apply_window_blends?: boolean }|nil If `apply_window_blends` is false, skip iterating every window (still sets global winblend/pumblend and transparent highlight groups).
+function ThemeManager.apply_global_opacity(opts)
+	opts = opts or {}
 	local blend = ThemeSettings.get_winblend()
-	vim.o.winblend = blend  -- Transparency for floating windows (enables blur if terminal supports it)
-	vim.o.pumblend = blend  -- Transparency for popup menus/completion (enables blur if terminal supports it)
+	vim.o.winblend = blend -- Transparency for floating windows (enables blur if terminal supports it)
+	vim.o.pumblend = blend -- Transparency for popup menus/completion (enables blur if terminal supports it)
 	ensure_transparent_highlights()
-	ThemeSettings.apply_all_window_blends()
+	if opts.apply_window_blends ~= false then
+		ThemeSettings.apply_all_window_blends()
+	end
 end
 
 -- Get theme for current system appearance (sync `background`; theme may map flavours per background).
@@ -481,6 +498,7 @@ end
 function ThemeManager.clear_highlight_cache()
 	highlight_cache = {}
 	formatting_cache = {}
+	flexoki_cursor_hl_sig = nil
 end
 
 -- Theme picker integration
@@ -549,16 +567,22 @@ end
 function ThemeManager.setup_highlight_autocmd()
 	local group = vim.api.nvim_create_augroup("ThemeManagerHighlights", { clear = true })
 
-	-- Helper to apply all highlight customisations
-	local function apply_all_highlights()
+	---Apply theme-manager highlight tweaks after `ColorScheme` (and similar).
+	---@param opts { apply_cursor?: boolean, apply_window_blends?: boolean }|nil When both false, skip Flexoki cursor overrides and per-window `winblend` sync (still runs global opacity + transparent groups).
+	local function apply_all_highlights(opts)
+		opts = opts or {}
+		local apply_cursor = opts.apply_cursor ~= false
+		local apply_window_blends = opts.apply_window_blends ~= false
 		ThemeManager.update_which_key_highlights()
 		ThemeManager.apply_formatting_parity()
 		ThemeManager.apply_spell_undercurl()
 		ThemeManager.apply_flexoki_light_contrast()
-		ThemeManager.apply_flexoki_cursor_highlights()
+		if apply_cursor then
+			ThemeManager.apply_flexoki_cursor_highlights()
+		end
 		ThemeManager.apply_link_highlights()
 		ThemeManager.apply_tex_style_highlights()
-		ThemeManager.apply_global_opacity()
+		ThemeManager.apply_global_opacity({ apply_window_blends = apply_window_blends })
 	end
 
 	-- Primary trigger: ColorScheme change
@@ -567,12 +591,16 @@ function ThemeManager.setup_highlight_autocmd()
 		group = group,
 		callback = function()
 			ThemeManager.clear_highlight_cache()
-			-- First pass: quick application
-			vim.defer_fn(apply_all_highlights, 10)
-			-- Second pass: catch any plugins that apply highlights after us
-			vim.defer_fn(apply_all_highlights, 100)
-			-- Final pass: ensure everything is correct after all deferred operations
-			vim.defer_fn(apply_all_highlights, 300)
+			-- Stagger full cursor + per-window winblend work so early passes skip heavy hl churn.
+			vim.defer_fn(function()
+				apply_all_highlights({ apply_cursor = false, apply_window_blends = false })
+			end, 10)
+			vim.defer_fn(function()
+				apply_all_highlights({ apply_cursor = false, apply_window_blends = false })
+			end, 100)
+			vim.defer_fn(function()
+				apply_all_highlights()
+			end, 300)
 		end,
 	})
 
