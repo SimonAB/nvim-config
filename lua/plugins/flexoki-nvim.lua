@@ -14,7 +14,8 @@ local function setup()
 	end
 
 	flexoki.setup({
-		light_variant = "light_high_contrast",
+		-- Must match a key in `flexoki.palette` variants (`dark` / `light` only in this fork).
+		light_variant = "light",
 		transparent = {
 			editor = true,
 			floats = true,
