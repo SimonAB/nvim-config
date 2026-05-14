@@ -216,6 +216,7 @@ if ok then
 		{ "<leader>G", group = "Git" },
 		-- Obsidian operations
 		{ "<leader>O", group = "Obsidian" },
+		{ "<leader>O!", group = "Callout" },
 		-- Search operations (grep with location options)
 		{ "<leader>S", group = "Search" },
 		-- Toggle options

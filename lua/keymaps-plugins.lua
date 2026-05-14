@@ -1246,6 +1246,140 @@ map("n", "<leader>ON", safe_cmd("ObsidianNewFromTemplate"), { desc = "New note f
 map("n", "<leader>Op", paste_obsidian_image, { desc = "Paste image and add two lines" })
 map("n", "<leader>Ov", "<cmd>MarkdownPreviewToggle<CR>", { desc = "Toggle Obsidian preview" })
 
+-- Obsidian callouts
+-- Insert Obsidian-style callout blocks (https://help.obsidian.md/callouts).
+-- The `!` sub-prefix mirrors the `[!type]` syntax used in callouts.
+-- Normal mode: insert an empty callout below the current line and place the
+--   cursor inside the body, ready for typing.
+-- Visual mode: wrap the selected lines inside a callout block.
+
+---List of Obsidian callout types mapped to a sub-key under `<leader>O!`.
+---@type { key: string, type: string, desc: string }[]
+local obsidian_callouts = {
+	{ key = "n", type = "note",     desc = "Note" },
+	{ key = "a", type = "abstract", desc = "Abstract" },
+	{ key = "i", type = "info",     desc = "Info" },
+	{ key = "o", type = "todo",     desc = "Todo" },
+	{ key = "t", type = "tip",      desc = "Tip" },
+	{ key = "s", type = "success",  desc = "Success" },
+	{ key = "q", type = "question", desc = "Question" },
+	{ key = "w", type = "warning",  desc = "Warning" },
+	{ key = "f", type = "failure",  desc = "Failure" },
+	{ key = "d", type = "danger",   desc = "Danger" },
+	{ key = "b", type = "bug",      desc = "Bug" },
+	{ key = "e", type = "example",  desc = "Example" },
+	{ key = "Q", type = "quote",    desc = "Quote" },
+}
+
+---Return whether the given buffer is safe to modify.
+---@param bufnr integer
+---@return boolean
+local function is_buffer_writable(bufnr)
+	return vim.api.nvim_buf_is_valid(bufnr) and vim.bo[bufnr].modifiable and not vim.bo[bufnr].readonly
+end
+
+---Validate that `callout_type` is one of the registered Obsidian callout types.
+---@param callout_type string
+---@return boolean
+local function is_valid_callout_type(callout_type)
+	for _, callout in ipairs(obsidian_callouts) do
+		if callout.type == callout_type then
+			return true
+		end
+	end
+	return false
+end
+
+---Insert an Obsidian-style callout block below the current line and position
+---the cursor at the end of the body line in insert mode. The user can edit
+---the title by escaping to normal mode and pressing `kA`.
+---@param callout_type string Callout type identifier (e.g. "note", "warning").
+local function insert_obsidian_callout(callout_type)
+	local bufnr = vim.api.nvim_get_current_buf()
+	if not is_buffer_writable(bufnr) then
+		return
+	end
+
+	local row = vim.api.nvim_win_get_cursor(0)[1]
+	local header = "> [!" .. callout_type .. "] "
+	local body = "> "
+	vim.api.nvim_buf_set_lines(bufnr, row, row, false, { header, body })
+
+	vim.api.nvim_win_set_cursor(0, { row + 2, #body })
+	vim.cmd("startinsert!")
+end
+
+---Wrap a line range inside an Obsidian-style callout block.
+---
+---Modal-editing notes:
+--- - This function is invoked from a user command bound to a `:`-style RHS in
+---   visual mode. Pressing `:` in visual mode auto-inserts `'<,'>` as the
+---   range, exits visual mode for cmdline, then returns to normal mode after
+---   `<CR>`. The range arrives here as `line1` / `line2`, fully resolved by
+---   Vim, so we never need to inspect visual marks or call `feedkeys`.
+--- - V-line and V-block both reduce to a contiguous line range when consumed
+---   as a `:` command range, which is the correct shape for a blockquote
+---   callout (whole-line wrap).
+---@param callout_type string Callout type identifier (e.g. "note", "warning").
+---@param line1 integer 1-indexed first line of the range (inclusive).
+---@param line2 integer 1-indexed last line of the range (inclusive).
+local function wrap_obsidian_callout_range(callout_type, line1, line2)
+	local bufnr = vim.api.nvim_get_current_buf()
+	if not is_buffer_writable(bufnr) then
+		return
+	end
+	if not is_valid_callout_type(callout_type) then
+		vim.notify("Unknown Obsidian callout type: " .. tostring(callout_type), vim.log.levels.ERROR)
+		return
+	end
+	if line1 < 1 or line2 < line1 then
+		vim.notify("Invalid range for Obsidian callout wrap", vim.log.levels.WARN)
+		return
+	end
+
+	local lines = vim.api.nvim_buf_get_lines(bufnr, line1 - 1, line2, false)
+	local header = "> [!" .. callout_type .. "] "
+	local wrapped = { header }
+	for _, line in ipairs(lines) do
+		table.insert(wrapped, "> " .. line)
+	end
+	vim.api.nvim_buf_set_lines(bufnr, line1 - 1, line2, false, wrapped)
+
+	-- Land at the end of the header so the user can append a title with `a`
+	-- or `A`, keeping the operation discoverable via normal-mode motions.
+	vim.api.nvim_win_set_cursor(0, { line1, #header })
+end
+
+vim.api.nvim_create_user_command("ObsidianCalloutWrap", function(opts)
+	wrap_obsidian_callout_range(opts.fargs[1], opts.line1, opts.line2)
+end, {
+	range = true,
+	nargs = 1,
+	complete = function()
+		local names = {}
+		for _, callout in ipairs(obsidian_callouts) do
+			table.insert(names, callout.type)
+		end
+		return names
+	end,
+	desc = "Wrap range inside an Obsidian callout block",
+})
+
+for _, callout in ipairs(obsidian_callouts) do
+	local lhs = "<leader>O!" .. callout.key
+	map("n", lhs, function()
+		insert_obsidian_callout(callout.type)
+	end, { desc = "Callout: " .. callout.desc })
+
+	-- Use a `:`-style RHS so Vim performs the standard visual→cmdline→normal
+	-- modal transition. The `'<,'>` range is auto-inserted by `:` in visual
+	-- mode and consumed by `:ObsidianCalloutWrap`, which the user command
+	-- declares via `range = true`. This avoids `<Cmd>`/`feedkeys` workarounds.
+	map("x", lhs,
+		string.format(":ObsidianCalloutWrap %s<CR>", callout.type),
+		{ silent = true, desc = "Wrap selection in " .. callout.desc .. " callout" })
+end
+
 -- Enhanced plugin manager keybindings
 local function call_plugin_manager(func_name)
 	local ok, PluginManager = pcall(require, "core.plugin-manager")
