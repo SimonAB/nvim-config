@@ -64,13 +64,20 @@ function ThemeManager.detect_system_theme()
 	end
 
 	local ok, result = pcall(vim.fn.system, { "defaults", "read", "-g", "AppleInterfaceStyle" })
-	if ok and result then
-		system_theme_cache = result:match("Dark") and "dark" or "light"
+	if ok and type(result) == "string" then
+		local trimmed = vim.trim(result)
+		-- Light appearance: the global key is absent, so `defaults read` often yields empty stdout.
+		-- Treating empty as light avoids wrongly forcing dark after a dark→light switch.
+		if trimmed == "" or not trimmed:match("Dark") then
+			system_theme_cache = "light"
+		else
+			system_theme_cache = "dark"
+		end
 		last_detection_time = current_time
 		return system_theme_cache
 	end
 
-	system_theme_cache = "dark" -- fallback
+	system_theme_cache = "dark" -- fallback when `defaults` cannot run
 	last_detection_time = current_time
 	return system_theme_cache
 end
@@ -346,16 +353,30 @@ function ThemeManager.apply_global_opacity(opts)
 	end
 end
 
--- Get theme for current system appearance (sync `background`; theme may map flavours per background).
-function ThemeManager.get_active_theme()
-	local appearance = ThemeManager.detect_system_theme()
+---Resolve the default colourscheme for the active appearance and sync `vim.o.background`.
+---@param opts { appearance?: "dark"|"light" }|nil When `appearance` is set (e.g. from auto-dark-mode),
+---	it is trusted over `detect_system_theme()` so we avoid stale cache / empty `defaults read` races.
+---@return string theme_name
+function ThemeManager.get_active_theme(opts)
+	opts = opts or {}
+	local appearance = opts.appearance
+	if appearance ~= "light" and appearance ~= "dark" then
+		appearance = ThemeManager.detect_system_theme()
+	else
+		-- Align cache with OS-driven callbacks so the next unprompted detection stays consistent.
+		system_theme_cache = appearance
+		last_detection_time = vim.loop.hrtime() / 1000000
+	end
 	vim.o.background = appearance
 	return ThemeSettings.get_default_theme(appearance)
 end
 
--- Load and apply theme immediately (no defer)
-function ThemeManager.load_immediate()
-	local theme = ThemeManager.get_active_theme()
+---Load and apply the default colourscheme for the current (or given) appearance.
+---@param opts { appearance?: "dark"|"light" }|nil
+---@return string theme_name
+function ThemeManager.load_immediate(opts)
+	opts = opts or {}
+	local theme = ThemeManager.get_active_theme({ appearance = opts.appearance })
 	local ok = pcall(vim.cmd.colorscheme, theme)
 	if not ok then
 		vim.notify("Failed to load theme: " .. theme, vim.log.levels.WARN)

@@ -11,7 +11,8 @@ if ok then
 
 			local ok_theme, ThemeManager = pcall(require, "core.theme-manager")
 			if ok_theme and ThemeManager and ThemeManager.load_immediate then
-				ThemeManager.load_immediate()
+				-- Pass appearance so we do not rely on `defaults read` racing the OS toggle.
+				ThemeManager.load_immediate({ appearance = "dark" })
 			end
 		end,
 		set_light_mode = function()
@@ -20,7 +21,7 @@ if ok then
 
 			local ok_theme, ThemeManager = pcall(require, "core.theme-manager")
 			if ok_theme and ThemeManager and ThemeManager.load_immediate then
-				ThemeManager.load_immediate()
+				ThemeManager.load_immediate({ appearance = "light" })
 			end
 		end,
 	})
