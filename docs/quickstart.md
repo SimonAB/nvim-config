@@ -320,6 +320,8 @@ local obsidian_path = "/Users/<username>/Library/Mobile Documents/iCloud~md~obsi
 <Space>Ob            " Show backlinks
 ```
 
+Callouts: `<Space>O!` plus a key (e.g. `<Space>O!w` for warning)—normal mode inserts a block under the cursor line; in visual mode the same sequence wraps the selection. See **docs/reference/keymaps.md** for the full key list.
+
 ## Julia Setup
 
 ### Install Julia Language Server

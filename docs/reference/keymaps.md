@@ -209,6 +209,18 @@ Table editing operations for markdown and quarto files (table-nvim):
 <Leader>Ov      " Toggle Obsidian preview
 ```
 
+Obsidian [callouts](https://help.obsidian.md/callouts) (`<Leader>O!` then a letter; normal mode inserts below the line, visual mode wraps the range):
+
+```vim
+<Leader>O!n     " Note        <Leader>O!a     " Abstract    <Leader>O!i     " Info
+<Leader>O!o     " Todo        <Leader>O!t     " Tip         <Leader>O!s     " Success
+<Leader>O!q     " Question    <Leader>O!w     " Warning     <Leader>O!f     " Failure
+<Leader>O!d     " Danger      <Leader>O!b     " Bug         <Leader>O!e     " Example
+<Leader>O!Q     " Quote
+```
+
+Command-line wrap (optional): `:ObsidianCalloutWrap <type>` with a line range.
+
 ## Terminal Integration
 
 ### Terminal Management

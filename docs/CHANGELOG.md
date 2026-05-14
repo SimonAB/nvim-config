@@ -15,13 +15,23 @@
 ### Documentation
 - **docs/reference/keymaps.md** and **AGENTS.md**: Forge descriptions updated to match the kanban/projects workflow and the new `<leader>F*` mappings.
 - **scripts/generate-docs.lua**: Leader group summary updated (Forge wording).
+- **docs/reference/keymaps.md**, **docs/quickstart.md**: Obsidian callout bindings and behaviour.
 
 ### Theme/UI
 - **Progress / plugin-update popup**: `core.progress-popup` buffers are flagged so global opacity autocmds still apply the shared which-key float chrome (`winblend` 0, `winhl` parity). Previously the update window could look blended next to Mason or which-key because `WinEnter` reapplied editor transparency.
 - **Cursor line highlight**: Disabled `cursorline` by default for a calmer editing surface.
 - **nvim-tree transparency**: Forced `NvimTree*` background groups to use `bg=none`, and reapply on `ColorScheme` so the file explorer matches the rest of the transparent UI.
 - **VimTeX TOC help keys**: Restyled single-letter hints (e.g. `L` in `vimtex#toc#open()`) to use muted red text on a transparent background, avoiding theme-provided background blocks.
-- **Flexoki defaults**: Switched theme defaults to `flexoki-dark` / `flexoki-light`, and now rely on the forked [`SimonAB/flexoki-neovim`](https://github.com/SimonAB/flexoki-neovim) for built-in transparency options and a light high-contrast variant.
+- **Flexoki defaults**: Switched theme defaults to `flexoki-dark` / `flexoki-light`, and now rely on the forked [`SimonAB/flexoki-neovim`](https://github.com/SimonAB/flexoki-neovim) for built-in transparency options. The plugin `light_variant` is set to `light` so it matches the fork’s palette keys.
+- **macOS system theme / auto-dark-mode**: `ThemeManager.detect_system_theme()` treats empty `defaults read` output as **light** (avoids sticking on dark after a dark→light switch). **auto-dark-mode.nvim** passes `appearance` into `ThemeManager.load_immediate()` so the colourscheme follows the plugin callback without racing `defaults read`.
+
+### Obsidian (callouts)
+- **Keymaps** (`<leader>O!*`): insert a callout below the current line (normal mode) or wrap the visual line range (same leader sequence). Types include note, abstract, info, todo, tip, success, question, warning, failure, danger, bug, example, and quote.
+- **Command**: `:ObsidianCalloutWrap <type>` with an explicit range when needed.
+- **which-key**: `<leader>O!` grouped as “Callout”.
+
+### Pack lock
+- **nvim-pack-lock.json**: Refreshed revisions for codecompanion.nvim, mason-lspconfig.nvim, mini.nvim, nvim-lspconfig, and vimtex.
 
 ---
 
