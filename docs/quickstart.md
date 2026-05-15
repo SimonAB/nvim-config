@@ -150,9 +150,10 @@ nvim
 <Space>Th            " Horizontal terminal
 <Space>Tv            " Vertical terminal
 <Space>Tf            " Floating terminal
-<Ctrl-i>             " Send line to terminal
-<Ctrl-c>             " Send code block to terminal
-<Ctrl-s>             " Send visual selection to terminal (visual mode)
+<Ctrl-i>             " Send line to Julia REPL
+<Ctrl-c>             " Send code block to Julia REPL (fences, # %%, or ## section)
+<Ctrl-s>             " Send visual selection to Julia REPL (visual mode)
+yic                  " Yank fenced or # %% code chunk
 ```
 
 ### LSP Operations
@@ -337,8 +338,9 @@ Pkg.add("LanguageServer")
 2. Launch REPL: `<Space>Jrv` (vertical split)
 3. Send code:
    - Current line: `<Ctrl-i>`
-   - Code block: `<Ctrl-c>`
+   - Code block: `<Ctrl-c>` — Quarto `` ```{julia} `` fences, VS Code `# %%` cells, or `##` sections (see **docs/reference/keymaps.md**)
    - Selection: `<Ctrl-s>` (visual mode)
+   - Yank chunk: `yic` (fenced or `# %%` only)
 
 ### Project Management
 

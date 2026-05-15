@@ -117,9 +117,11 @@ Plugins install automatically on first launch (vim.pack). Mason prompts for lang
 | `<leader>Jrh/v/f` | Julia REPL (horizontal/vertical/float) |
 | `<leader>Jp`      | Project status                         |
 | `<leader>Ji`      | Instantiate project                    |
+| `<C-i>` / `<C-c>` / `<C-s>` | Send line, block, or selection to REPL |
+| `yic`             | Yank fenced or `# %%` code chunk       |
 
 
-Julia REPLs launch with `--threads=auto` for parallel computing.
+Julia REPLs launch with `--threads=auto` for parallel computing. `<C-c>` recognises Quarto `` ```{...} `` fences, `# %%` cells, and `##` sections.
 
 ### Theme Management
 

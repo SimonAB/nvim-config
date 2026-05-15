@@ -49,7 +49,7 @@ execution, and strong LSP support for day-to-day scientific and technical work.
 
 ### Scientific coding
 - **Julia REPL**: `<Leader>Jrh`, `<Leader>Jrv`, `<Leader>Jrf` launch layouts
-- **Code send**: `<C-i>`, `<C-c>`, `<C-s>` for line, block, and selection
+- **Code send**: `<C-i>`, `<C-c>`, `<C-s>` for line, block, and selection; blocks include Quarto fences, `# %%` cells, and `##` sections; `yic` yanks fenced or `# %%` chunks
 - **LSP controls**: `gd`, `K`, `<Leader>Lf`, `<Leader>Ll`, `<Leader>Lr`
 
 ### Terminal-first workflow

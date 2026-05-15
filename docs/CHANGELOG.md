@@ -33,6 +33,10 @@
 ### Pack lock
 - **nvim-pack-lock.json**: Refreshed revisions for codecompanion.nvim, mason-lspconfig.nvim, mini.nvim, nvim-lspconfig, and vimtex.
 
+### Julia REPL (code blocks)
+- **`<C-c>` / `yic`**: VS Code–style `# %%` cell markers (`# %%`, `#%%`, optional spaces/title) for send and yank; detection order is fenced Quarto chunks, then `# %%` cells (when any marker exists in the buffer), then `##` sections for send only.
+- **Documentation**: **docs/reference/keymaps.md**, **docs/quickstart.md**, **docs/index.md** — block delimiter table and `yic` behaviour.
+
 ---
 
 ## [Previous] - Documentation aligned with keymaps

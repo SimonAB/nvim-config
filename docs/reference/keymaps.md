@@ -242,9 +242,22 @@ When a Julia REPL is open (via `<Leader>Jr*`), you can send code directly:
 <C-i>           " Send current line to Julia REPL (normal mode)
 <C-c>           " Send current code block to Julia REPL (normal mode)
 <C-s>           " Send visual selection to Julia REPL (visual mode)
+yic             " Yank current code chunk (fenced or # %%) to registers
 ```
 
 Note: these use bracketed paste to avoid REPL line-editing features mutating bracket characters.
+
+**`<C-c>` block detection** (first match wins; marker lines are not sent):
+
+| Style | Opening | Closing / end |
+|-------|---------|----------------|
+| Quarto / R Markdown | `` ```{...} `` (e.g. `` ```{julia} ``) | `` ``` `` (line of three backticks only) |
+| VS Code cells | `# %%`, `#%%`, or `#` + spaces + `%%` (optional title after) | Next `# %%` marker or EOF |
+| Section (fallback) | `##` header | Line before next `##` header (header line is included) |
+
+**`yic`** uses fenced chunks first (Quarto `` ```{...} `` or plain `` ``` `` … `` ``` ``), then the same `# %%` cell body as `<C-c>` (markers excluded). It does not yank `##` sections.
+
+After `<C-c>`, the cursor jumps to the start of the next detected block when one exists.
 
 ## Git Operations
 
