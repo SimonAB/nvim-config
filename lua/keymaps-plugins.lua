@@ -709,8 +709,100 @@ local function send_to_julia_repl(text)
 	vim.api.nvim_chan_send(job_id, payload)
 end
 
+---True when `line` starts a VS Code–style cell marker (`# %%`, `#%%`, optional spaces).
+---@param line string|nil
+---@return boolean
+local function is_percent_cell_marker_line(line)
+	if not line then
+		return false
+	end
+	return line:match("^#%s*%%%%") ~= nil
+end
+
+---Bounds of the `# %%` cell containing `current_line` (body only, markers excluded).
+---@param lines string[]
+---@param current_line integer
+---@return integer|nil body_start
+---@return integer|nil body_end
+---@return integer|nil jump_after_send first line of the next cell body, if any
+local function resolve_percent_cell_range(lines, current_line)
+	if current_line < 1 or current_line > #lines then
+		return nil, nil, nil
+	end
+
+	local any_marker = false
+	for i = 1, #lines do
+		if is_percent_cell_marker_line(lines[i]) then
+			any_marker = true
+			break
+		end
+	end
+	if not any_marker then
+		return nil, nil, nil
+	end
+
+	if is_percent_cell_marker_line(lines[current_line]) then
+		local body_start = current_line + 1
+		local body_end = #lines
+		for j = current_line + 1, #lines do
+			if is_percent_cell_marker_line(lines[j]) then
+				body_end = j - 1
+				break
+			end
+		end
+		if body_start > body_end then
+			return nil, nil, nil
+		end
+		local jump_after = nil
+		for j = body_end + 1, #lines do
+			if is_percent_cell_marker_line(lines[j]) then
+				jump_after = j + 1
+				break
+			end
+		end
+		if jump_after and jump_after > #lines then
+			jump_after = nil
+		end
+		return body_start, body_end, jump_after
+	end
+
+	local prev_marker = nil
+	for i = current_line - 1, 1, -1 do
+		if is_percent_cell_marker_line(lines[i]) then
+			prev_marker = i
+			break
+		end
+	end
+
+	local body_start = prev_marker and (prev_marker + 1) or 1
+
+	local next_marker = nil
+	for j = current_line + 1, #lines do
+		if is_percent_cell_marker_line(lines[j]) then
+			next_marker = j
+			break
+		end
+	end
+
+	local body_end = next_marker and (next_marker - 1) or #lines
+
+	if body_start > body_end or current_line < body_start or current_line > body_end then
+		return nil, nil, nil
+	end
+
+	local jump_after = nil
+	if next_marker then
+		jump_after = next_marker + 1
+		if jump_after > #lines then
+			jump_after = nil
+		end
+	end
+
+	return body_start, body_end, jump_after
+end
+
 ---Send the current code block to ToggleTerm (best effort).
----Supports Quarto/R Markdown fences (```{...}) and header blocks (## ...).
+---Supports Quarto/R Markdown fences (```{...}), VS Code–style cells (`# %%`), and header blocks (## ...).
 local function send_current_code_block()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local cursor = vim.api.nvim_win_get_cursor(0)
@@ -719,7 +811,8 @@ local function send_current_code_block()
 
 	local start_line = nil
 	local end_line = nil
-	local block_type = nil -- "fenced" or "header"
+	local block_type = nil -- "fenced" | "percent" | "header"
+	local percent_jump = nil
 
 	local fenced_start = nil
 	local fenced_end = nil
@@ -745,32 +838,40 @@ local function send_current_code_block()
 		end_line = fenced_end
 		block_type = "fenced"
 	else
-		local header_start = nil
-		local header_end = nil
+		local ps, pe, pj = resolve_percent_cell_range(lines, current_line)
+		if ps and pe then
+			start_line = ps
+			end_line = pe
+			block_type = "percent"
+			percent_jump = pj
+		else
+			local header_start = nil
+			local header_end = nil
 
-		for i = current_line, 1, -1 do
-			if lines[i] and lines[i]:match("^##") then
-				header_start = i
-				break
-			end
-		end
-
-		if header_start then
-			for i = header_start + 1, #lines do
+			for i = current_line, 1, -1 do
 				if lines[i] and lines[i]:match("^##") then
-					header_end = i - 1
+					header_start = i
 					break
 				end
 			end
-			if not header_end then
-				header_end = #lines
-			end
-		end
 
-		if header_start and header_end and current_line >= header_start and current_line <= header_end then
-			start_line = header_start
-			end_line = header_end
-			block_type = "header"
+			if header_start then
+				for i = header_start + 1, #lines do
+					if lines[i] and lines[i]:match("^##") then
+						header_end = i - 1
+						break
+					end
+				end
+				if not header_end then
+					header_end = #lines
+				end
+			end
+
+			if header_start and header_end and current_line >= header_start and current_line <= header_end then
+				start_line = header_start
+				end_line = header_end
+				block_type = "header"
+			end
 		end
 	end
 
@@ -783,6 +884,9 @@ local function send_current_code_block()
 	if block_type == "fenced" then
 		selection_start = start_line + 1
 		selection_end = end_line - 1
+	elseif block_type == "percent" then
+		selection_start = start_line
+		selection_end = end_line
 	else
 		selection_start = start_line
 		selection_end = end_line
@@ -800,20 +904,33 @@ local function send_current_code_block()
 	send_to_julia_repl(table.concat(code_lines, "\n") .. "\n")
 
 	local next_block_start = nil
-	local search_start = end_line + 1
+	if block_type == "percent" and percent_jump then
+		next_block_start = percent_jump
+	else
+		local search_start = end_line + 1
 
-	for i = search_start, #lines do
-		if lines[i] and lines[i]:match("^```{.*}") then
-			next_block_start = i + 1
-			break
-		end
-	end
-
-	if not next_block_start then
 		for i = search_start, #lines do
-			if lines[i] and lines[i]:match("^##") then
-				next_block_start = i
+			if lines[i] and lines[i]:match("^```{.*}") then
+				next_block_start = i + 1
 				break
+			end
+		end
+
+		if not next_block_start then
+			for i = search_start, #lines do
+				if lines[i] and is_percent_cell_marker_line(lines[i]) then
+					next_block_start = i + 1
+					break
+				end
+			end
+		end
+
+		if not next_block_start then
+			for i = search_start, #lines do
+				if lines[i] and lines[i]:match("^##") then
+					next_block_start = i
+					break
+				end
 			end
 		end
 	end
@@ -823,8 +940,8 @@ local function send_current_code_block()
 	end
 end
 
----Yank the current fenced code chunk (excluding delimiter lines).
----Supports Quarto (```{lang}) and Markdown fences (```lang / ```).
+---Yank the current code chunk (fenced or `# %%` cell), excluding delimiter lines.
+---Supports Quarto (```{lang}), Markdown fences (```lang / ```), and VS Code–style `# %%` cells.
 local function yank_code_chunk()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local cursor = vim.api.nvim_win_get_cursor(0)
@@ -884,32 +1001,51 @@ local function yank_code_chunk()
 		end
 	end
 
-	if not (fenced_start and fenced_end and fenced_start < fenced_end) then
-		vim.notify("No code chunk found around cursor", vim.log.levels.WARN)
+	if fenced_start and fenced_end and fenced_start < fenced_end then
+		local code_start = fenced_start + 1
+		local code_end = fenced_end - 1
+		if code_start > code_end then
+			vim.notify("Empty code chunk", vim.log.levels.WARN)
+			return
+		end
+
+		local code_lines = {}
+		for i = code_start, code_end do
+			table.insert(code_lines, lines[i])
+		end
+		local code_content = table.concat(code_lines, "\n") .. "\n"
+
+		vim.fn.setreg('"', code_content)
+		vim.fn.setreg("+", code_content)
+		vim.fn.setreg("*", code_content)
+
+		vim.notify(
+			("Yanked code chunk (%d lines)"):format(code_end - code_start + 1),
+			vim.log.levels.INFO
+		)
 		return
 	end
 
-	local code_start = fenced_start + 1
-	local code_end = fenced_end - 1
-	if code_start > code_end then
-		vim.notify("Empty code chunk", vim.log.levels.WARN)
+	local ps, pe = resolve_percent_cell_range(lines, current_line)
+	if ps and pe then
+		local code_lines = {}
+		for i = ps, pe do
+			table.insert(code_lines, lines[i])
+		end
+		local code_content = table.concat(code_lines, "\n") .. "\n"
+
+		vim.fn.setreg('"', code_content)
+		vim.fn.setreg("+", code_content)
+		vim.fn.setreg("*", code_content)
+
+		vim.notify(
+			("Yanked code chunk (%d lines)"):format(pe - ps + 1),
+			vim.log.levels.INFO
+		)
 		return
 	end
 
-	local code_lines = {}
-	for i = code_start, code_end do
-		table.insert(code_lines, lines[i])
-	end
-	local code_content = table.concat(code_lines, "\n") .. "\n"
-
-	vim.fn.setreg('"', code_content)
-	vim.fn.setreg("+", code_content)
-	vim.fn.setreg("*", code_content)
-
-	vim.notify(
-		("Yanked code chunk (%d lines)"):format(code_end - code_start + 1),
-		vim.log.levels.INFO
-	)
+	vim.notify("No code chunk found around cursor", vim.log.levels.WARN)
 end
 
 ---Open ToggleTerm with a consistent direction/size.
